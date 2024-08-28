@@ -1,0 +1,4 @@
+name: NewJack
+abbreviation: nj/NJ
+file extension: .nj
+about: Derived language of jack, referencing C++ and python

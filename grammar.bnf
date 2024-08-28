@@ -1,0 +1,44 @@
+# NewJack grammar
+<code> ::= {<class>}
+<class> ::= "class" <identifier'class_name'> "{" {<class_content>} "}"
+<class_content> ::= <var_S> | <subroutine>
+<subroutine> ::= ("constructor" | "function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
+<type> ::= <identifier'type'> | <built-in_type>
+<argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
+<statements> ::= ({<statement>} | "pass")
+<statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
+<var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression>] ";"
+<let_S> ::= "let" <var> "=" <expression> ";"
+<do_S> ::= "do" <call> ";"
+<if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"else if" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
+<while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
+<for_S> ::= "for" "(" <integer> [";" <integer> ";" <integer>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
+<return_S> ::= "return" (<expression> | "void") ";"
+<break_S> ::= "break" ";"
+<continue_S> ::= "continue" ";"
+<var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
+<expression> ::= <term> [{<operator> <term>}]
+<term> ::= <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional>
+<call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")"
+<conditional> ::= <expression> <logical_operator> <expression>
+
+# terminal symbol:
+<identifier> ::= (<a-z> | <A-Z> | "_") {(<a-z> | <A-Z> | "_" | <0-9>)}
+<a-z> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k"
+        | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+<A-Z> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K"
+        | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<0-9> ::= "0" | <1-9>
+<1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+<built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
+<keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
+            | "let" | "do" | "if" | "if else" | "else" | "while" | "return" | "for" | "break" | "continue"
+<keyword_content> ::= "false" | "true" | "none" | "self"
+<symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator>
+<operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&"
+<unoperator> ::= "-" | "~"
+<logical_operator> ::= "==" | "!=" | ">=" | "<=" | ">" | "<"
+<string> ::= '"' {unicode_characters} '"'
+<char> ::= "'" unicode_characters "'"
+<integer> ::= ["-"] <1-9> {<0-9>} | "0"
+<float> ::= ["-"] {<0-9>} "." {<0-9>}
