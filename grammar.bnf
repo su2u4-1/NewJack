@@ -32,7 +32,7 @@
 <1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
 <keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
-            | "let" | "do" | "if" | "if else" | "else" | "while" | "return" | "for" | "break" | "continue"
+            | "let" | "do" | "if" | "if else" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "none" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "~"
 <operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&"
