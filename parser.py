@@ -2,6 +2,8 @@ import os.path
 from typing import Literal
 
 TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier"]
+Label = Literal["filename", "class", "subroutine", "var_s", "argument_list", "statements", "let_S", "do_S", "if_S", "while_S", "for_S", "return_S", "break_S", "continue_S", "expression", "term"]
+tokentype = ("string", "integer", "symbol", "keyword", "float", "char", "identifier")
 Symbol = ("{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "~", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<")
 Number = ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 atoZ = ("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
@@ -9,7 +11,7 @@ Keyword = ("class", "var", "attr", "constructor", "function", "method", "void", 
 
 
 class Token:
-    def __init__(self, content: str, type: TokenType | Literal["filename"], location: tuple[int, int]) -> None:
+    def __init__(self, content: str, type: TokenType | Label, location: tuple[int, int]) -> None:
         self.content = content
         self.type = type
         self.line = location[0]
@@ -17,6 +19,25 @@ class Token:
 
     def __str__(self) -> str:
         return f"<{self.type}> {self.content} </{self.type}>"
+
+
+class XmlToken:
+    def __init__(self, t: Token, ident: int) -> None:
+        self.content = t.content
+        self.type = t.type
+        self.line = t.line
+        self.index = t.index
+        self.ident = ident
+        if t.type in tokentype:
+            self.kind = 0
+        else:
+            self.kind = 1
+
+    def __str__(self) -> str:
+        if self.kind == 0 or self.type == "filename":
+            return "    " * self.ident + f"<{self.type}> {self.content} </{self.type}>"
+        else:
+            return "    " * self.ident + f"<{self.type}>"
 
 
 def read_from_path(path: str) -> list[str]:
@@ -35,6 +56,30 @@ def read_from_path(path: str) -> list[str]:
                 source.append("//" + i.split("\\")[-1])
                 source += f.readlines()
     return source
+
+
+class Parser:
+    def __init__(self, tokens: list[Token]) -> None:
+        self.tokens = tokens
+        self.index = 0
+        self.ident = 0
+        self.length = len(tokens)
+        self.code: list[XmlToken] = []
+
+    def get(self) -> Token:
+        self.index += 1
+        if self.index >= self.length:
+            exit()
+        return self.tokens[self.index - 1]
+
+    def main(self) -> list[XmlToken]:
+        while True:
+            now = self.get()
+            if now.type == "keyword" and now.content == "class":
+                self.compileClass()
+
+    def compileClass(self) -> None:
+        pass
 
 
 def lexer(source: list[str]) -> list[Token]:
@@ -130,6 +175,10 @@ def lexer(source: list[str]) -> list[Token]:
                 state = "identifier"
                 content = char
                 location = (i + 1, j + 1)
+    if state != "":
+        print("error:", state)
+        print("location:", location)
+        exit()
     return tokens
 
 
@@ -137,5 +186,5 @@ if __name__ == "__main__":
     path = input("file(s) path: ")
     source = read_from_path(path)
     tokens = lexer(source)
-    for i in tokens:
-        print(i)
+    parser = Parser(tokens)
+    xmlcode = parser.main()
