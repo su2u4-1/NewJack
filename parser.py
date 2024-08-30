@@ -77,6 +77,8 @@ class Parser:
             now = self.get()
             if now.type == "keyword" and now.content == "class":
                 self.compileClass()
+            elif self.index:
+                pass
 
     def compileClass(self) -> None:
         pass
