@@ -1,7 +1,7 @@
 import os.path
-from typing import Literal
+from typing import Literal, Iterable
 
-TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier"]
+TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "f"]
 Label = Literal["filename", "class", "subroutine", "var_s", "argument_list", "statements", "let_S", "do_S", "if_S", "while_S", "for_S", "return_S", "break_S", "continue_S", "expression", "term"]
 tokentype = ("string", "integer", "symbol", "keyword", "float", "char", "identifier")
 Symbol = ("{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "~", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<")
@@ -11,33 +11,38 @@ Keyword = ("class", "var", "attr", "constructor", "function", "method", "void", 
 
 
 class Token:
-    def __init__(self, content: str, type: TokenType | Label, location: tuple[int, int]) -> None:
+    def __init__(self, type: TokenType, content: str, location: tuple[int, int] = (-1, -1)) -> None:
         self.content = content
         self.type = type
         self.line = location[0]
         self.index = location[1]
 
     def __str__(self) -> str:
-        return f"<{self.type}> {self.content} </{self.type}>"
+        return f"<{self.type}> {self.content} [{self.line}, {self.index}]"
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) == Token:
+            return self.type == value.type and self.content == value.content
+        elif type(value) == Tokens:
+            if self.type == value.type:
+                for i in value.content:
+                    if i == self.content:
+                        return True
+        return False
 
 
-class XmlToken:
-    def __init__(self, t: Token, ident: int) -> None:
-        self.content = t.content
-        self.type = t.type
-        self.line = t.line
-        self.index = t.index
-        self.ident = ident
-        if t.type in tokentype:
-            self.kind = 0
-        else:
-            self.kind = 1
+class Tokens:
+    def __init__(self, type: TokenType, content: Iterable[str]) -> None:
+        self.content = content
+        self.type = type
 
-    def __str__(self) -> str:
-        if self.kind == 0 or self.type == "filename":
-            return "    " * self.ident + f"<{self.type}> {self.content} </{self.type}>"
-        else:
-            return "    " * self.ident + f"<{self.type}>"
+    def __eq__(self, value: object) -> bool:
+        if type(value) == Token:
+            if self.type == value.type:
+                for i in self.content:
+                    if i == value.content:
+                        return True
+        return False
 
 
 def read_from_path(path: str) -> list[str]:
@@ -62,9 +67,9 @@ class Parser:
     def __init__(self, tokens: list[Token]) -> None:
         self.tokens = tokens
         self.index = 0
-        self.ident = 0
         self.length = len(tokens)
-        self.code: list[XmlToken] = []
+        self.code: list[Token] = []
+        self.error: list[tuple[str, tuple[int, int]]] = []
 
     def get(self) -> Token:
         self.index += 1
@@ -72,16 +77,23 @@ class Parser:
             exit()
         return self.tokens[self.index - 1]
 
-    def main(self) -> list[XmlToken]:
+    def main(self) -> list[Token]:
         while True:
             now = self.get()
-            if now.type == "keyword" and now.content == "class":
+            if now == Token("keyword", "class"):
                 self.compileClass()
-            elif self.index:
-                pass
+            elif self.index >= self.length:
+                break
+            else:
+                self.error.append(("missing keyword 'class'", (now.line, now.index)))
+        return self.code
 
     def compileClass(self) -> None:
-        pass
+        now = self.get()
+        if now.type != Token("symbol", "{"):
+            self.error.append(("missing symbol '{'", (now.line, now.index)))
+        while now != Tokens("keyword", ("constructor", "function", "method", "var", "attr")):
+            pass
 
 
 def lexer(source: list[str]) -> list[Token]:
@@ -91,7 +103,7 @@ def lexer(source: list[str]) -> list[Token]:
     location = (-1, -1)
     for i, line in enumerate(source):
         if line.startswith("//"):
-            tokens.append(Token(line[2:], "filename", (-1, -1)))
+            tokens.append(Token("filename", line[2:], (-1, -1)))
             continue
         for j, char in enumerate(line):
             if state == "commant":
@@ -101,7 +113,7 @@ def lexer(source: list[str]) -> list[Token]:
             elif state == "string":
                 content += char
                 if char == '"':
-                    tokens.append(Token(content, "string", location))
+                    tokens.append(Token("string", content, location))
                     content = ""
                     state = ""
                 continue
@@ -111,7 +123,7 @@ def lexer(source: list[str]) -> list[Token]:
                     state = "int"
                     continue
                 else:
-                    tokens.append(Token(content, "symbol", location))
+                    tokens.append(Token("symbol", content, location))
                     content = ""
                     state = ""
             elif state == "identifier":
@@ -119,20 +131,20 @@ def lexer(source: list[str]) -> list[Token]:
                     content += char
                     continue
                 elif content in Keyword:
-                    tokens.append(Token(content, "keyword", location))
+                    tokens.append(Token("keyword", content, location))
                 else:
-                    tokens.append(Token(content, "identifier", location))
+                    tokens.append(Token("identifier", content, location))
                 content = ""
                 state = ""
             elif state == "int":
                 if char in Number:
                     if content == "-0":
-                        tokens.append(Token("-", "symbol", location))
-                        tokens.append(Token("0", "integer", (i + 1, j + 1)))
+                        tokens.append(Token("symbol", "-", location))
+                        tokens.append(Token("integer", "0", (i + 1, j + 1)))
                         content = ""
                         state = ""
                     elif char == "0":
-                        tokens.append(Token("0", "integer", (i + 1, j + 1)))
+                        tokens.append(Token("integer", "0", (i + 1, j + 1)))
                         content = ""
                         state = ""
                     else:
@@ -143,7 +155,7 @@ def lexer(source: list[str]) -> list[Token]:
                     state = "float"
                     continue
                 else:
-                    tokens.append(Token(content, "integer", location))
+                    tokens.append(Token("integer", content, location))
                     content = ""
                     state = ""
             elif state == "float":
@@ -151,7 +163,7 @@ def lexer(source: list[str]) -> list[Token]:
                     content += char
                     continue
                 else:
-                    tokens.append(Token(content, "float", location))
+                    tokens.append(Token("float", content, location))
                     content = ""
                     state = ""
 
@@ -168,7 +180,7 @@ def lexer(source: list[str]) -> list[Token]:
                 content = char
                 location = (i + 1, j + 1)
             elif char in Symbol:
-                tokens.append(Token(char, "symbol", (i + 1, j + 1)))
+                tokens.append(Token("symbol", char, (i + 1, j + 1)))
             elif char in Number:
                 state = "int"
                 content = char
