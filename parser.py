@@ -1,7 +1,7 @@
 import os.path
 from typing import Literal, Iterable
 
-TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "f"]
+TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "filename"]
 Label = Literal["filename", "class", "subroutine", "var_s", "argument_list", "statements", "let_S", "do_S", "if_S", "while_S", "for_S", "return_S", "break_S", "continue_S", "expression", "term"]
 tokentype = ("string", "integer", "symbol", "keyword", "float", "char", "identifier")
 Symbol = ("{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "~", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<")
@@ -70,11 +70,17 @@ class Parser:
         self.length = len(tokens)
         self.code: list[Token] = []
         self.error: list[tuple[str, tuple[int, int]]] = []
+        self.var_g = {}
+        self.var_l = {}
+        self.var_i = {"attr": 0, "global": 0, "local": 0}
 
     def get(self) -> Token:
         self.index += 1
         if self.index >= self.length:
             exit()
+        return self.tokens[self.index - 1]
+
+    def peek(self) -> Token:
         return self.tokens[self.index - 1]
 
     def main(self) -> list[Token]:
@@ -92,8 +98,31 @@ class Parser:
         now = self.get()
         if now.type != Token("symbol", "{"):
             self.error.append(("missing symbol '{'", (now.line, now.index)))
-        while now != Tokens("keyword", ("constructor", "function", "method", "var", "attr")):
+        now = self.get()
+        while now == Tokens("keyword", ("constructor", "function", "method", "var", "attr")):
+            if now == Tokens("keyword", ("constructor", "function", "method")):
+                self.compileSubroutine()
+            elif now == Tokens("keyword", ("var", "attr")):
+                self.compileVar(_global=True)
+        now = self.get()
+        if now != Token("symbol", "}"):
+            self.error.append(("missing symbol '}'", (now.line, now.index)))
+
+    def compileVar(self, _global: bool = False) -> None:
+        now = self.peek()
+        if now == Token("keyword", "var"):
+            if _global:
+                kind = "global"
+            else:
+                kind = "local"
+        else:
+            kind = "attr"
+        now = self.get()
+        if now != Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) and now.type != "index":
             pass
+
+    def compileSubroutine(self) -> None:
+        pass
 
 
 def lexer(source: list[str]) -> list[Token]:
