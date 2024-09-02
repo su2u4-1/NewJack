@@ -70,8 +70,7 @@ class Parser:
         self.length = len(tokens)
         self.code: list[Token] = []
         self.error: list[tuple[str, tuple[int, int]]] = []
-        self.var_g = {}
-        self.var_l = {}
+        self.var: dict[str, tuple[str, str, int]] = {}
         self.var_i = {"attr": 0, "global": 0, "local": 0}
 
     def get(self) -> Token:
@@ -118,10 +117,41 @@ class Parser:
         else:
             kind = "attr"
         now = self.get()
-        if now != Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) and now.type != "index":
-            pass
+        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or now.type == "identifier":
+            type = now.content
+            now = self.get()
+        else:
+            type = "unknow"
+            self.error.append(("missing variable type", (now.line, now.index)))
+        n = 0
+        if now.type == "identifier":
+            self.var[now.content] = (kind, type, self.var_i[kind])
+            self.var_i[kind] += 1
+            n += 1
+        else:
+            self.error.append((f"variable name must be identifier, now {now.type} '{now.content}'", (now.line, now.index)))
+        now = self.get()
+        while now == Token("symbol", ","):
+            now = self.get()
+            if now.type == "identifier":
+                self.var[now.content] = (kind, type, self.var_i[kind])
+                self.var_i[kind] += 1
+                n += 1
+            else:
+                self.error.append((f"variable name must be identifier, now {now.type} '{now.content}'", (now.line, now.index)))
+            now = self.get()
+        if now == Token("symbol", ";"):
+            return
+        elif now == Token("symbol", "="):
+            self.compileExpression()
+        else:
+            # TODO
+            self.error.append((".", (now.line, now.index)))
 
     def compileSubroutine(self) -> None:
+        pass
+
+    def compileExpression(self) -> None:
         pass
 
 
