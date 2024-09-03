@@ -75,9 +75,10 @@ class Parser:
         self.var_i = {"attr": 0, "global": 0, "local": 0}
         self.file = None
 
-    def error(self, text, location) -> NoReturn:
+    def error(self, text: str, location: tuple[int, int]) -> NoReturn:
         print(self.file, location)
         print(text)
+        exit()
 
     def get(self) -> Token:
         self.index += 1
@@ -106,13 +107,14 @@ class Parser:
         now = self.get()
         if now.type != Token("symbol", "{"):
             self.error("missing symbol '{'", now.location)
-        now = self.get()
-        while now == Tokens("keyword", ("constructor", "function", "method", "var", "attr")):
+        while True:
+            now = self.get()
             if now == Tokens("keyword", ("constructor", "function", "method")):
                 self.compileSubroutine()
             elif now == Tokens("keyword", ("var", "attr")):
                 self.compileVar(_global=True)
-        now = self.get()
+            else:
+                break
         if now != Token("symbol", "}"):
             self.error("missing symbol '}'", now.location)
 
@@ -130,7 +132,6 @@ class Parser:
             type = now.content
             now = self.get()
         else:
-            type = "unknow"
             self.error("missing variable type", now.location)
         n = 0
         if now.type == "identifier":
@@ -162,7 +163,26 @@ class Parser:
             self.error("the end must be symbol ';'", now.location)
 
     def compileSubroutine(self) -> None:
-        pass
+        now = self.peek()
+        if now == Token("keyword", "constructor"):
+            pass
+        elif now == Token("keyword", "method"):
+            pass
+        elif now == Token("keyword", "function"):
+            pass
+        else:
+            self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'", now.location)
+        now = self.get()
+        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or now.type == "identifier":
+            type = now.content
+            now = self.get()
+        else:
+            self.error("missing return type", now.location)
+        now = self.get()
+        if now.type == "identifier":
+            name = now.content
+        else:
+            self.error("missing subroutine name", now.location)
 
     def compileExpression(self) -> None:
         pass
