@@ -173,7 +173,7 @@ class Parser:
         else:
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'", now.location)
         now = self.get()
-        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or now.type == "identifier":
+        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or now.type == "identifier":
             type = now.content
             now = self.get()
         else:
@@ -183,6 +183,12 @@ class Parser:
             name = now.content
         else:
             self.error("missing subroutine name", now.location)
+        now = self.get()
+        if now != Token("symbol", "("):
+            self.error("missing symbol '('", now.location)
+        now = self.get()
+        if now == Token("keyword", "pass"):
+            pass
 
     def compileExpression(self) -> None:
         pass
