@@ -1,7 +1,7 @@
 import os.path
-from typing import Literal, Iterable
+from typing import Literal, Iterable, NoReturn
 
-TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "filename"]
+TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file"]
 Label = Literal["filename", "class", "subroutine", "var_s", "argument_list", "statements", "let_S", "do_S", "if_S", "while_S", "for_S", "return_S", "break_S", "continue_S", "expression", "term"]
 tokentype = ("string", "integer", "symbol", "keyword", "float", "char", "identifier")
 Symbol = ("{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "~", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<")
@@ -16,6 +16,7 @@ class Token:
         self.type = type
         self.line = location[0]
         self.index = location[1]
+        self.location = location
 
     def __str__(self) -> str:
         return f"<{self.type}> {self.content} [{self.line}, {self.index}]"
@@ -58,7 +59,7 @@ def read_from_path(path: str) -> list[str]:
     for i in file:
         if i.endswith(".nj"):
             with open(i, "r") as f:
-                source.append("//" + i.split("\\")[-1])
+                source.append("//" + i)
                 source += f.readlines()
     return source
 
@@ -69,15 +70,23 @@ class Parser:
         self.index = 0
         self.length = len(tokens)
         self.code: list[Token] = []
-        self.error: list[tuple[str, tuple[int, int]]] = []
+        # self.error: list[tuple[str, tuple[int, int]]] = []
         self.var: dict[str, tuple[str, str, int]] = {}
         self.var_i = {"attr": 0, "global": 0, "local": 0}
+        self.file = None
+
+    def error(self, text, location) -> NoReturn:
+        print(self.file, location)
+        print(text)
 
     def get(self) -> Token:
         self.index += 1
         if self.index >= self.length:
             exit()
-        return self.tokens[self.index - 1]
+        t = self.tokens[self.index - 1]
+        if t.type == "file":
+            self.file = t.content
+        return t
 
     def peek(self) -> Token:
         return self.tokens[self.index - 1]
@@ -90,13 +99,13 @@ class Parser:
             elif self.index >= self.length:
                 break
             else:
-                self.error.append(("missing keyword 'class'", (now.line, now.index)))
+                self.error("missing keyword 'class'", now.location)
         return self.code
 
     def compileClass(self) -> None:
         now = self.get()
         if now.type != Token("symbol", "{"):
-            self.error.append(("missing symbol '{'", (now.line, now.index)))
+            self.error("missing symbol '{'", now.location)
         now = self.get()
         while now == Tokens("keyword", ("constructor", "function", "method", "var", "attr")):
             if now == Tokens("keyword", ("constructor", "function", "method")):
@@ -105,7 +114,7 @@ class Parser:
                 self.compileVar(_global=True)
         now = self.get()
         if now != Token("symbol", "}"):
-            self.error.append(("missing symbol '}'", (now.line, now.index)))
+            self.error("missing symbol '}'", now.location)
 
     def compileVar(self, _global: bool = False) -> None:
         now = self.peek()
@@ -122,14 +131,14 @@ class Parser:
             now = self.get()
         else:
             type = "unknow"
-            self.error.append(("missing variable type", (now.line, now.index)))
+            self.error("missing variable type", now.location)
         n = 0
         if now.type == "identifier":
             self.var[now.content] = (kind, type, self.var_i[kind])
             self.var_i[kind] += 1
             n += 1
         else:
-            self.error.append((f"variable name must be identifier, now {now.type} '{now.content}'", (now.line, now.index)))
+            self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
         now = self.get()
         while now == Token("symbol", ","):
             now = self.get()
@@ -138,15 +147,18 @@ class Parser:
                 self.var_i[kind] += 1
                 n += 1
             else:
-                self.error.append((f"variable name must be identifier, now {now.type} '{now.content}'", (now.line, now.index)))
+                self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
             now = self.get()
         if now == Token("symbol", ";"):
             return
         elif now == Token("symbol", "="):
             self.compileExpression()
         else:
-            # TODO
-            self.error.append((".", (now.line, now.index)))
+            self.error("must be symbol ';' or '='", now.location)
+        if now == Token("symbol", ";"):
+            return
+        else:
+            self.error("the end must be symbol ';'", now.location)
 
     def compileSubroutine(self) -> None:
         pass
@@ -162,7 +174,7 @@ def lexer(source: list[str]) -> list[Token]:
     location = (-1, -1)
     for i, line in enumerate(source):
         if line.startswith("//"):
-            tokens.append(Token("filename", line[2:], (-1, -1)))
+            tokens.append(Token("file", line[2:], (-1, -1)))
             continue
         for j, char in enumerate(line):
             if state == "commant":
