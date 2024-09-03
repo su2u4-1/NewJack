@@ -153,6 +153,7 @@ class Parser:
             return
         elif now == Token("symbol", "="):
             self.compileExpression()
+            # TODO: value -> variable
         else:
             self.error("must be symbol ';' or '='", now.location)
         if now == Token("symbol", ";"):
