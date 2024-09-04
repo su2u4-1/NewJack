@@ -46,6 +46,21 @@ class Tokens:
         return False
 
 
+class Code:
+    def __init__(self, command: str, arg_1: str = "", arg_2: str = "") -> None:
+        self.command = command
+        self.arg1 = arg_1
+        self.arg2 = arg_2
+
+    def __str__(self) -> str:
+        if self.arg1 == "":
+            return self.command
+        elif self.arg2 == "":
+            return self.command + " " + self.arg1
+        else:
+            return self.command + " " + self.arg1 + " " + self.arg2
+
+
 def read_from_path(path: str) -> list[str]:
     path = os.path.abspath(path)
     file: list[str] = []
@@ -69,10 +84,10 @@ class Parser:
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
-        self.code: list[Token] = []
+        self.code: list[Code] = []
         # self.error: list[tuple[str, tuple[int, int]]] = []
         self.var: dict[str, tuple[str, str, int]] = {}
-        self.var_i = {"attr": 0, "global": 0, "local": 0}
+        self.var_i = {"attr": 0, "global": 0, "local": 0, "arg": 0}
         self.file = None
 
     def error(self, text: str, location: tuple[int, int]) -> NoReturn:
@@ -92,7 +107,7 @@ class Parser:
     def peek(self) -> Token:
         return self.tokens[self.index - 1]
 
-    def main(self) -> list[Token]:
+    def main(self) -> list[Code]:
         while True:
             now = self.get()
             if now == Token("keyword", "class"):
@@ -154,7 +169,7 @@ class Parser:
             return
         elif now == Token("symbol", "="):
             self.compileExpression()
-            # TODO: value -> variable
+            # TODO: assign value to variable
         else:
             self.error("must be symbol ';' or '='", now.location)
         if now == Token("symbol", ";"):
@@ -163,18 +178,19 @@ class Parser:
             self.error("the end must be symbol ';'", now.location)
 
     def compileSubroutine(self) -> None:
+        self.var_i["arg"] = 0
         now = self.peek()
         if now == Token("keyword", "constructor"):
+            # TODO: allocate memory for attribute
             pass
         elif now == Token("keyword", "method"):
+            # TODO: add self to arguments list
             pass
-        elif now == Token("keyword", "function"):
-            pass
-        else:
+        elif now != Token("keyword", "function"):
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'", now.location)
         now = self.get()
         if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or now.type == "identifier":
-            type = now.content
+            return_type = now.content
             now = self.get()
         else:
             self.error("missing return type", now.location)
@@ -188,7 +204,37 @@ class Parser:
             self.error("missing symbol '('", now.location)
         now = self.get()
         if now == Token("keyword", "pass"):
-            pass
+            now = self.get()
+        elif now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or now.type == "identifier":
+            arg_type = now.content
+            now = self.get()
+            if now.type == "identifier":
+                arg_name = now.content
+            else:
+                self.error("missing argument name", now.location)
+            self.var[arg_name] = ("arg", arg_type, self.var_i["arg"])
+            self.var_i["arg"] += 1
+            now = self.get()
+            while now == Token("symbol", ","):
+                if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or now.type == "identifier":
+                    arg_type = now.content
+                else:
+                    self.error("the symbol ',' must be followed by a argument type", now.location)
+                now = self.get()
+                if now.type == "identifier":
+                    arg_name = now.content
+                else:
+                    self.error("missing argument name", now.location)
+                self.var[arg_name] = ("arg", arg_type, self.var_i["arg"])
+                self.var_i["arg"] += 1
+                now = self.get()
+        else:
+            self.error("missing argument type", now.location)
+        if now != Token("symbol", ")"):
+            self.error("missing symbol ')'", now.location)
+        if self.get() != Token("symbol", "{"):
+            self.error("missing symbol '{'", now.location)
+        # TODO: subrputine content
 
     def compileExpression(self) -> None:
         pass
