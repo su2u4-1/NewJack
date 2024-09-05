@@ -88,7 +88,10 @@ class Parser:
         # self.error: list[tuple[str, tuple[int, int]]] = []
         self.var: dict[str, tuple[str, str, int]] = {}
         self.var_i = {"attr": 0, "global": 0, "local": 0, "arg": 0}
-        self.file = None
+        self.other: dict[str, tuple[str, str, int, str] | tuple[str, int]] = {}
+        self.other_i = {"function": 0, "constructor": 0, "method": 0, "class": 0}
+        self.file = ""
+        self.now_class = ""
 
     def error(self, text: str, location: tuple[int, int]) -> NoReturn:
         print(self.file, location)
@@ -120,7 +123,14 @@ class Parser:
 
     def compileClass(self) -> None:
         now = self.get()
-        if now.type != Token("symbol", "{"):
+        if now.type == "identifier":
+            self.other[now.content] = ("class", self.other_i["class"])
+            self.other_i["class"] += 1
+            self.now_class = now.content
+        else:
+            self.error("missing class name", now.location)
+        now = self.get()
+        if now != Token("symbol", "{"):
             self.error("missing symbol '{'", now.location)
         while True:
             now = self.get()
@@ -188,6 +198,7 @@ class Parser:
             pass
         elif now != Token("keyword", "function"):
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'", now.location)
+        kind = now.content
         now = self.get()
         if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or now.type == "identifier":
             return_type = now.content
@@ -196,7 +207,8 @@ class Parser:
             self.error("missing return type", now.location)
         now = self.get()
         if now.type == "identifier":
-            name = now.content
+            self.other[now.content] = (kind, return_type, self.other_i[kind], self.now_class)
+            self.other_i[kind] += 1
         else:
             self.error("missing subroutine name", now.location)
         now = self.get()
@@ -234,9 +246,46 @@ class Parser:
             self.error("missing symbol ')'", now.location)
         if self.get() != Token("symbol", "{"):
             self.error("missing symbol '{'", now.location)
-        # TODO: subrputine content
+        while True:
+            now = self.get()
+            if now == Token("keyword", "var"):
+                self.compileVar()
+            elif now == Token("keyword", "let"):
+                self.compileLet()
+            elif now == Token("keyword", "do"):
+                self.compileDo()
+            elif now == Token("keyword", "if"):
+                self.compileIf()
+            elif now == Token("keyword", "while"):
+                self.compileWhile()
+            elif now == Token("keyword", "for"):
+                self.compileFor()
+            elif now == Token("keyword", "return"):
+                self.compileReturn()
+            elif now == Token("symbol", "}"):
+                break
+            else:
+                self.error(f"unknow {now.type} '{now.content}", now.location)
 
     def compileExpression(self) -> None:
+        pass
+
+    def compileLet(self) -> None:
+        pass
+
+    def compileDo(self) -> None:
+        pass
+
+    def compileIf(self) -> None:
+        pass
+
+    def compileWhile(self) -> None:
+        pass
+
+    def compileFor(self) -> None:
+        pass
+
+    def compileReturn(self) -> None:
         pass
 
 
