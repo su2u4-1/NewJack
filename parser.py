@@ -143,50 +143,6 @@ class Parser:
         if now != Token("symbol", "}"):
             self.error("missing symbol '}'", now.location)
 
-    def compileVar(self, _global: bool = False) -> None:
-        now = self.peek()
-        if now == Token("keyword", "var"):
-            if _global:
-                kind = "global"
-            else:
-                kind = "local"
-        else:
-            kind = "attr"
-        now = self.get()
-        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or now.type == "identifier":
-            type = now.content
-            now = self.get()
-        else:
-            self.error("missing variable type", now.location)
-        n = 0
-        if now.type == "identifier":
-            self.var[now.content] = (kind, type, self.var_i[kind])
-            self.var_i[kind] += 1
-            n += 1
-        else:
-            self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
-        now = self.get()
-        while now == Token("symbol", ","):
-            now = self.get()
-            if now.type == "identifier":
-                self.var[now.content] = (kind, type, self.var_i[kind])
-                self.var_i[kind] += 1
-                n += 1
-            else:
-                self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
-            now = self.get()
-        if now == Token("symbol", ";"):
-            return
-        elif now == Token("symbol", "="):
-            self.compileExpression()
-            # TODO: assign value to variable
-        else:
-            self.error("must be symbol ';' or '='", now.location)
-        if now == Token("symbol", ";"):
-            return
-        else:
-            self.error("the end must be symbol ';'", now.location)
-
     def compileSubroutine(self) -> None:
         self.var_i["arg"] = 0
         now = self.peek()
@@ -267,11 +223,57 @@ class Parser:
             else:
                 self.error(f"unknow {now.type} '{now.content}", now.location)
 
-    def compileExpression(self) -> None:
-        pass
+    def compileVar(self, _global: bool = False) -> None:
+        now = self.peek()
+        if now == Token("keyword", "var"):
+            if _global:
+                kind = "global"
+            else:
+                kind = "local"
+        else:
+            kind = "attr"
+        now = self.get()
+        if now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or now.type == "identifier":
+            type = now.content
+            now = self.get()
+        else:
+            self.error("missing variable type", now.location)
+        n = 0
+        if now.type == "identifier":
+            self.var[now.content] = (kind, type, self.var_i[kind])
+            self.var_i[kind] += 1
+            n += 1
+        else:
+            self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
+        now = self.get()
+        while now == Token("symbol", ","):
+            now = self.get()
+            if now.type == "identifier":
+                self.var[now.content] = (kind, type, self.var_i[kind])
+                self.var_i[kind] += 1
+                n += 1
+            else:
+                self.error(f"variable name must be identifier, not {now.type} '{now.content}'", now.location)
+            now = self.get()
+        if now == Token("symbol", ";"):
+            return
+        elif now == Token("symbol", "="):
+            self.compileExpression()
+            # TODO: assign value to variable
+        else:
+            self.error("must be symbol ';' or '='", now.location)
+        if now == Token("symbol", ";"):
+            return
+        else:
+            self.error("the end must be symbol ';'", now.location)
 
     def compileLet(self) -> None:
-        pass
+        self.compileVariable()
+        now = self.get()
+        if now != Token("symbol", "="):
+            self.error("missing symbol '='", now.location)
+        self.compileExpression()
+        # TODO: assign value to variable
 
     def compileDo(self) -> None:
         pass
@@ -286,6 +288,12 @@ class Parser:
         pass
 
     def compileReturn(self) -> None:
+        pass
+
+    def compileExpression(self) -> None:
+        pass
+
+    def compileVariable(self) -> None:
         pass
 
 
