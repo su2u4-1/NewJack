@@ -274,6 +274,9 @@ class Parser:
             self.error("missing symbol '='", now.location)
         self.compileExpression()
         # TODO: assign value to variable
+        now = self.get()
+        if now != Token("symbol", ";"):
+            self.error("missing symbol ';'", now.location)
 
     def compileDo(self) -> None:
         pass
