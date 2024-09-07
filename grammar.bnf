@@ -1,13 +1,13 @@
 # NewJack grammar
 <code> ::= {<class>}
 <class> ::= "class" <identifier'class_name'> "{" {<class_content>} "}"
-<class_content> ::= <var_S> | <subroutine>
+<class_content> ::= <var_S> | <subroutine> | "pass"
 <subroutine> ::= ("constructor" | "function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
 <type> ::= <identifier'type'> | <built-in_type>
 <argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
 <statements> ::= ({<statement>} | "pass")
 <statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
-<var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression>] ";"
+<var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
 <let_S> ::= "let" <var> "=" <expression> ";"
 <do_S> ::= "do" <call> ";"
 <if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"else if" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]

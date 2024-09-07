@@ -61,6 +61,9 @@ class Parser:
                 self.compileSubroutine()
             elif self.now == Tokens("keyword", ("var", "attr")):
                 self.compileVar(_global=True)
+            elif self.now == Token("keyword", "pass"):
+                self.get()
+                break
             else:
                 break
         if self.now != Token("symbol", "}"):
@@ -203,7 +206,10 @@ class Parser:
             self.error("missing symbol ';'")
 
     def compileDo(self) -> None:
-        pass
+        self.compileCall()
+        self.get()
+        if self.now != Token("symbol", ";"):
+            self.error("missing symbol ';'")
 
     def compileIf(self) -> None:
         pass
@@ -221,4 +227,7 @@ class Parser:
         pass
 
     def compileVariable(self) -> None:
+        pass
+
+    def compileCall(self) -> None:
         pass
