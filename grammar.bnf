@@ -1,26 +1,26 @@
 # NewJack grammar
-<code> ::= {<class>} [<commant>]
-<class> ::= "class" <identifier'class_name'> "{" {<class_content>} "}" [<commant>]
-<class_content> ::= <var_S> | <subroutine> [<commant>]
-<subroutine> ::= ("constructor" | "function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}" [<commant>]
-<type> ::= <identifier'type'> | <built-in_type> [<commant>]
-<argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}] [<commant>]
-<statements> ::= ({<statement>} | "pass") [<commant>]
-<statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S> [<commant>]
-<var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression>] ";" [<commant>]
-<let_S> ::= "let" <var> "=" <expression> ";" [<commant>]
-<do_S> ::= "do" <call> ";" [<commant>]
-<if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"else if" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"] [<commant>]
-<while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}" [<commant>]
-<for_S> ::= "for" "(" <integer> [";" <integer> ";" <integer>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"] [<commant>]
-<return_S> ::= "return" (<expression> | "void") ";" [<commant>]
-<break_S> ::= "break" ";" [<commant>]
-<continue_S> ::= "continue" ";" [<commant>]
-<var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]" [<commant>]
-<expression> ::= <term> [{<operator> <term>}] [<commant>]
-<term> ::= <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional> [<commant>]
-<call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")" [<commant>]
-<conditional> ::= <expression> <logical_operator> <expression> [<commant>]
+<code> ::= {<class>}
+<class> ::= "class" <identifier'class_name'> "{" {<class_content>} "}"
+<class_content> ::= <var_S> | <subroutine>
+<subroutine> ::= ("constructor" | "function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
+<type> ::= <identifier'type'> | <built-in_type>
+<argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
+<statements> ::= ({<statement>} | "pass")
+<statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
+<var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression>] ";"
+<let_S> ::= "let" <var> "=" <expression> ";"
+<do_S> ::= "do" <call> ";"
+<if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"else if" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
+<while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
+<for_S> ::= "for" "(" <integer> [";" <integer> ";" <integer>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
+<return_S> ::= "return" (<expression> | "void") ";"
+<break_S> ::= "break" ";"
+<continue_S> ::= "continue" ";"
+<var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
+<expression> ::= <term> [{<operator> <term>}]
+<term> ::= <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional>
+<call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")"
+<conditional> ::= <expression> <logical_operator> <expression>
 
 # terminal symbol:
 <identifier> ::= (<a-z> | <A-Z> | "_") {(<a-z> | <A-Z> | "_" | <0-9>)}
