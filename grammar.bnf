@@ -10,7 +10,7 @@
 <var_S> ::= ("var" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
 <let_S> ::= "let" <var> "=" <expression> ";"
 <do_S> ::= "do" <call> ";"
-<if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"else if" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
+<if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"elif" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
 <while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
 <for_S> ::= "for" "(" <integer> [";" <integer> ";" <integer>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
 <return_S> ::= "return" (<expression> | "void") ";"
@@ -32,7 +32,7 @@
 <1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
 <keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
-            | "let" | "do" | "if" | "if else" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
+            | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "none" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "~"
 <operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&"

@@ -131,6 +131,9 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
+        self.compileStatements()
+
+    def compileStatements(self) -> None:
         while True:
             self.get()
             if self.now == Token("keyword", "var"):
@@ -216,7 +219,31 @@ class Parser:
             self.error("missing symbol ';'")
 
     def compileIf(self) -> None:
-        pass
+        self.get()
+        if self.now != Token("symbol", "("):
+            self.error("missing symbol '('")
+        self.compileExpression()
+        # TODO: jump
+        self.get()
+        if self.now != Token("symbol", "{"):
+            self.error("missing symbol '{'")
+        self.compileStatements()
+        while True:
+            self.get()
+            if self.now == Token("keyword", "elif"):
+                self.get()
+                if self.now != Token("symbol", "{"):
+                    self.error("missing symbol '{'")
+                self.compileStatements()
+            else:
+                break
+        if self.now == Token("keyword", "else"):
+            self.get()
+            if self.now != Token("symbol", "{"):
+                self.error("missing symbol '{'")
+            self.compileStatements()
+        else:
+            self.index += 1
 
     def compileWhile(self) -> None:
         pass
