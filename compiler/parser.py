@@ -9,12 +9,12 @@ class Parser:
         self.index = 0
         self.length = len(tokens)
         self.code: list[Code] = []
-        self.var: dict[str, tuple[str, str, int]] = {}
-        self.var_i = {"attr": 0, "global": 0, "local": 0, "arg": 0}
-        self.other: dict[str, tuple[str, str, int, str] | tuple[str, int]] = {}
-        self.other_i = {"function": 0, "constructor": 0, "method": 0, "class": 0}
+        # [global: {class, global}, class: {function, attr}, subroutine: {arg, local}]
+        self.scope: list[dict[str, tuple[str, str, int]]] = []
+        self.count: dict[str, int] = {"class": 0, "global": 0, "function": 0, "attr": 0, "arg": 0, "local": 0}
         self.file = ""
         self.now_class = ""
+        self.now = tokens[0]
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
@@ -24,16 +24,15 @@ class Parser:
     def get(self) -> None:
         self.index += 1
         if self.index >= self.length:
-            exit()
+            self.error("Unexpected end of input")
         self.now = self.tokens[self.index - 1]
         if self.now.type == "file":
             self.file = self.now.content
             self.get()
 
-    def peek(self) -> Token:
-        return self.tokens[self.index - 1]
-
     def main(self) -> list[Code]:
+        self.count["class"] = 0
+        self.count["global"] = 0
         while True:
             self.get()
             if self.now == Token("keyword", "class"):
@@ -45,10 +44,13 @@ class Parser:
         return self.code
 
     def compileClass(self) -> None:
+        self.count["function"] = 0
+        self.count["attr"] = 0
         self.get()
         if self.now.type == "identifier":
-            self.other[self.now.content] = ("class", self.other_i["class"])
-            self.other_i["class"] += 1
+            self.scope.append({})
+            self.scope[-1][self.now.content] = ("class", "class", self.count["class"])
+            self.count["class"] += 1
             self.now_class = self.now.content
         else:
             self.error("missing class name")
@@ -70,8 +72,8 @@ class Parser:
             self.error("missing symbol '}'")
 
     def compileSubroutine(self) -> None:
-        self.var_i["arg"] = 0
-        self.now = self.peek()
+        self.count["arg"] = 0
+        self.count["local"] = 0
         if self.now == Token("keyword", "constructor"):
             # TODO: allocate memory for attribute
             pass
@@ -80,7 +82,6 @@ class Parser:
             pass
         elif self.now != Token("keyword", "function"):
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'")
-        kind = self.now.content
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
             return_type = self.now.content
@@ -89,10 +90,11 @@ class Parser:
             self.error("missing return type")
         self.get()
         if self.now.type == "identifier":
-            self.other[self.now.content] = (kind, return_type, self.other_i[kind], self.now_class)
-            self.other_i[kind] += 1
+            self.scope[-1][self.now.content] = ("function", return_type, self.count["function"])
+            self.count["function"] += 1
         else:
             self.error("missing subroutine name")
+        self.scope.append({})
         self.get()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
@@ -106,8 +108,8 @@ class Parser:
                 arg_name = self.now.content
             else:
                 self.error("missing argument name")
-            self.var[arg_name] = ("arg", arg_type, self.var_i["arg"])
-            self.var_i["arg"] += 1
+            self.scope[-1][arg_name] = ("arg", arg_type, self.count["arg"])
+            self.count["arg"] += 1
             self.get()
             while self.now == Token("symbol", ","):
                 if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
@@ -119,8 +121,8 @@ class Parser:
                     arg_name = self.now.content
                 else:
                     self.error("missing argument name")
-                self.var[arg_name] = ("arg", arg_type, self.var_i["arg"])
-                self.var_i["arg"] += 1
+                self.scope[-1][arg_name] = ("arg", arg_type, self.count["arg"])
+                self.count["arg"] += 1
                 self.get()
         else:
             self.error("missing argument type")
@@ -151,7 +153,6 @@ class Parser:
                 self.error(f"unkself.now {self.now.type} '{self.now.content}")
 
     def compileVar(self, _global: bool = False) -> None:
-        self.now = self.peek()
         if self.now == Token("keyword", "var"):
             if _global:
                 kind = "global"
@@ -165,20 +166,23 @@ class Parser:
             self.get()
         else:
             self.error("missing variable type")
-        n = 0
         if self.now.type == "identifier":
-            self.var[self.now.content] = (kind, type, self.var_i[kind])
-            self.var_i[kind] += 1
-            n += 1
+            if kind == "global":
+                self.scope[0][self.now.content] = (kind, type, self.count[kind])
+            else:
+                self.scope[-1][self.now.content] = (kind, type, self.count[kind])
+            self.count[kind] += 1
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
         self.get()
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                self.var[self.now.content] = (kind, type, self.var_i[kind])
-                self.var_i[kind] += 1
-                n += 1
+                if kind == "global":
+                    self.scope[0][self.now.content] = (kind, type, self.count[kind])
+                else:
+                    self.scope[-1][self.now.content] = (kind, type, self.count[kind])
+                self.count[kind] += 1
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
             self.get()

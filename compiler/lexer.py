@@ -11,7 +11,7 @@ def lexer(source: list[str]) -> list[Token]:
             tokens.append(Token("file", line[2:], (-1, -1)))
             continue
         if state == "string":
-            print("error: string not close\nlocation:", location)
+            print("error: string not closed\nlocation:", location)
             exit()
         for j, char in enumerate(line):
             if state == "commant":
@@ -115,6 +115,10 @@ def lexer(source: list[str]) -> list[Token]:
                 state = "identifier"
                 content = char
                 location = (i, j + 1)
+            else:
+                print(f"error: illegal symbol '{char}'\nlocation:", (i, j + 1))
+                exit()
+
     if state != "":
         print("error:", state)
         print("location:", location)
