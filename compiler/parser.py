@@ -223,24 +223,33 @@ class Parser:
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
         self.compileExpression()
-        # TODO: jump
+        if self.now != Token("symbol", ")"):
+            self.error("missing symbol ')'")
+        # TODO: label & jump
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         self.compileStatements()
         while True:
             self.get()
-            if self.now == Token("keyword", "elif"):
-                self.get()
-                if self.now != Token("symbol", "{"):
-                    self.error("missing symbol '{'")
-                self.compileStatements()
-            else:
+            if self.now != Token("keyword", "elif"):
                 break
+            self.get()
+            if self.now != Token("symbol", "("):
+                self.error("missing symbol '('")
+            self.compileExpression()
+            # TODO: label & jump
+            if self.now != Token("symbol", ")"):
+                self.error("missing symbol ')'")
+            self.get()
+            if self.now != Token("symbol", "{"):
+                self.error("missing symbol '{'")
+            self.compileStatements()
         if self.now == Token("keyword", "else"):
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
+            # TODO: label & jump
             self.compileStatements()
         else:
             self.index += 1
