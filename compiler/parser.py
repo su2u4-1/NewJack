@@ -255,13 +255,29 @@ class Parser:
             self.index += 1
 
     def compileWhile(self) -> None:
-        pass
+        self.get()
+        if self.now != Token("symbol", "("):
+            self.error("missing symbol '('")
+        self.compileExpression()
+        if self.now != Token("symbol", ")"):
+            self.error("missing symbol ')'")
+        # TODO: label & jump
+        self.get()
+        if self.now != Token("symbol", "{"):
+            self.error("missing symbol '{'")
+        self.compileStatements()
 
     def compileFor(self) -> None:
         pass
 
     def compileReturn(self) -> None:
-        pass
+        self.get()
+        if self.now == Token("symbol", ";"):
+            return
+        self.index -= 1
+        self.compileExpression()
+        if self.now != Token("symbol", ";"):
+            self.error("missing symbol ';'")
 
     def compileExpression(self) -> None:
         pass
