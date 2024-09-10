@@ -5,10 +5,12 @@ def lexer(source: list[str]) -> list[Token]:
     tokens: list[Token] = []
     content = ""
     state = ""
+    file_start = 0
     location = (-1, -1)
     for i, line in enumerate(source):
         if line.startswith("//"):
             tokens.append(Token("file", line[2:], (-1, -1)))
+            file_start = i
             continue
         if state == "string":
             print("error: string not closed\nlocation:", location)
@@ -58,11 +60,11 @@ def lexer(source: list[str]) -> list[Token]:
                 if char in Number:
                     if content == "-0":
                         tokens.append(Token("symbol", "-", location))
-                        tokens.append(Token("integer", "0", (i, j + 1)))
+                        tokens.append(Token("integer", "0", (i - file_start, j + 1)))
                         content = ""
                         state = ""
                     elif content == "0":
-                        tokens.append(Token("integer", "0", (i, j + 1)))
+                        tokens.append(Token("integer", "0", (i - file_start, j + 1)))
                         content = ""
                         state = ""
                     else:
@@ -83,7 +85,7 @@ def lexer(source: list[str]) -> list[Token]:
                 else:
                     if content[-1] == ".":
                         tokens.append(Token("integer", content[:-1], location))
-                        tokens.append(Token("symbol", ".", (i, j + 1)))
+                        tokens.append(Token("symbol", ".", (i - file_start, j + 1)))
                     else:
                         tokens.append(Token("float", content, location))
                     content = ""
@@ -92,7 +94,7 @@ def lexer(source: list[str]) -> list[Token]:
             if char == '"':
                 state = "string"
                 content = char
-                location = (i, j + 1)
+                location = (i - file_start, j + 1)
             elif char == "#":
                 break
             elif char == "`":
@@ -100,23 +102,23 @@ def lexer(source: list[str]) -> list[Token]:
             elif char == "-":
                 state = "neg"
                 content = char
-                location = (i, j + 1)
+                location = (i - file_start, j + 1)
             elif char in ("!", "=", ">", "<"):
                 state = "equal"
                 content = char
-                location = (i, j + 1)
+                location = (i - file_start, j + 1)
             elif char in Symbol:
-                tokens.append(Token("symbol", char, (i, j + 1)))
+                tokens.append(Token("symbol", char, (i - file_start, j + 1)))
             elif char in Number:
                 state = "int"
                 content = char
-                location = (i, j + 1)
+                location = (i - file_start, j + 1)
             elif char in atoZ or char == "_":
                 state = "identifier"
                 content = char
-                location = (i, j + 1)
+                location = (i - file_start, j + 1)
             else:
-                print(f"error: illegal symbol '{char}'\nlocation:", (i, j + 1))
+                print(f"error: illegal symbol '{char}'\nlocation:", (i - file_start, j + 1))
                 exit()
 
     if state != "":

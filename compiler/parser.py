@@ -9,8 +9,8 @@ class Parser:
         self.index = 0
         self.length = len(tokens)
         self.code: list[Code] = []
-        # [global: {class, global}, class: {function, attr}, subroutine: {arg, local}]
-        self.scope: list[dict[str, tuple[str, str, int]]] = []
+        # {class: {subroutine: {arg, local}, attr}, global}
+        self.scope: dict[str, dict[str, dict[str, tuple[str, str, int]]]] = {}
         self.count: dict[str, int] = {"class": 0, "global": 0, "function": 0, "attr": 0, "arg": 0, "local": 0}
         self.file = ""
         self.now_class = ""
@@ -48,8 +48,7 @@ class Parser:
         self.count["attr"] = 0
         self.get()
         if self.now.type == "identifier":
-            self.scope.append({})
-            self.scope[-1][self.now.content] = ("class", "class", self.count["class"])
+            self.scope[self.now.content] = {"$info": {"$info": ("class", "class", self.count["class"])}}
             self.count["class"] += 1
             self.now_class = self.now.content
         else:
@@ -63,13 +62,10 @@ class Parser:
                 self.compileSubroutine()
             elif self.now == Token("keyword", "var"):
                 self.compileVar(_global=True)
-            elif self.now == Token("keyword", "pass"):
-                self.get()
+            elif self.now == Token("symbol", "}"):
                 break
             else:
-                break
-        if self.now != Token("symbol", "}"):
-            self.error("missing symbol '}'")
+                self.error("missing symbol '}'")
 
     def compileSubroutine(self) -> None:
         self.count["arg"] = 0
@@ -78,7 +74,6 @@ class Parser:
         if self.now == Token("keyword", "constructor"):
             _attr = True
             # TODO: allocate memory for attribute
-            pass
         elif self.now == Token("keyword", "method"):
             # TODO: add self to arguments list
             pass
@@ -92,11 +87,11 @@ class Parser:
             self.error("missing return type")
         self.get()
         if self.now.type == "identifier":
-            self.scope[-1][self.now.content] = ("function", return_type, self.count["function"])
+            self.now_subroutine = self.now.content
+            self.scope[self.now_class][self.now_subroutine] = {"$info": ("function", return_type, self.count["function"])}
             self.count["function"] += 1
         else:
             self.error("missing subroutine name")
-        self.scope.append({})
         self.get()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
@@ -110,7 +105,7 @@ class Parser:
                 arg_name = self.now.content
             else:
                 self.error("missing argument name")
-            self.scope[-1][arg_name] = ("arg", arg_type, self.count["arg"])
+            self.scope[self.now_class][self.now_subroutine][arg_name] = ("arg", arg_type, self.count["arg"])
             self.count["arg"] += 1
             self.get()
             while self.now == Token("symbol", ","):
@@ -123,7 +118,7 @@ class Parser:
                     arg_name = self.now.content
                 else:
                     self.error("missing argument name")
-                self.scope[-1][arg_name] = ("arg", arg_type, self.count["arg"])
+                self.scope[self.now_class][self.now_subroutine][arg_name] = ("arg", arg_type, self.count["arg"])
                 self.count["arg"] += 1
                 self.get()
         else:
@@ -135,13 +130,13 @@ class Parser:
             self.error("missing symbol '{'")
         self.compileStatements(_attr)
 
-    def compileStatements(self, _attr = False) -> None:
+    def compileStatements(self, _attr: bool = False) -> None:
         while True:
             self.get()
             if self.now == Token("keyword", "var"):
                 self.compileVar()
             elif self.now == Token("keyword", "attr") and _attr:
-                self.compileAttr()
+                self.compileVar(False, _attr)
             elif self.now == Token("keyword", "let"):
                 self.compileLet()
             elif self.now == Token("keyword", "do"):
@@ -159,11 +154,10 @@ class Parser:
             else:
                 self.error(f"unkself.now {self.now.type} '{self.now.content}")
 
-    def compileAttr(self) -> None:
-        pass
-
-    def compileVar(self, _global: bool = False) -> None:
-        if _global:
+    def compileVar(self, _global: bool = False, _attr: bool = False) -> None:
+        if _attr:
+            kind = "attr"
+        elif _global:
             kind = "global"
         else:
             kind = "local"
@@ -174,10 +168,10 @@ class Parser:
         else:
             self.error("missing variable type")
         if self.now.type == "identifier":
-            if kind == "global":
-                self.scope[0][self.now.content] = (kind, type, self.count[kind])
+            if kind == "local":
+                self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
             else:
-                self.scope[-1][self.now.content] = (kind, type, self.count[kind])
+                self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
             self.count[kind] += 1
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
@@ -185,10 +179,10 @@ class Parser:
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                if kind == "global":
-                    self.scope[0][self.now.content] = (kind, type, self.count[kind])
+                if kind == "local":
+                    self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
                 else:
-                    self.scope[-1][self.now.content] = (kind, type, self.count[kind])
+                    self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
                 self.count[kind] += 1
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
@@ -196,7 +190,7 @@ class Parser:
         if self.now == Token("symbol", ";"):
             return
         elif self.now == Token("symbol", "="):
-            self.compileExpression()
+            self.compileExpressionList()
             # TODO: assign value to variable
         else:
             self.error("must be symbol ';' or '='")
@@ -313,6 +307,9 @@ class Parser:
         self.compileExpression()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
+
+    def compileExpressionList(self) -> None:
+        pass
 
     def compileExpression(self) -> None:
         pass

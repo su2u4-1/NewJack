@@ -1,7 +1,6 @@
 # NewJack grammar
 <code> ::= {<class>}
-<class> ::= "class" <identifier'class_name'> "{" {<class_content>} "}"
-<class_content> ::= <var_S> | <subroutine> | "pass"
+<class> ::= "class" <identifier'class_name'> "{" [{<var_S>}] <constructor> {(<var_S> | <subroutine>)} "}"
 <subroutine> ::= ("function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
 <constructor> ::= "constructor" <type> <identifier'name'> "(" (<argument_list> | "pass") ")" "{" {(<statement> | <attr_S>)} "}"
 <type> ::= <identifier'type'> | <built-in_type>
