@@ -61,7 +61,7 @@ class Parser:
             self.get()
             if self.now == Tokens("keyword", ("constructor", "function", "method")):
                 self.compileSubroutine()
-            elif self.now == Tokens("keyword", ("var", "attr")):
+            elif self.now == Token("keyword", "var"):
                 self.compileVar(_global=True)
             elif self.now == Token("keyword", "pass"):
                 self.get()
@@ -74,7 +74,9 @@ class Parser:
     def compileSubroutine(self) -> None:
         self.count["arg"] = 0
         self.count["local"] = 0
+        _attr = False
         if self.now == Token("keyword", "constructor"):
+            _attr = True
             # TODO: allocate memory for attribute
             pass
         elif self.now == Token("keyword", "method"):
@@ -131,13 +133,15 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        self.compileStatements()
+        self.compileStatements(_attr)
 
-    def compileStatements(self) -> None:
+    def compileStatements(self, _attr = False) -> None:
         while True:
             self.get()
             if self.now == Token("keyword", "var"):
                 self.compileVar()
+            elif self.now == Token("keyword", "attr") and _attr:
+                self.compileAttr()
             elif self.now == Token("keyword", "let"):
                 self.compileLet()
             elif self.now == Token("keyword", "do"):
@@ -155,14 +159,14 @@ class Parser:
             else:
                 self.error(f"unkself.now {self.now.type} '{self.now.content}")
 
+    def compileAttr(self) -> None:
+        pass
+
     def compileVar(self, _global: bool = False) -> None:
-        if self.now == Token("keyword", "var"):
-            if _global:
-                kind = "global"
-            else:
-                kind = "local"
+        if _global:
+            kind = "global"
         else:
-            kind = "attr"
+            kind = "local"
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
             type = self.now.content
