@@ -268,7 +268,38 @@ class Parser:
         self.compileStatements()
 
     def compileFor(self) -> None:
-        pass
+        self.get()
+        if self.now != Token("symbol", "("):
+            self.error("missing symbol '('")
+        self.get()
+        if self.now.type != "integer":
+            self.error("must be integer")
+        i_0 = self.now.content
+        self.get()
+        if self.now == Token("symbol", ")"):
+            for_range = (0, i_0, 1)
+        else:
+            if self.now != Token("symbol", ";"):
+                self.error("missing symbol ';'")
+            self.get()
+            if self.now.type != "integer":
+                self.error("must be integer")
+            i_1 = self.now.content
+            self.get()
+            if self.now != Token("symbol", ";"):
+                self.error("missing symbol ';'")
+            self.get()
+            if self.now.type != "integer":
+                self.error("must be integer")
+            foe_range = (i_0, i_1, self.now.content)
+            self.get()
+            if self.now != Token("symbol", ")"):
+                self.error("missing symbol ')'")
+        # TODO: for-loop
+        self.get()
+        if self.now != Token("symbol", "{"):
+            self.error("missing symbol '{'")
+        self.compileStatements()
 
     def compileReturn(self) -> None:
         self.get()
