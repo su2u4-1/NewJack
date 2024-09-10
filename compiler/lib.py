@@ -77,6 +77,8 @@ def read_from_path(path: str) -> list[str]:
                 file.append(f)
     elif os.path.isfile(path):
         file.append(path)
+    if len(file) == 0:
+        raise FileNotFoundError("NewJack(.nj) file not found")
     source: list[str] = []
     for i in file:
         if i.endswith(".nj"):

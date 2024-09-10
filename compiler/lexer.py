@@ -117,7 +117,7 @@ def lexer(source: list[str]) -> list[Token]:
                 state = "identifier"
                 content = char
                 location = (i - file_start, j + 1)
-            else:
+            elif char not in (" ", "\t", "\n"):
                 print(f"error: illegal symbol '{char}'\nlocation:", (i - file_start, j + 1))
                 exit()
 
