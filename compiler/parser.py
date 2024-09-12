@@ -201,7 +201,6 @@ class Parser:
 
     def compileLet(self) -> None:
         self.compileVariable()
-        self.get()
         if self.now != Token("symbol", "="):
             self.error("missing symbol '='")
         self.compileExpression()
@@ -212,7 +211,6 @@ class Parser:
 
     def compileDo(self) -> None:
         self.compileCall()
-        self.get()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
 
@@ -309,13 +307,42 @@ class Parser:
             self.error("missing symbol ';'")
 
     def compileExpressionList(self) -> None:
-        pass
+        self.compileExpression()
+        if self.now == Token("symbol", ","):
+            while True:
+                self.compileExpression()
+                if self.now != Token("symbol", ","):
+                    break
 
     def compileExpression(self) -> None:
         pass
 
     def compileVariable(self) -> None:
-        pass
+        self.get()
+        if self.now.type == "identifier":
+            # TODO: get variable
+            pass
+        else:
+            self.error("must be identifier")
+        self.get()
+        if self.now == Token("symbol", "."):
+            self.get()
+            if self.now.type == "identifier":
+                # TODO: get attribute
+                pass
+            else:
+                self.error("must be identifier")
+        elif self.now == Token("symbol", "["):
+            self.compileExpression()
+            # TODO: get index
+            if self.now != Token("symbol", "]"):
+                self.error("missing symbol ']'")
 
     def compileCall(self) -> None:
-        pass
+        self.compileVariable()
+        if self.now != Token("symbol", "("):
+            self.error("missing symbol '('")
+        self.compileExpressionList()
+        if self.now != Token("symbol", ")"):
+            self.error("missing symbol ')'")
+        # TODO: call subroutine

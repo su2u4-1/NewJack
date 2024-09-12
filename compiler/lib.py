@@ -28,7 +28,9 @@ class Token:
                 for i in value.content:
                     if i == self.content:
                         return True
-        return False
+            return False
+        else:
+            return NotImplemented
 
 
 class Tokens:
@@ -42,7 +44,9 @@ class Tokens:
                 for i in self.content:
                     if i == value.content:
                         return True
-        return False
+            return False
+        else:
+            return NotImplemented
 
 
 class Code:
