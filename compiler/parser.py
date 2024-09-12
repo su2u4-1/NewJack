@@ -287,7 +287,7 @@ class Parser:
             self.get()
             if self.now.type != "integer":
                 self.error("must be integer")
-            foe_range = (i_0, i_1, self.now.content)
+            for_range = (i_0, i_1, self.now.content)
             self.get()
             if self.now != Token("symbol", ")"):
                 self.error("missing symbol ')'")
