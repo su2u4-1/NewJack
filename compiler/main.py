@@ -23,5 +23,5 @@ if __name__ == "__main__":
         if t.endswith("\n"):
             t = t[:-1]
         print(t)
-        print(" "*(e.index-1) + "^")
+        print(" " * (e.index - 1) + "^")
         exit()

@@ -320,28 +320,105 @@ class Parser:
                     break
 
     def compileExpression(self) -> None:
-        pass
+        # <term> [{<operator> <term>}]
+        self.compileTerm()
+        while self.now == Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&")):
+            if self.now == Token("symbol", "+"):
+                pass
+            elif self.now == Token("symbol", "-"):
+                pass
+            elif self.now == Token("symbol", "*"):
+                pass
+            elif self.now == Token("symbol", "/"):
+                pass
+            elif self.now == Token("symbol", "=="):
+                pass
+            elif self.now == Token("symbol", "!="):
+                pass
+            elif self.now == Token("symbol", ">="):
+                pass
+            elif self.now == Token("symbol", "<="):
+                pass
+            elif self.now == Token("symbol", ">"):
+                pass
+            elif self.now == Token("symbol", "<"):
+                pass
+            elif self.now == Token("symbol", "|"):
+                pass
+            elif self.now == Token("symbol", "&"):
+                pass
+            self.compileTerm()
 
-    def compileVariable(self) -> None:
+    def compileTerm(self) -> None:
+        # <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional>
         self.get()
+        if self.now.type == "string":
+            # TODO: string
+            self.get()
+        elif self.now.type == "integer":
+            # TODO: integer
+            self.get()
+        elif self.now.type == "float":
+            # TODO: float
+            self.get()
+        elif self.now == Tokens("keyword", ("true", "false", "none")):
+            if self.now == Token("keyword", "true"):
+                # TODO: true
+                self.get()
+            elif self.now == Token("keyword", "false"):
+                # TODO: false
+                self.get()
+            elif self.now == Token("keyword", "none"):
+                # TODO: none
+                self.get()
+        elif self.now == Tokens("symbol", ("-", "~", "(")):
+            if self.now == Token("symbol", "("):
+                self.compileExpression()
+                if self.now != Token("symbol", ")"):
+                    self.error("missing symbol ')'")
+            elif self.now == Token("symbol", "-"):
+                # TODO: -
+                self.compileExpression()
+            elif self.now == Token("symbol", "~"):
+                # TODO: ~
+                self.compileExpression()
+        elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
+            self.compileVariable(False)
+            if self.now == Token("symbol", "("):
+                self.compileExpressionList()
+                if self.now != Token("symbol", ")"):
+                    self.error("missing symbol ')'")
+                # TODO: call subroutine
+            else:
+                pass
+                # TODO: get variable
+
+    def compileVariable(self, f: bool = True) -> None:
+        if f:
+            self.get()
         if self.now.type == "identifier":
             # TODO: get variable
+            pass
+        elif self.now == Token("keyword", "self"):
+            # TODO: get now object
             pass
         else:
             self.error("must be identifier")
         self.get()
-        if self.now == Token("symbol", "."):
+        while self.now == Tokens("symbol", (".", "[")):
+            if self.now == Token("symbol", "."):
+                self.get()
+                if self.now.type == "identifier":
+                    # TODO: get attribute
+                    pass
+                else:
+                    self.error("must be identifier")
+            elif self.now == Token("symbol", "["):
+                self.compileExpression()
+                # TODO: get index
+                if self.now != Token("symbol", "]"):
+                    self.error("missing symbol ']'")
             self.get()
-            if self.now.type == "identifier":
-                # TODO: get attribute
-                pass
-            else:
-                self.error("must be identifier")
-        elif self.now == Token("symbol", "["):
-            self.compileExpression()
-            # TODO: get index
-            if self.now != Token("symbol", "]"):
-                self.error("missing symbol ']'")
 
     def compileCall(self) -> None:
         self.compileVariable()

@@ -36,8 +36,8 @@ def lexer(source: list[str]) -> list[Token]:
                     tokens.append(Token("symbol", content, location))
                     content = ""
                     state = ""
-            elif state == "equal":
-                if char == "=":
+            elif state == "symbol":
+                if content + char in Symbol:
                     tokens.append(Token("symbol", content + char, location))
                     content = ""
                     state = ""
@@ -104,7 +104,7 @@ def lexer(source: list[str]) -> list[Token]:
                 content = char
                 location = (i - file_start, j + 1)
             elif char in ("!", "=", ">", "<"):
-                state = "equal"
+                state = "symbol"
                 content = char
                 location = (i - file_start, j + 1)
             elif char in Symbol:

@@ -19,7 +19,7 @@
 <continue_S> ::= "continue" ";"
 <var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
 <expression> ::= <term> [{<operator> <term>}]
-<term> ::= <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional>
+<term> ::= <string> | <integer> | <float> | <keyword_content> | ("-" | "~") <term> | <call> | <var> | "(" <expression> ")" | <conditional>
 <call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")"
 <conditional> ::= <expression> <logical_operator> <expression>
 
@@ -36,8 +36,7 @@
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "none" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "~"
-<operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&"
-<unoperator> ::= "-" | "~"
+<operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&" | "<<" | ">>"
 <logical_operator> ::= "==" | "!=" | ">=" | "<=" | ">" | "<"
 <string> ::= '"' {unicode_characters} '"' # Disable line breaks
 <char> ::= "'" unicode_characters "'"
