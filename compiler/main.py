@@ -13,10 +13,15 @@ if __name__ == "__main__":
         except FileNotFoundError:
             pass
     tokens = lexer(source)
+    parser = Parser(tokens)
     try:
-        parser = Parser(tokens)
+        xmlcode = parser.main()
     except ParsingError as e:
         print(f'File "{e.file}", line {e.line}, in {e.index}')
         print(e.text)
+        t = source[source.index("//" + e.file) + e.line]
+        if t.endswith("\n"):
+            t = t[:-1]
+        print(t)
+        print(" "*(e.index-1) + "^")
         exit()
-    xmlcode = parser.main()

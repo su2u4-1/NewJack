@@ -5,12 +5,13 @@ from lib import Token, Tokens, Code, ParsingError
 
 class Parser:
     def __init__(self, tokens: list[Token]) -> None:
+        tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
         self.code: list[Code] = []
         # {class: {subroutine: {arg, local}, attr}, global}
-        self.scope: dict[str, dict[str, dict[str, tuple[str, str, int]]]] = {}
+        self.scope: dict[str, dict[str, dict[str, tuple[str, str, int]]]] = {"global": {"global": {}}}
         self.count: dict[str, int] = {"class": 0, "global": 0, "function": 0, "attr": 0, "arg": 0, "local": 0}
         self.file = ""
         self.now_class = ""
@@ -23,8 +24,8 @@ class Parser:
 
     def get(self) -> None:
         self.index += 1
-        if self.index >= self.length:
-            self.error("Unexpected end of input")
+        if self.index > self.length:
+            raise Exception("Unexpected end of input")
         self.now = self.tokens[self.index - 1]
         if self.now.type == "file":
             self.file = self.now.content
@@ -37,7 +38,7 @@ class Parser:
             self.get()
             if self.now == Token("keyword", "class"):
                 self.compileClass()
-            elif self.index >= self.length:
+            elif self.now == Token("keyword", "EOF"):
                 break
             else:
                 self.error("missing keyword 'class'")
@@ -48,7 +49,7 @@ class Parser:
         self.count["attr"] = 0
         self.get()
         if self.now.type == "identifier":
-            self.scope[self.now.content] = {"$info": {"$info": ("class", "class", self.count["class"])}}
+            self.scope[self.now.content] = {"attr": {}, "attr": {}, "$info": {"$info": ("class", "class", self.count["class"])}}
             self.count["class"] += 1
             self.now_class = self.now.content
         else:
@@ -82,7 +83,6 @@ class Parser:
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
             return_type = self.now.content
-            self.get()
         else:
             self.error("missing return type")
         self.get()
@@ -109,6 +109,7 @@ class Parser:
             self.count["arg"] += 1
             self.get()
             while self.now == Token("symbol", ","):
+                self.get()
                 if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
                     arg_type = self.now.content
                 else:
@@ -120,7 +121,7 @@ class Parser:
                     self.error("missing argument name")
                 self.scope[self.now_class][self.now_subroutine][arg_name] = ("arg", arg_type, self.count["arg"])
                 self.count["arg"] += 1
-                self.get()
+            self.get()
         else:
             self.error("missing argument type")
         if self.now != Token("symbol", ")"):
@@ -170,6 +171,8 @@ class Parser:
         if self.now.type == "identifier":
             if kind == "local":
                 self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
+            elif kind == "global":
+                self.scope[kind][kind][self.now.content] = (kind, type, self.count[kind])
             else:
                 self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
             self.count[kind] += 1
@@ -181,6 +184,8 @@ class Parser:
             if self.now.type == "identifier":
                 if kind == "local":
                     self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
+                elif kind == "global":
+                    self.scope[kind][kind][self.now.content] = (kind, type, self.count[kind])
                 else:
                     self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
                 self.count[kind] += 1

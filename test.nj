@@ -1,5 +1,5 @@
 class Test{
-    constructor new(int a, int b){
+    constructor Test new(int a, int b){
         attr int a, b = a, b;
         return self;
     }
