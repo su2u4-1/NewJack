@@ -15,7 +15,7 @@ if __name__ == "__main__":
     tokens = lexer(source)
     parser = Parser(tokens)
     try:
-        xmlcode = parser.main()
+        code = parser.main()
     except ParsingError as e:
         print(f'File "{e.file}", line {e.line}, in {e.index}')
         print(e.text)

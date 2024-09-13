@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from lib import Token, Tokens, Code, ParsingError
+from lib import Token, Tokens, ParsingError
 
 
 class Parser:
@@ -9,10 +9,8 @@ class Parser:
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
-        self.code: list[Code] = []
-        # {class: {subroutine: {arg, local}, attr}, global}
-        self.scope: dict[str, dict[str, dict[str, tuple[str, str, int]]]] = {"global": {"global": {}}}
-        self.count: dict[str, int] = {"class": 0, "global": 0, "function": 0, "attr": 0, "arg": 0, "local": 0}
+        self.code: list[str] = []
+        self.count: dict[str, int] = {"class": 0, "subroutine": 0, "statement": 0, "var": 0, "let": 0, "do": 0, "if": 0, "while": 0, "for": 0, "return": 0, "expression": 0, "expressionList": 0, "term": 0, "variable": 0, "call": 0}
         self.file = ""
         self.now_class = ""
         self.now = tokens[0]
@@ -31,27 +29,31 @@ class Parser:
             self.file = self.now.content
             self.get()
 
-    def main(self) -> list[Code]:
+    def next(self) -> Token:
+        if self.index >= self.length:
+            raise Exception("Unexpected end of input")
+        return self.tokens[self.index]
+
+    def main(self) -> list[str]:
         self.count["class"] = 0
         self.count["global"] = 0
         while True:
             self.get()
             if self.now == Token("keyword", "class"):
-                self.compileClass()
+                self.parse_Class()
             elif self.now == Token("keyword", "EOF"):
                 break
             else:
                 self.error("missing keyword 'class'")
         return self.code
 
-    def compileClass(self) -> None:
-        self.count["function"] = 0
-        self.count["attr"] = 0
+    def parse_Class(self) -> None:
+        n = self.count["class"]
+        self.count["class"] += 1
+        self.code.append(f"start class {n}")
         self.get()
         if self.now.type == "identifier":
-            self.scope[self.now.content] = {"attr": {}, "attr": {}, "$info": {"$info": ("class", "class", self.count["class"])}}
-            self.count["class"] += 1
-            self.now_class = self.now.content
+            self.code.append(f"class name {self.now.content}")
         else:
             self.error("missing class name")
         self.get()
@@ -60,36 +62,33 @@ class Parser:
         while True:
             self.get()
             if self.now == Tokens("keyword", ("constructor", "function", "method")):
-                self.compileSubroutine()
+                self.parse_Subroutine()
             elif self.now == Token("keyword", "var"):
-                self.compileVar(_global=True)
+                self.parse_Var(_global=True)
             elif self.now == Token("symbol", "}"):
                 break
             else:
                 self.error("missing symbol '}'")
+        self.code.append(f"end class {n}")
 
-    def compileSubroutine(self) -> None:
-        self.count["arg"] = 0
-        self.count["local"] = 0
+    def parse_Subroutine(self) -> None:
+        n = self.count["subroutine"]
+        self.count["subroutine"] += 1
+        self.code.append(f"start subroutine {n}")
         _attr = False
         if self.now == Token("keyword", "constructor"):
             _attr = True
-            # TODO: allocate memory for attribute
-        elif self.now == Token("keyword", "method"):
-            # TODO: add self to arguments list
-            pass
-        elif self.now != Token("keyword", "function"):
+        elif self.now != Tokens("keyword", ("function", "method")):
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'")
+        self.code.append(f"subroutine type {self.now.content}")
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
-            return_type = self.now.content
+            self.code.append(f"subroutine return {self.now.content}")
         else:
             self.error("missing return type")
         self.get()
         if self.now.type == "identifier":
-            self.now_subroutine = self.now.content
-            self.scope[self.now_class][self.now_subroutine] = {"$info": ("function", return_type, self.count["function"])}
-            self.count["function"] += 1
+            self.code.append(f"subroutine name {self.now.content}")
         else:
             self.error("missing subroutine name")
         self.get()
@@ -102,11 +101,9 @@ class Parser:
             arg_type = self.now.content
             self.get()
             if self.now.type == "identifier":
-                arg_name = self.now.content
+                self.code.append(f"argument {arg_type} {self.now.content}")
             else:
                 self.error("missing argument name")
-            self.scope[self.now_class][self.now_subroutine][arg_name] = ("arg", arg_type, self.count["arg"])
-            self.count["arg"] += 1
             self.get()
             while self.now == Token("symbol", ","):
                 self.get()
@@ -116,11 +113,9 @@ class Parser:
                     self.error("the symbol ',' must be followed by a argument type")
                 self.get()
                 if self.now.type == "identifier":
-                    arg_name = self.now.content
+                    self.code.append(f"argument {arg_type} {self.now.content}")
                 else:
                     self.error("missing argument name")
-                self.scope[self.now_class][self.now_subroutine][arg_name] = ("arg", arg_type, self.count["arg"])
-                self.count["arg"] += 1
             self.get()
         else:
             self.error("missing argument type")
@@ -129,33 +124,41 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        self.compileStatements(_attr)
+        self.parse_Statements(_attr)
+        self.code.append(f"end subroutine {n}")
 
-    def compileStatements(self, _attr: bool = False) -> None:
+    def parse_Statements(self, _attr: bool = False) -> None:
+        n = self.count["statement"]
+        self.count["statement"] += 1
+        self.code.append(f"start statement {n}")
         while True:
             self.get()
             if self.now == Token("keyword", "var"):
-                self.compileVar()
+                self.parse_Var()
             elif self.now == Token("keyword", "attr") and _attr:
-                self.compileVar(False, _attr)
+                self.parse_Var(False, _attr)
             elif self.now == Token("keyword", "let"):
-                self.compileLet()
+                self.parse_Let()
             elif self.now == Token("keyword", "do"):
-                self.compileDo()
+                self.parse_Do()
             elif self.now == Token("keyword", "if"):
-                self.compileIf()
+                self.parse_If()
             elif self.now == Token("keyword", "while"):
-                self.compileWhile()
+                self.parse_While()
             elif self.now == Token("keyword", "for"):
-                self.compileFor()
+                self.parse_For()
             elif self.now == Token("keyword", "return"):
-                self.compileReturn()
+                self.parse_Return()
             elif self.now == Token("symbol", "}"):
                 break
             else:
-                self.error(f"unkself.now {self.now.type} '{self.now.content}")
+                self.error(f"unknown {self.now.type} '{self.now.content}'")
+        self.code.append(f"end statement {n}")
 
-    def compileVar(self, _global: bool = False, _attr: bool = False) -> None:
+    def parse_Var(self, _global: bool = False, _attr: bool = False) -> None:
+        n = self.count["var"]
+        self.count["var"] += 1
+        self.code.append(f"start var {n}")
         if _attr:
             kind = "attr"
         elif _global:
@@ -164,111 +167,127 @@ class Parser:
             kind = "local"
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
-            type = self.now.content
+            var_type = self.now.content
             self.get()
         else:
             self.error("missing variable type")
         if self.now.type == "identifier":
-            if kind == "local":
-                self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
-            elif kind == "global":
-                self.scope[kind][kind][self.now.content] = (kind, type, self.count[kind])
-            else:
-                self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
-            self.count[kind] += 1
+            self.code.append(f"{kind} {var_type} {self.now.content}")
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
         self.get()
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                if kind == "local":
-                    self.scope[self.now_class][self.now_subroutine][self.now.content] = (kind, type, self.count[kind])
-                elif kind == "global":
-                    self.scope[kind][kind][self.now.content] = (kind, type, self.count[kind])
-                else:
-                    self.scope[self.now_class][kind][self.now.content] = (kind, type, self.count[kind])
-                self.count[kind] += 1
+                self.code.append(f"{kind} {var_type} {self.now.content}")
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
             self.get()
         if self.now == Token("symbol", ";"):
+            self.code.append(f"end var {n}")
             return
         elif self.now == Token("symbol", "="):
-            self.compileExpressionList()
-            # TODO: assign value to variable
+            self.code.append(f"var assign_value_to_variable {n}")
+            self.parse_ExpressionList()
         else:
             self.error("must be symbol ';' or '='")
         if self.now == Token("symbol", ";"):
+            self.code.append(f"end var {n}")
             return
         else:
             self.error("the end must be symbol ';'")
+        self.code.append(f"end var {n}")
 
-    def compileLet(self) -> None:
-        self.compileVariable()
+    def parse_Let(self) -> None:
+        n = self.count["let"]
+        self.count["let"] += 1
+        self.code.append(f"start let {n}")
+        self.parse_Variable()
         if self.now != Token("symbol", "="):
             self.error("missing symbol '='")
-        self.compileExpression()
-        # TODO: assign value to variable
+        self.code.append(f"let assign_value_to_variable {n}")
+        self.parse_Expression()
+        if self.now != Token("symbol", ";"):
+            self.error("missing symbol ';'")
+        self.code.append(f"end let {n}")
+
+    def parse_Do(self) -> None:
+        n = self.count["do"]
+        self.count["do"] += 1
+        self.code.append(f"start do {n}")
+        self.parse_Call()
         self.get()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
+        self.code.append(f"end do {n}")
 
-    def compileDo(self) -> None:
-        self.compileCall()
-        if self.now != Token("symbol", ";"):
-            self.error("missing symbol ';'")
-
-    def compileIf(self) -> None:
+    def parse_If(self) -> None:
+        n = self.count["if"]
+        self.count["if"] += 1
+        self.code.append(f"start if {n}")
         self.get()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
-        self.compileExpression()
+        self.parse_Expression()
         if self.now != Token("symbol", ")"):
             self.error("missing symbol ')'")
-        # TODO: label & jump
+        self.code.append(f"if if_jump {n}")
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        self.compileStatements()
+        self.parse_Statements()
+        n1 = 0
         while True:
             self.get()
             if self.now != Token("keyword", "elif"):
                 break
+            self.code.append(f"start elif {n}-{n1}")
             self.get()
             if self.now != Token("symbol", "("):
                 self.error("missing symbol '('")
-            self.compileExpression()
-            # TODO: label & jump
+            self.parse_Expression()
+            self.code.append(f"if elif_jump {n}-{n1}")
             if self.now != Token("symbol", ")"):
                 self.error("missing symbol ')'")
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
-            self.compileStatements()
+            self.parse_Statements()
+            self.code.append(f"end elif {n}-{n1}")
+            n1 += 1
         if self.now == Token("keyword", "else"):
+            self.code.append(f"start else {n}")
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
-            # TODO: label & jump
-            self.compileStatements()
+            self.code.append(f"if else_jump {n}")
+            self.parse_Statements()
+            self.code.append(f"end else {n}")
         else:
             self.index += 1
+        self.code.append(f"end if {n}")
 
-    def compileWhile(self) -> None:
+    def parse_While(self) -> None:
+        n = self.count["while"]
+        self.count["while"] += 1
+        self.code.append(f"start while {n}")
         self.get()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
-        self.compileExpression()
+        self.parse_Expression()
         if self.now != Token("symbol", ")"):
             self.error("missing symbol ')'")
-        # TODO: label & jump
+        self.code.append(f"while while_jump {n}")
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        self.compileStatements()
+        self.parse_Statements()
+        self.code.append(f"end while {n}")
 
-    def compileFor(self) -> None:
+    def parse_For(self) -> None:
+        n = self.count["for"]
+        self.count["for"] += 1
+        self.code.append(f"start for {n}")
         self.get()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
@@ -296,112 +315,107 @@ class Parser:
             self.get()
             if self.now != Token("symbol", ")"):
                 self.error("missing symbol ')'")
-        # TODO: for-loop
+        self.code.append(f"for start {for_range[0]}")
+        self.code.append(f"for end {for_range[1]}")
+        self.code.append(f"for step {for_range[2]}")
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        self.compileStatements()
+        self.parse_Statements()
+        self.code.append(f"end for {n}")
 
-    def compileReturn(self) -> None:
+    def parse_Return(self) -> None:
+        n = self.count["return"]
+        self.count["return"] += 1
+        self.code.append(f"start return {n}")
         self.get()
         if self.now == Token("symbol", ";"):
+            self.code.append(f"end return {n}")
             return
         self.index -= 1
-        self.compileExpression()
+        self.parse_Expression()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
+        self.code.append(f"end return {n}")
 
-    def compileExpressionList(self) -> None:
-        self.compileExpression()
+    def parse_ExpressionList(self) -> None:
+        n = self.count["expressionList"]
+        self.count["expressionList"] += 1
+        self.code.append(f"start expressionList {n}")
+        self.parse_Expression()
         if self.now == Token("symbol", ","):
             while True:
-                self.compileExpression()
+                self.parse_Expression()
                 if self.now != Token("symbol", ","):
                     break
+        self.code.append(f"end expressionList {n}")
 
-    def compileExpression(self) -> None:
-        # <term> [{<operator> <term>}]
-        self.compileTerm()
+    def parse_Expression(self) -> None:
+        n = self.count["expression"]
+        self.count["expression"] += 1
+        self.code.append(f"start expression {n}")
+        self.parse_Term()
         while self.now == Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&")):
-            if self.now == Token("symbol", "+"):
-                pass
-            elif self.now == Token("symbol", "-"):
-                pass
-            elif self.now == Token("symbol", "*"):
-                pass
-            elif self.now == Token("symbol", "/"):
-                pass
-            elif self.now == Token("symbol", "=="):
-                pass
-            elif self.now == Token("symbol", "!="):
-                pass
-            elif self.now == Token("symbol", ">="):
-                pass
-            elif self.now == Token("symbol", "<="):
-                pass
-            elif self.now == Token("symbol", ">"):
-                pass
-            elif self.now == Token("symbol", "<"):
-                pass
-            elif self.now == Token("symbol", "|"):
-                pass
-            elif self.now == Token("symbol", "&"):
-                pass
-            self.compileTerm()
+            self.code.append(f"expression op {self.now.content}")
+            self.parse_Term()
+        self.code.append(f"end expression {n}")
 
-    def compileTerm(self) -> None:
-        # <string> | <integer> | <float> | <keyword_content> | <unoperator> <term> | <call> | <var> | "(" <expression> ")" | <conditional>
+    def parse_Term(self) -> None:
+        n = self.count["term"]
+        self.count["term"] += 1
+        self.code.append(f"start term {n}")
         self.get()
         if self.now.type == "string":
-            # TODO: string
+            self.code.append("term add string")
             self.get()
         elif self.now.type == "integer":
-            # TODO: integer
+            self.code.append("term add integer")
             self.get()
         elif self.now.type == "float":
-            # TODO: float
+            self.code.append("term add float")
             self.get()
         elif self.now == Tokens("keyword", ("true", "false", "none")):
             if self.now == Token("keyword", "true"):
-                # TODO: true
+                self.code.append("term add true")
                 self.get()
             elif self.now == Token("keyword", "false"):
-                # TODO: false
+                self.code.append("term add false")
                 self.get()
             elif self.now == Token("keyword", "none"):
-                # TODO: none
+                self.code.append("term add none")
                 self.get()
         elif self.now == Tokens("symbol", ("-", "~", "(")):
             if self.now == Token("symbol", "("):
-                self.compileExpression()
+                self.parse_Expression()
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
             elif self.now == Token("symbol", "-"):
-                # TODO: -
-                self.compileExpression()
+                self.code.append("term add -")
+                self.parse_Expression()
             elif self.now == Token("symbol", "~"):
-                # TODO: ~
-                self.compileExpression()
+                self.code.append("term add ~")
+                self.parse_Expression()
         elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
-            self.compileVariable(False)
+            self.parse_Variable(False)
             if self.now == Token("symbol", "("):
-                self.compileExpressionList()
+                self.parse_ExpressionList()
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
-                # TODO: call subroutine
+                self.code.append("term add call")
             else:
-                pass
-                # TODO: get variable
+                self.code.append("term add variable")
+        self.code.append(f"end term {n}")
 
-    def compileVariable(self, f: bool = True) -> None:
+    def parse_Variable(self, f: bool = True) -> None:
+        n = self.count["variable"]
+        self.count["variable"] += 1
+        self.code.append(f"start variable {n}")
         if f:
             self.get()
         if self.now.type == "identifier":
-            # TODO: get variable
-            pass
+            self.code.append(f"variable get {self.now.content}")
         elif self.now == Token("keyword", "self"):
-            # TODO: get now object
-            pass
+            self.code.append(f"variable get self")
         else:
             self.error("must be identifier")
         self.get()
@@ -409,22 +423,28 @@ class Parser:
             if self.now == Token("symbol", "."):
                 self.get()
                 if self.now.type == "identifier":
-                    # TODO: get attribute
-                    pass
+                    self.code.append(f"variable point {self.now.content}")
                 else:
                     self.error("must be identifier")
             elif self.now == Token("symbol", "["):
-                self.compileExpression()
-                # TODO: get index
+                self.parse_Expression()
+                self.code.append("variable add index")
                 if self.now != Token("symbol", "]"):
                     self.error("missing symbol ']'")
             self.get()
+        self.code.append(f"end variable {n}")
 
-    def compileCall(self) -> None:
-        self.compileVariable()
+    def parse_Call(self) -> None:
+        n = self.count["call"]
+        self.count["call"] += 1
+        self.code.append(f"start call {n}")
+        self.parse_Variable()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
-        self.compileExpressionList()
+        if self.next() == Token("keyword", "pass"):
+            self.code.append("call arg pass")
+        else:
+            self.parse_ExpressionList()
         if self.now != Token("symbol", ")"):
             self.error("missing symbol ')'")
-        # TODO: call subroutine
+        self.code.append(f"end call {n}")
