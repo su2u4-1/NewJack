@@ -282,6 +282,14 @@ class Parser:
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         self.parse_Statements()
+        if self.next() == Token("keyword", "else"):
+            self.get()
+            self.code.append(f"start while-else {n}")
+            self.get()
+            if self.now != Token("symbol", "{"):
+                self.error("missing symbol '{'")
+            self.parse_Statements()
+            self.code.append(f"end while-else {n}")
         self.code.append(f"end while {n}")
 
     def parse_For(self) -> None:
@@ -322,6 +330,14 @@ class Parser:
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         self.parse_Statements()
+        if self.next() == Token("keyword", "else"):
+            self.get()
+            self.code.append(f"start for-else {n}")
+            self.get()
+            if self.now != Token("symbol", "{"):
+                self.error("missing symbol '{'")
+            self.parse_Statements()
+            self.code.append(f"end for-else {n}")
         self.code.append(f"end for {n}")
 
     def parse_Return(self) -> None:
