@@ -64,6 +64,31 @@ class Code:
             return self.command + " " + self.arg1 + " " + self.arg2
 
 
+class CodeObject:
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.class_list: list[Class] = []
+
+
+class Class:
+    def __init__(self, name: str, return_type: str) -> None:
+        self.name = name
+        self.return_type = return_type
+        self.variable = []
+        self.subroutine = []
+        self.statements = []  # only var statement
+
+
+class Subroutine:
+    def __init__(self, name: str) -> None:
+        pass
+
+
+class Statement:
+    def __init__(self, name: str) -> None:
+        pass
+
+
 class ParsingError(Exception):
     def __init__(self, file: str, location: tuple[int, int], text: str) -> None:
         self.file = file
