@@ -90,3 +90,21 @@ def read_from_path(path: str) -> list[str]:
                 source.append("//" + i)
                 source += f.readlines()
     return source
+
+
+def write_to_a_file(path: str, content: Iterable[str], extension_name: str) -> None:
+    dir_path, file_name = os.path.split(os.path.abspath(path))
+    with open(os.path.join(dir_path, file_name.split(".")[0] + extension_name), "w+") as f:
+        f.write("\n".join(content))
+
+
+def format_vmcode(code: Iterable[str]) -> list[str]:
+    ind = 0
+    new_code: list[str] = []
+    for i in code:
+        if i.startswith("end"):
+            ind -= 1
+        new_code.append("    " * ind + i)
+        if i.startswith("start"):
+            ind += 1
+    return new_code

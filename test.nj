@@ -5,4 +5,8 @@ class Test{
         let b = 2;
         return self;
     }
+
+    method void test0(pass){
+        return ;
+    }
 }

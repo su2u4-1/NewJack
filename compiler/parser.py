@@ -12,7 +12,6 @@ class Parser:
         self.code: list[str] = []
         self.count: dict[str, int] = {"class": 0, "subroutine": 0, "statement": 0, "var": 0, "let": 0, "do": 0, "if": 0, "while": 0, "for": 0, "return": 0, "expression": 0, "expressionList": 0, "term": 0, "variable": 0, "call": 0}
         self.file = ""
-        self.now_class = ""
         self.now = tokens[0]
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
@@ -255,7 +254,8 @@ class Parser:
             self.parse_Statements()
             self.code.append(f"end elif {n}-{n1}")
             n1 += 1
-        if self.now == Token("keyword", "else"):
+        if self.next() == Token("keyword", "else"):
+            self.get()
             self.code.append(f"start else {n}")
             self.get()
             if self.now != Token("symbol", "{"):
@@ -263,8 +263,6 @@ class Parser:
             self.code.append(f"if else_jump {n}")
             self.parse_Statements()
             self.code.append(f"end else {n}")
-        else:
-            self.index += 1
         self.code.append(f"end if {n}")
 
     def parse_While(self) -> None:
@@ -344,11 +342,10 @@ class Parser:
         n = self.count["return"]
         self.count["return"] += 1
         self.code.append(f"start return {n}")
-        self.get()
-        if self.now == Token("symbol", ";"):
+        if self.next() == Token("symbol", ";"):
+            self.get()
             self.code.append(f"end return {n}")
             return
-        self.index -= 1
         self.parse_Expression()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")

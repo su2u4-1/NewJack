@@ -1,4 +1,4 @@
-from lib import read_from_path, ParsingError
+from lib import read_from_path, write_to_a_file, format_vmcode, ParsingError
 from lexer import lexer
 from parser import Parser
 
@@ -10,8 +10,8 @@ if __name__ == "__main__":
         try:
             source = read_from_path(path)
             break
-        except FileNotFoundError:
-            pass
+        except FileNotFoundError as e:
+            print(e)
     tokens = lexer(source)
     parser = Parser(tokens)
     try:
@@ -25,3 +25,4 @@ if __name__ == "__main__":
         print(t)
         print(" " * (e.index - 1) + "^")
         exit()
+    write_to_a_file(path, format_vmcode(code), ".vmcode")
