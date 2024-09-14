@@ -71,22 +71,42 @@ class CodeObject:
 
 
 class Class:
-    def __init__(self, name: str, return_type: str) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
-        self.return_type = return_type
         self.variable = []
         self.subroutine = []
         self.statements = []  # only var statement
 
 
 class Subroutine:
-    def __init__(self, name: str) -> None:
-        pass
+    def __init__(self, name: str, return_type: str) -> None:
+        self.name = name
+        self.return_type = return_type
+        self.variable = []
+        self.argument = []
+
+
+class Expression:
+    pass
 
 
 class Statement:
     def __init__(self, name: str) -> None:
-        pass
+        self.name = name
+
+
+class Variable:
+    pass
+
+
+class Var(Statement):
+    def __init__(self, var: Iterable[str], value: Iterable[Expression]) -> None:
+        self.variable = dict(i for i in zip(var, value))
+
+
+class Let(Statement):
+    def __init__(self, var: Iterable[Variable], value: Iterable[Expression]) -> None:
+        self.variable = dict(i for i in zip(var, value))
 
 
 class ParsingError(Exception):
