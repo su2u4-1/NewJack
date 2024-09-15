@@ -50,63 +50,13 @@ class Tokens:
 
 
 class Code:
-    def __init__(self, command: str, arg_1: str = "", arg_2: str = "") -> None:
-        self.command = command
-        self.arg1 = arg_1
-        self.arg2 = arg_2
+    def __init__(self, kind: str, info: dict[str, str]) -> None:
+        self.kind = kind
+        self.info = info
+        self.content: list[Code] = []
 
     def __str__(self) -> str:
-        if self.arg1 == "":
-            return self.command
-        elif self.arg2 == "":
-            return self.command + " " + self.arg1
-        else:
-            return self.command + " " + self.arg1 + " " + self.arg2
-
-
-class CodeObject:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.class_list: list[Class] = []
-
-
-class Class:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.variable = []
-        self.subroutine = []
-        self.statements = []  # only var statement
-
-
-class Subroutine:
-    def __init__(self, name: str, return_type: str) -> None:
-        self.name = name
-        self.return_type = return_type
-        self.variable = []
-        self.argument = []
-
-
-class Expression:
-    pass
-
-
-class Statement:
-    def __init__(self, name: str) -> None:
-        self.name = name
-
-
-class Variable:
-    pass
-
-
-class Var(Statement):
-    def __init__(self, var: Iterable[str], value: Iterable[Expression]) -> None:
-        self.variable = dict(i for i in zip(var, value))
-
-
-class Let(Statement):
-    def __init__(self, var: Iterable[Variable], value: Iterable[Expression]) -> None:
-        self.variable = dict(i for i in zip(var, value))
+        return str(self.kind) + ", " + str(self.info)
 
 
 class ParsingError(Exception):
