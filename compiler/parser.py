@@ -11,7 +11,22 @@ class Parser:
         self.length = len(tokens)
         self.code_str: list[str] = []
         self.code: list[Code] = []
-        self.count: dict[str, int] = {"class": 0, "subroutine": 0, "statement": 0, "var": 0, "let": 0, "do": 0, "if": 0, "while": 0, "for": 0, "return": 0, "expression": 0, "expressionList": 0, "term": 0, "variable": 0, "call": 0}
+        self.count: dict[str, int] = {
+            "class": 0,
+            "subroutine": 0,
+            "statement": 0,
+            "var": 0,
+            "let": 0,
+            "do": 0,
+            "if": 0,
+            "loop": 0,
+            "return": 0,
+            "expression": 0,
+            "expressionList": 0,
+            "term": 0,
+            "variable": 0,
+            "call": 0,
+        }
         self.file = ""
         self.now = tokens[0]
 
@@ -149,6 +164,8 @@ class Parser:
                 self.parse_For()
             elif self.now == Token("keyword", "return"):
                 self.parse_Return()
+            elif self.now == Token("keyword", "break"):
+                self.parse_Break()
             elif self.now == Token("symbol", "}"):
                 break
             else:
@@ -267,8 +284,8 @@ class Parser:
         self.code_str.append(f"end if {n}")
 
     def parse_While(self) -> None:
-        n = self.count["while"]
-        self.count["while"] += 1
+        n = self.count["loop"]
+        self.count["loop"] += 1
         self.code_str.append(f"start while {n}")
         self.get()
         if self.now != Token("symbol", "("):
@@ -292,8 +309,8 @@ class Parser:
         self.code_str.append(f"end while {n}")
 
     def parse_For(self) -> None:
-        n = self.count["for"]
-        self.count["for"] += 1
+        n = self.count["loop"]
+        self.count["loop"] += 1
         self.code_str.append(f"start for {n}")
         self.get()
         if self.now != Token("symbol", "("):
@@ -351,6 +368,13 @@ class Parser:
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
         self.code_str.append(f"end return {n}")
+
+    def parse_Break(self) -> None:
+        n = self.count["loop"]
+        self.get()
+        if self.now != Token("symbol", ";"):
+            self.error("missing symbol ';'")
+        self.code_str.append(f"break loop {n}")
 
     def parse_ExpressionList(self) -> None:
         n = self.count["expressionList"]
