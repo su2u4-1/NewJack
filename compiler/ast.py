@@ -31,7 +31,7 @@ class Char(Node):
 
 
 class Op(Node):
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: Literal["+", "-", "*", "/", "|", "&", "<<", ">>", "==", "!=", ">=", "<=", ">", "<"]) -> None:
         self.content = content
 
 
@@ -46,11 +46,10 @@ class Term(Node):
 
 
 class Expression(Node):
-    def __init__(self, term_list: list[Term], op_list: list[Op]) -> None:
-        self.content: list[Term | Op] = [term_list[0]]
-        for i in range(len(op_list)):
-            self.content.append(op_list[i])
-            self.content.append(term_list[i + 1])
+    def __init__(self, left_term: Term | Self, op: Optional[Op] = None, right_term: Optional[Term | Self] = None) -> None:
+        self.left_term = left_term
+        self.op = op
+        self.right_term = right_term
 
 
 class Variable(Node):

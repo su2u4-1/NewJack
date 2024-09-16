@@ -19,7 +19,8 @@
 <continue_S> ::= "continue" ";"
 <var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
 <expression> ::= <term> [{<operator> <term>}]
-<term> ::= <string> | <integer> | <float> | <keyword_content> | ("-" | "~") <term> | <call> | <var> | "(" <expression> ")" | <conditional>
+<expression> ::= (<term> | <expression>) [<operator> (<term> | <expression>)]
+<term> ::= <string> | <integer> | <float> | <keyword_content> | ("-" | "!") <term> | <call> | <var> | "(" <expression> ")" | <conditional>
 <call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")"
 <conditional> ::= <expression> <logical_operator> <expression>
 
@@ -35,7 +36,7 @@
 <keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "none" | "self"
-<symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "~"
+<symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "!"
 <operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&" | "<<" | ">>"
 <logical_operator> ::= "==" | "!=" | ">=" | "<=" | ">" | "<"
 <string> ::= '"' {unicode_characters} '"' # Disable line breaks
@@ -43,3 +44,14 @@
 <integer> ::= ["-"] <1-9> {<0-9>} | "0"
 <float> ::= ["-"] {<0-9>} "." {<0-9>}
 <commant> ::= "#" <string> | "`" <string> "`"
+
+# 優先級 運算符  描述
+# 1      ! ~    邏輯not與取負數
+# 2      * /    乘除法
+# 3      + -    加减法
+# 4      << >>  左右移
+# 5      <  <=  < 與 ≤
+# 5      >  >=  > 與 ≥
+# 6      == !=  = 與 ≠
+# 7      &      邏輯and
+# 8      |      邏輯or
