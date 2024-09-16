@@ -93,13 +93,16 @@ class Return_S(Node):
         self.expression = expression
 
 
+Statement = Var_S | Do_S | Let_S | Return_S  # | For_S | If_S | While_S
+
+
 class For_S(Node):
     def __init__(
         self,
         for_range: tuple[Integer, Integer, Integer],
-        statement_list: list[Var_S | Do_S | Let_S | Return_S | Self | "If_S" | "While_S"],
+        statement_list: list[Statement | Self | "If_S" | "While_S"],
         else_: bool = False,
-        else_statement_list: Optional[list[Var_S | Do_S | Let_S | Return_S | Self | "If_S" | "While_S"]] = None,
+        else_statement_list: Optional[list[Statement | Self | "If_S" | "While_S"]] = None,
     ) -> None:
         self.for_range = for_range
         self.statement_list = statement_list
@@ -111,12 +114,12 @@ class If_S(Node):
     def __init__(
         self,
         if_conditional: Expression,
-        if_statement_list: list[Var_S | Do_S | Let_S | Return_S | For_S | Self | "While_S"],
+        if_statement_list: list[Statement | For_S | Self | "While_S"],
         elif_n: int = 0,
-        elif_statement_list: list[list[Var_S | Do_S | Let_S | Return_S | For_S | Self | "While_S"]] = [],
+        elif_statement_list: list[list[Statement | For_S | Self | "While_S"]] = [],
         elif_conditional_list: list[Expression] = [],
         else_: bool = False,
-        else_statement_list: list[Var_S | Do_S | Let_S | Return_S | For_S | Self | "While_S"] = [],
+        else_statement_list: list[Statement | For_S | Self | "While_S"] = [],
     ) -> None:
         self.if_conditional = if_conditional
         self.if_statement_list = if_statement_list
@@ -131,9 +134,9 @@ class While_S(Node):
     def __init__(
         self,
         conditional: Expression,
-        statement_list: list[Var_S | Do_S | Let_S | Return_S | For_S | If_S | Self],
+        statement_list: list[Statement | For_S | If_S | Self],
         else_: bool = False,
-        else_statement_list: list[Var_S | Do_S | Let_S | Return_S | For_S | If_S | Self] = [],
+        else_statement_list: list[Statement | For_S | If_S | Self] = [],
     ) -> None:
         self.conditional = conditional
         self.statement_list = statement_list
@@ -141,12 +144,13 @@ class While_S(Node):
         self.else_statement_list = else_statement_list
 
 
-Statement = Var_S | Do_S | Let_S | Return_S | For_S | If_S | While_S
-
-
 class Subroutine(Node):
     def __init__(
-        self, name: Identifier, kind: Literal["constructor", "method", "function"], return_type: Identifier, statement_list: list[Statement]
+        self,
+        name: Identifier,
+        kind: Literal["constructor", "method", "function"],
+        return_type: Identifier,
+        statement_list: list[Statement | For_S | If_S | While_S],
     ) -> None:
         self.name = name
         self.kind = kind
