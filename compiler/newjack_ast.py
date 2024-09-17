@@ -44,40 +44,25 @@ class Integer:
     def __init__(self, content: str) -> None:
         self.content = int(content)
 
-    def show(self, indent: int) -> str:
-        return "    " * indent + f"integer: {self.content}"
-
 
 class Float:
     def __init__(self, content: str) -> None:
         self.content = float(content)
-
-    def show(self, indent: int) -> str:
-        return "    " * indent + f"float: {self.content}"
 
 
 class String:
     def __init__(self, content: str) -> None:
         self.content = content
 
-    def show(self, indent: int) -> str:
-        return "    " * indent + "string: " + self.content
-
 
 class Char:
     def __init__(self, content: str) -> None:
         self.content = content[0]
 
-    def show(self, indent: int) -> str:
-        return "    " * indent + "char: " + self.content
-
 
 class Op:
     def __init__(self, content: Literal["+", "-", "*", "/", "|", "&", "<<", ">>", "==", "!=", ">=", "<=", ">", "<"]) -> None:
         self.content = content
-
-    def show(self, indent: int) -> str:
-        return "    " * indent + "operator: " + self.content
 
 
 class Term:
@@ -88,18 +73,6 @@ class Term:
     ) -> None:
         self.content = content
         self.neg = neg
-
-    def show(self, indent: int) -> str:
-        s = "    " * indent + "term:\n"
-        if self.neg is None:
-            e = ""
-        else:
-            e = self.neg
-        if type(self.content) == str:
-            s += e + " " + Identifier(self.content).show(indent + 1)
-        else:
-            s += e + " " + self.content.show(indent + 1)
-        return s
 
 
 class Expression:
@@ -233,6 +206,3 @@ class Root:
     def __init__(self, name: str, class_list: list[Class]) -> None:
         self.name = name
         self.class_list = class_list
-
-    def show(self) -> str:
-        return ""

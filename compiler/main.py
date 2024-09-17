@@ -25,4 +25,3 @@ if __name__ == "__main__":
         print(t)
         print(" " * (e.index - 1) + "^")
         exit()
-    print(ast.show())
