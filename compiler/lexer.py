@@ -5,6 +5,7 @@ def lexer(source: list[str]) -> list[Token]:
     tokens: list[Token] = []
     content = ""
     state = ""
+    pp, p = "", ""
     file_start = 0
     location = (-1, -1)
     for i, line in enumerate(source):
@@ -16,6 +17,8 @@ def lexer(source: list[str]) -> list[Token]:
             print("error: string not closed\nlocation:", location)
             exit()
         for j, char in enumerate(line):
+            p = pp
+            pp = char
             if state == "commant":
                 if char == "`":
                     state = ""
@@ -100,9 +103,12 @@ def lexer(source: list[str]) -> list[Token]:
             elif char == "`":
                 state = "commant"
             elif char == "-":
-                state = "neg"
-                content = char
-                location = (i - file_start, j + 1)
+                if p in ("[", "(", "=", ",", "!", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<", "<<", ">>"):
+                    state = "neg"
+                    content = char
+                    location = (i - file_start, j + 1)
+                else:
+                    tokens.append(Token("symbol", "-", location))
             elif char in ("!", "=", ">", "<"):
                 state = "symbol"
                 content = char

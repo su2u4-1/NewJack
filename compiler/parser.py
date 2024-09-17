@@ -126,8 +126,11 @@ class Parser:
             self.get()
             if self.now == Token("keyword", "var"):
                 output.append(self.parse_Var())
-            elif self.now == Token("keyword", "attr") and _attr:
-                output.append(self.parse_Var(False, _attr))
+            elif self.now == Token("keyword", "attr"):
+                if _attr:
+                    output.append(self.parse_Var(False, _attr))
+                else:
+                    self.error("attriable must be declared in the constructor")
             elif self.now == Token("keyword", "let"):
                 output.append(self.parse_Let())
             elif self.now == Token("keyword", "do"):
@@ -326,6 +329,7 @@ class Parser:
         return output
 
     def parse_Expression(self) -> Expression:
+        print("expression start", self.now)
         symbol: list[Op] = []
         output: list[Term | Op] = []
         output.append(self.parse_Term())
@@ -342,9 +346,11 @@ class Parser:
             output.append(self.parse_Term())
         while len(symbol) > 0:
             output.append(symbol.pop())
+        print("expression end", self.now)
         return Expression(output)
 
     def parse_Term(self) -> Term:
+        print("term start", self.now)
         self.get()
         if self.now.type == "string":
             if len(self.now.content) == 1:
@@ -380,49 +386,60 @@ class Parser:
                 output = Term(self.parse_Term(), "-")
             elif self.now == Token("symbol", "!"):
                 output = Term(self.parse_Term(), "!")
-        elif self.next().type == "identifier" or self.next() == Token("keyword", "self"):
-            var = self.parse_Variable()
+        elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
+            var = self.parse_Variable(GetVariable(Identifier(self.now.content)))
             if self.now == Token("symbol", "("):
-                output = Term(Call(var, self.parse_ExpressionList()))
+                if self.next() == Token("keyword", "pass"):
+                    self.get()
+                    self.get()
+                    e = []
+                else:
+                    e = self.parse_ExpressionList()
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
+                output = Term(Call(var, e))
             else:
                 output = Term(var)
         else:
             self.error(f"unknown Term '{self.now}'")
+        print("term end", self.now)
         return output
 
     def parse_Variable(self, var: GetVariable = GetVariable(Identifier("none"))) -> GetVariable:
-        self.get()
-        if self.now.type == "identifier" or self.now == Token("keyword", "self"):
-            var = GetVariable(Identifier(self.now.content))
-        else:
+        print("variable start", self.now)
+        if self.next().type == "identifier" or self.next() == Token("keyword", "self"):
             self.get()
-            if self.now == Tokens("symbol", (".", "[")):
-                if self.now == Token("symbol", "."):
-                    self.get()
-                    if self.now.type == "identifier":
-                        var.attr = Identifier(self.now.content)
-                    else:
-                        self.error("must be identifier")
-                elif self.now == Token("symbol", "["):
-                    var.index = self.parse_Expression()
-                    if self.now != Token("symbol", "]"):
-                        self.error("missing symbol ']'")
+            var = GetVariable(Identifier(self.now.content))
+        elif self.now == Tokens("symbol", (".", "[")):
+            if self.now == Token("symbol", "."):
+                self.get()
+                if self.now.type == "identifier":
+                    var.attr = Identifier(self.now.content)
+                else:
+                    self.error("must be identifier")
+            elif self.now == Token("symbol", "["):
+                var.index = self.parse_Expression()
+                if self.now != Token("symbol", "]"):
+                    self.error("missing symbol ']'")
         self.get()
         if self.now == Tokens("symbol", (".", "[")):
-            return self.parse_Variable(var)
-        else:
-            return var
+            var = self.parse_Variable(var)
+        print("variable end", self.now)
+        return var
 
     def parse_Call(self) -> Call:
+        print("call start", self.now)
         var = self.parse_Variable()
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
         if self.next() == Token("keyword", "pass"):
+            self.get()
+            self.get()
             e = []
         else:
             e = self.parse_ExpressionList()
         if self.now != Token("symbol", ")"):
             self.error("missing symbol ')'")
-        return Call(var, e)
+        c = Call(var, e)
+        print("call end", self.now)
+        return c

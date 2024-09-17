@@ -1,12 +1,23 @@
 class Test{
     constructor Test new(int a, int b){
         attr int a, b = a, b;
-        do self.a[2]();
+        do self.a[2](pass);
         let b = 2;
         return self;
     }
 
     method void test0(pass){
-        return ;
+        return;
+    }
+}
+
+class Test2{
+    constructor Test2 new(pass){
+        attr int a;
+    }
+
+    function void test1(pass){
+        var int b;
+        let b = 1*2+3-5+8/2;
     }
 }
