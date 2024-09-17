@@ -1,6 +1,8 @@
 import os.path
 from typing import Literal, Iterable
 
+from newjack_ast import *
+
 TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file"]
 Symbol = {"{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "!", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<", "<<", ">>"}
 Number = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
@@ -36,6 +38,24 @@ Keyword = {
     "str",
     "list",
     "float",
+}
+Precedence = {
+    "!": 8,
+    "~": 8,
+    "*": 7,
+    "/": 7,
+    "+": 6,
+    "-": 6,
+    "<<": 5,
+    ">>": 5,
+    "<": 4,
+    "<=": 4,
+    ">": 4,
+    ">=": 4,
+    "==": 3,
+    "!=": 3,
+    "&": 2,
+    "|": 1,
 }
 
 
@@ -78,15 +98,8 @@ class Tokens:
         else:
             return NotImplemented
 
-
-class Code:
-    def __init__(self, kind: str, info: dict[str, str]) -> None:
-        self.kind = kind
-        self.info = info
-        self.content: list[Code] = []
-
     def __str__(self) -> str:
-        return str(self.kind) + ", " + str(self.info)
+        return f"<{self.type}> " + ", ".join(i for i in self.content)
 
 
 class ParsingError(Exception):
@@ -95,6 +108,9 @@ class ParsingError(Exception):
         self.line = location[0]
         self.index = location[1]
         self.text = text
+
+
+Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
 
 
 def read_from_path(path: str) -> list[str]:
@@ -117,19 +133,6 @@ def read_from_path(path: str) -> list[str]:
     return source
 
 
-def write_to_a_file(path: str, content: Iterable[str], extension_name: str) -> None:
+def get_one_path(path: str, extension_name: str) -> str:
     dir_path, file_name = os.path.split(os.path.abspath(path))
-    with open(os.path.join(dir_path, file_name.split(".")[0] + extension_name), "w+") as f:
-        f.write("\n".join(content))
-
-
-def format_vmcode(code: Iterable[str]) -> list[str]:
-    ind = 0
-    new_code: list[str] = []
-    for i in code:
-        if i.startswith("end"):
-            ind -= 1
-        new_code.append("    " * ind + i)
-        if i.startswith("start"):
-            ind += 1
-    return new_code
+    return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
