@@ -134,3 +134,13 @@ def read_from_path(path: str) -> list[str]:
 def get_one_path(path: str, extension_name: str) -> str:
     dir_path, file_name = os.path.split(os.path.abspath(path))
     return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
+
+
+class CompileError(Exception):
+    def __init__(self, text: str, path: str, address: tuple[int, int]) -> None:
+        self.text = text
+        self.path = path
+        self.address = address
+
+    def __str__(self) -> str:
+        return f"File: {self.path} line:{self.address[0]} index:{self.address[1]}\n  {self.text}"
