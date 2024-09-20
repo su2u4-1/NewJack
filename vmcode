@@ -1,0 +1,32 @@
+code:
+    move 'a' 'b'
+    - Copy the value of 'a' to 'b'
+
+    set 'a' 'int'
+    - Set the value of 'a' to 'int'
+    - int: -2147483648 ~ 2147483647
+
+    jump 'a' J-code
+    - Jump to address 'a' or label 'a'
+    - J-code:
+        000 no
+        001 >
+        010 ==
+        011 >=
+        100 <
+        101 !=
+        110 <=
+        111 all
+
+    label "'a'"
+    - Create label "'a'"
+
+    # 'a', 'b': register
+
+register:
+    A: address
+    B: base
+    C: command
+    D: data
+    L: local
+    V: value
