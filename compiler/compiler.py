@@ -8,13 +8,13 @@ class Compiler:
         self.scope = {}
 
     def main(self) -> list[str]:
-        code: list[str] = []
+        code: list[str] = ["label start"]
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
         return code
 
     def compileClass(self, class_: Class) -> list[str]:
-        code: list[str] = []
+        code: list[str] = [f"label {self.ast.name}.{class_.name}"]
         for i in class_.var_list:
             code.extend(self.compileVar_S(i))
         for i in class_.subroutine_list:
@@ -22,7 +22,11 @@ class Compiler:
         return code
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
-        code: list[str] = []
+        code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
+        if subroutine.kind == "method":
+            code.extend([""])  # argument_list.append(self)
+        elif subroutine.kind == "constructor":
+            code.extend([""])  # alloc memory
         for i in subroutine.argument_list:
             code.extend(self.compileVariable(i))
         for i in subroutine.statement_list:
@@ -45,16 +49,10 @@ class Compiler:
         elif type(statement) == Break_S:
             return self.compileBreak_S(statement)
         else:
-            raise CompileError(f"unknown statement {statement}", self.ast.name, (0, 0))
+            raise CompileError(f"unknown statement {statement}", self.ast.file, (0, 0))
 
     def compileVar_S(self, var: Var_S) -> list[str]:
         code: list[str] = []
-
-        return code
-
-    def compileVariable(self, var: Variable) -> list[str]:
-        code: list[str] = []
-        # TODO: add code
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:
@@ -78,5 +76,9 @@ class Compiler:
         return code
 
     def compileBreak_S(self, break_: Break_S) -> list[str]:
+        code: list[str] = []
+        return code
+
+    def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []
         return code

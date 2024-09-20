@@ -1,4 +1,5 @@
 from typing import Literal, Optional, Self, Union
+import os.path
 
 from lib import Keyword
 
@@ -372,12 +373,13 @@ class Class:
 
 
 class Root:
-    def __init__(self, name: str, class_list: list[Class]) -> None:
-        self.name = name
+    def __init__(self, file: str, class_list: list[Class]) -> None:
+        self.name = os.path.split(os.path.abspath(self.file))[1].split(".")[0]
+        self.file = file
         self.class_list = class_list
 
     def show(self) -> list[str]:
-        s = [f"Root: path:{self.name}"]
+        s = [f"Root: path:{self.file}"]
         for i in self.class_list:
             s.extend(indent(i.show()))
         return s
