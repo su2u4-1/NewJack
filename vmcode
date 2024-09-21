@@ -1,32 +1,45 @@
 code:
-    move 'a' 'b'
-    - Copy the value of 'a' to 'b'
+    input 'value'
+    4 byte
+    00 + [value](30)
+        - Set the value of register 'V'alue to 'value'
+        - value: -1073741824 ~ 1073741823
 
-    set 'a' 'int'
-    - Set the value of 'a' to 'int'
-    - int: -2147483648 ~ 2147483647
+    to-label "abc"
+    4 byte
+    01 + [label](30)
+        - Set label position to register 'A'ddress
+
+    copy 'a' 'b'
+    1 byte
+    10 + [register a](3) + [register b](3)
+        - Copy the value of 'a' to 'b'
 
     jump 'a' J-code
-    - Jump to address 'a' or label 'a'
-    - J-code:
-        000 no
-        001 >
-        010 ==
-        011 >=
-        100 <
-        101 !=
-        110 <=
-        111 all
+    1 byte
+    11 + [register](3) + [jump code](3)
+        - Jump to address 'a'
+        - J-code:
+            000 no
+            001 >
+            010 ==
+            011 >=
+            100 <
+            101 !=
+            110 <=
+            111 all
 
-    label "'a'"
-    - Create label "'a'"
+    label "abc"
+        - Create label "abc"
 
     # 'a', 'b': register
 
 register:
-    A: address
-    B: base
-    C: command
-    D: data
-    L: local
-    V: value
+    A: address 000
+    C: command 001
+    D: data    010
+    L: local   011
+    M: memory  100
+    S: self    101
+    T: temp    110
+    V: value   111

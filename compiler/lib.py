@@ -100,12 +100,17 @@ class Tokens:
         return f"<{self.type}> " + ", ".join(i for i in self.content)
 
 
-class ParsingError(Exception):
-    def __init__(self, file: str, location: tuple[int, int], text: str) -> None:
+class CompileError(Exception):
+    def __init__(self, text: str, file: str, location: tuple[int, int]) -> None:
         self.file = file
         self.line = location[0]
         self.index = location[1]
         self.text = text
+
+    def show(self, source: str) -> str:
+        if source.endswith("\n"):
+            source = source[:-1]
+        return f'File "{self.file}", line {self.line}, in {self.index}\nparser Error: {self.text}\n{source}' + " " * (self.index - 1) + "^"
 
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
@@ -134,13 +139,3 @@ def read_from_path(path: str) -> list[str]:
 def get_one_path(path: str, extension_name: str) -> str:
     dir_path, file_name = os.path.split(os.path.abspath(path))
     return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
-
-
-class CompileError(Exception):
-    def __init__(self, text: str, path: str, address: tuple[int, int]) -> None:
-        self.text = text
-        self.path = path
-        self.address = address
-
-    def __str__(self) -> str:
-        return f"File: {self.path} line:{self.address[0]} index:{self.address[1]}\n  {self.text}"
