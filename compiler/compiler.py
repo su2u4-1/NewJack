@@ -5,8 +5,10 @@ from compiler.lib import CompileError
 class Compiler:
     def __init__(self, ast: Root) -> None:
         self.ast = ast
-        self.scope = {}
+        self.scope: dict[str, dict[str, tuple[str, int]]] = {"global": {}, "argument": {}, "attriable": {}}
         self.err_list: list[CompileError] = []
+        self.count: dict[str, int] = {"global": 0, "argument": 0, "attriable": 0, "local": 0, "subroutine": 0, "class": 0}
+        self.now: dict[str, str] = {}
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         self.err_list.append(CompileError(text, self.ast.file, location))
@@ -19,6 +21,9 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
+        n = self.count["class"]
+        self.count["class"] += 1
+        self.now["class_name"] = class_.name.content
         for i in class_.var_list:
             code.extend(self.compileVar_S(i))
         for i in class_.subroutine_list:
@@ -27,6 +32,9 @@ class Compiler:
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
+        n = self.count["subroutine"]
+        self.count["subroutine"] += 1
+        self.now["subroutine_name"] = subroutine.name.content
         if subroutine.kind == "method":
             code.extend([""])  # TODO: argument_list.append(self)
         elif subroutine.kind == "constructor":
@@ -60,18 +68,25 @@ class Compiler:
         code: list[str] = []
         if len(var.var_list) < len(var.expression_list):
             self.error("'value' redundant 'variable'", var.location)
-            for i, j in zip(var.var_list, var.expression_list):
-                code.extend(self.compileVariable(i))
-                code.append("")  # TODO: Assign the value of expression to var
-                code.extend(self.compileExpression(j))
-        else:
-            for i, j in zip(var.var_list, var.expression_list):
-                code.extend(self.compileVariable(i))
-                code.append("")  # TODO: Assign the value of expression to var
-                code.extend(self.compileExpression(j))
+        for i, j in zip(var.var_list, var.expression_list):
+            code.extend(self.compileExpression(j))
+            if i.kind == "global":
+                t = "global"
+            elif i.kind == "argument":
+                t = self.now["class_name"]
+            elif i.kind == "attriable":
+                t = self.now["class_name"]
+            elif i.kind == "local":
+                t = self.now["subroutine_name"]
+            self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
+            self.count[i.kind] += 1
+            # TODO: Assign the value of expression to var
+            code.append("")
+        if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
                 code.extend(self.compileVariable(i))
-                code.append("")  # TODO: Assign default value to var
+                # TODO: Assign default value to var
+                code.append("")
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:
