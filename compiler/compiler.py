@@ -1,5 +1,5 @@
 from compiler.newjack_ast import *
-from compiler.lib import CompileError
+from compiler.lib import CompileError, CompileErrorGroup
 
 
 class Compiler:
@@ -9,6 +9,7 @@ class Compiler:
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {"global": 0, "argument": 0, "attriable": 0, "local": 0, "subroutine": 0, "class": 0}
         self.now: dict[str, str] = {}
+        self.obj_attr: dict[str, dict[str, tuple[str, int]]] = {}
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         self.err_list.append(CompileError(text, self.ast.file, location))
@@ -17,6 +18,8 @@ class Compiler:
         code: list[str] = ["label start"]
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
+        if len(self.err_list) > 0:
+            raise CompileErrorGroup(self.err_list)
         return code
 
     def compileClass(self, class_: Class) -> list[str]:
@@ -28,6 +31,7 @@ class Compiler:
             code.extend(self.compileVar_S(i))
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
+        code.insert(1, f"alloc heap {self.count["global"]}")
         return code
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
@@ -36,13 +40,14 @@ class Compiler:
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
         if subroutine.kind == "method":
-            code.extend([""])  # TODO: argument_list.append(self)
-        elif subroutine.kind == "constructor":
-            code.extend([""])  # TODO: alloc memory
+            code.extend(self.compileExpression(Expression((-1, -1), [])))  # TODO
         for i in subroutine.argument_list:
             code.extend(self.compileVariable(i))
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
+        if subroutine.kind == "constructor":
+            code.insert(1, f"alloc heap {self.count["attriable"]}")
+            self.obj_attr[self.now["class_name"]] = self.scope["attriable"]
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -76,17 +81,28 @@ class Compiler:
                 t = self.now["class_name"]
             elif i.kind == "attriable":
                 t = self.now["class_name"]
-            elif i.kind == "local":
+            else:
                 t = self.now["subroutine_name"]
+            code.append(f"pop {i.kind} {self.count[i.kind]}")
             self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
             self.count[i.kind] += 1
-            # TODO: Assign the value of expression to var
-            code.append("")
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
-                code.extend(self.compileVariable(i))
-                # TODO: Assign default value to var
-                code.append("")
+                if i.kind == "global":
+                    t = "global"
+                elif i.kind == "argument":
+                    t = self.now["class_name"]
+                elif i.kind == "attriable":
+                    t = self.now["class_name"]
+                else:
+                    t = self.now["subroutine_name"]
+                if i.type.content in ("int", "bool", "float", "char"):
+                    code.append("push constant 0")
+                else:
+                    code.append(f"call {i.type.content}.init")
+                code.append(f"pop {i.kind} {self.count[i.kind]}")
+                self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
+                self.count[i.kind] += 1
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:

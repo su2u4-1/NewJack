@@ -1,4 +1,4 @@
-from compiler.lib import read_from_path, get_one_path, CompileError
+from compiler.lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
 from compiler.lexer import lexer
 from compiler.parser import Parser
 from compiler.compiler import Compiler
@@ -23,6 +23,7 @@ if __name__ == "__main__":
     compiler = Compiler(ast)
     try:
         code = compiler.main()
-    except CompileError as e:
-        print(e.show(source[source.index("//" + e.file) + e.line]))
-        exit()
+    except CompileErrorGroup as e:
+        for i in e.exceptions:
+            print(i.show(source[source.index("//" + i.file) + i.line]))
+            exit()

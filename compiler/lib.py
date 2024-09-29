@@ -1,5 +1,5 @@
 import os.path
-from typing import Literal, Iterable
+from typing import Literal, Sequence
 
 TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file"]
 Symbol = {"{", "}", "[", "]", "(", ")", "=", ";", ",", ".", "!", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<", "<<", ">>"}
@@ -82,7 +82,7 @@ class Token:
 
 
 class Tokens:
-    def __init__(self, type: TokenType, content: Iterable[str]) -> None:
+    def __init__(self, type: TokenType, content: Sequence[str]) -> None:
         self.content = content
         self.type = type
 
@@ -111,6 +111,11 @@ class CompileError(Exception):
         if source.endswith("\n"):
             source = source[:-1]
         return f'File "{self.file}", line {self.line}, in {self.index}\nparser Error: {self.text}\n{source}' + " " * (self.index - 1) + "^"
+
+
+class CompileErrorGroup(Exception):
+    def __init__(self, exceptions: Sequence[CompileError]) -> None:
+        self.exceptions = exceptions
 
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))

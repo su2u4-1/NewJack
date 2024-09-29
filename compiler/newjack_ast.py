@@ -122,7 +122,7 @@ class Term:
         s = ["term:"]
         if self.neg is not None:
             s[0] += " neg: " + self.neg
-        if type(self.content) == str:
+        if isinstance(self.content, str):
             s.extend(indent([f"integer: {self.content}"]))
         else:
             s.extend(indent(self.content.show()))
@@ -149,7 +149,7 @@ class GetVariable:
         self.var = var
         self.index = None
         self.attr = None
-        if type(var) == GetVariable:
+        if isinstance(var, GetVariable):
             if index is not None:
                 self.index = index
             elif attr is not None:
@@ -188,7 +188,7 @@ class Variable:
     ) -> None:
         self.location = location
         self.name = name
-        self.kind = kind
+        self.kind: Literal["global", "argument", "attriable", "local"] = kind
         self.type = type
 
     def show(self) -> list[str]:
