@@ -1,45 +1,78 @@
 code:
-    input 'value'
+    input [value]
     4 byte
-    00 + [value](30)
+    00 + [value](30 bit)
         - Set the value of register 'V'alue to 'value'
         - value: -1073741824 ~ 1073741823
 
-    to-label "abc"
+    get-label "[abc]"
     4 byte
-    01 + [label](30)
+    01 + [label](30 bit)
         - Set label position to register 'A'ddress
 
-    copy 'a' 'b'
+    copy $[a] $[b]
     1 byte
-    10 + [register a](3) + [register b](3)
+    10 + [register a](3 bit) + [register b](3 bit)
         - Copy the value of 'a' to 'b'
 
-    jump 'a' J-code
+    jump $[a] [J-code]
     1 byte
-    11 + [register](3) + [jump code](3)
-        - Jump to address 'a'
+    110 + [register](3 bit) + [jump code](2 bit)
+        - If register $C J-code 0, jump to address 'a'
         - J-code:
-            000 no
-            001 >
-            010 ==
-            011 >=
-            100 <
-            101 !=
-            110 <=
-            111 all
+            00 >
+            01 ==
+            10 <
+            11 !=
 
-    label "abc"
-        - Create label "abc"
+    [operation] $[a] $[b] $[c]
+    2 byte
+    1111 [operation](3 bit) + [register a](3 bit) + [register b](3 bit) + [register c](3 bit)
+        - Operate $[a] and $[b] and save to $[c]
+        - operation:
+            000 add
+            001 sub
+            010 mul
+            011 div
+            100 rmv  # right move
+            101 lmv  # left move
+            110 and
+            111 _or
 
-    # 'a', 'b': register
+    label "[abc]"
+        - Create label
 
 register:
-    A: address 000
-    C: command 001
-    D: data    010
-    L: local   011
-    M: memory  100
-    S: self    101
-    T: temp    110
-    V: value   111
+    $A: address   000
+    $C: condition 001
+    $D: data      010
+    $L: local     011
+    $N: now       100
+    $M: memory    101
+    $P: pointer   110
+    $V: value     111
+
+syntactic sugar:
+    jump "[abc]" if $[a] [J-code] $[b]
+        sub $[a] $[b]
+        copy $D $C
+        get-label "[abc]"
+        jump $A [J-code]
+
+    jump "[abc]" if $[a] [J-code]
+        copy $[a] $C
+        get-label "[abc]"
+        jump $A [J-code]
+
+    jump "[abc]" [J-code]
+        get-label "[abc]"
+        jump $A [J-code]
+
+    move $[a] $[b]
+        copy $[a] $[b]
+        input 0
+        copy $V $[a]
+
+    input $[a] [value]
+        input [value]
+        copy $V $[a]
