@@ -39,8 +39,6 @@ class Compiler:
         n = self.count["subroutine"]
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
-        if subroutine.kind == "method":
-            code.extend(self.compileExpression(Expression((-1, -1), [])))  # TODO
         for i in subroutine.argument_list:
             code.extend(self.compileVariable(i))
         for i in subroutine.statement_list:
@@ -106,8 +104,7 @@ class Compiler:
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:
-        code: list[str] = []
-        return code
+        return self.compileCall(do.call)
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
@@ -129,10 +126,23 @@ class Compiler:
         code: list[str] = []
         return code
 
-    def compileVariable(self, var: Variable) -> list[str]:
+    def compileVariable(self, var: GetVariable) -> list[str]:
         code: list[str] = []
         return code
 
     def compileExpression(self, expression: Expression) -> list[str]:
         code: list[str] = []
         return code
+
+    def compileCall(self, call: Call) -> list[str]:
+        code: list[str] = []
+        for i in call.expression_list:
+            code.extend(self.compileExpression(i))
+        var_type, get_var_code = self.get_var_type(call.var)
+        if var_type == "method":
+            code.append(get_var_code)
+        code.extend(self.compileVariable(call.var))
+        return code
+
+    def get_var_type(self, var: GetVariable) -> tuple[str, str]:
+        return "", ""
