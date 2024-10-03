@@ -39,6 +39,9 @@ class Compiler:
         n = self.count["subroutine"]
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
+        if subroutine.kind == "method":
+            self.scope["argument"]["self"] = ("argument", 0)
+            self.count["argument"] += 1
         for i in subroutine.argument_list:
             code.extend(self.compileVariable(i))
         for i in subroutine.statement_list:
@@ -126,7 +129,7 @@ class Compiler:
         code: list[str] = []
         return code
 
-    def compileVariable(self, var: GetVariable) -> list[str]:
+    def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []
         return code
 
@@ -136,13 +139,30 @@ class Compiler:
 
     def compileCall(self, call: Call) -> list[str]:
         code: list[str] = []
+        var_info = self.compileGetVariable(call.var)
+        if var_info["kind"] == "method":
+            code.append("\n".join(var_info["code"].split("\n")[:-2]))
+        elif var_info["kind"] != "function" and var_info["kind"] != "constructor":
+            self.error("variable is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
-        var_type, get_var_code = self.get_var_type(call.var)
-        if var_type == "method":
-            code.append(get_var_code)
-        code.extend(self.compileVariable(call.var))
+        code.append(f"call {var_info["type"]}.{var_info["name"]} {len(call.expression_list)}")
         return code
 
-    def get_var_type(self, var: GetVariable) -> tuple[str, str]:
-        return "", ""
+    def compileGetVariable(self, var: GetVariable) -> dict[str, str]:
+        var_info = {"kind": "", "type": "", "name": "", "code": ""}
+        if isinstance(var.var, Identifier):
+            for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
+                if var.var.content in self.scope[i]:
+                    t = "local" if i == self.now["subroutine_name"] else i
+                    var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
+                    break
+            else:
+                self.error("unknown identifier", var.var.location)
+        else:
+            var_info = self.compileGetVariable(var.var)
+        if var.index is not None:
+            var_info["code"] += "\n" + "\n".join(self.compileExpression(var.index)) + "\nadd"
+        elif var.attr is not None:
+            var_info["code"] += f"\n{self.obj_attr[var_info["type"]][var.attr.content][1]}\nadd"
+        return var_info
