@@ -111,6 +111,9 @@ class Compiler:
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
+        code.extend(self.compileGetVariable(let.var))
+        code.extend(self.compileExpression(let.expression))
+        code.append("pop term 0\npop address 0\npush term 0\npop memory 0")
         return code
 
     def compileIf_S(self, if_: If_S) -> list[str]:
