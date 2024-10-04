@@ -7,7 +7,7 @@ class Compiler:
         self.ast = ast
         self.scope: dict[str, dict[str, tuple[str, int]]] = {"global": {}, "argument": {}, "attriable": {}}
         self.err_list: list[CompileError] = []
-        self.count: dict[str, int] = {"global": 0, "argument": 0, "attriable": 0, "local": 0, "subroutine": 0, "class": 0}
+        self.count: dict[str, int] = {"global": 0, "argument": 0, "attriable": 0, "local": 0, "subroutine": 0, "class": 0, "loop": 0}
         self.now: dict[str, str] = {}
         self.obj_attr: dict[str, dict[str, tuple[str, int]]] = {}
 
@@ -107,7 +107,9 @@ class Compiler:
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:
-        return self.compileCall(do.call)
+        result = self.compileCall(do.call)
+        result.append("pop term 0")
+        return result
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
@@ -118,6 +120,22 @@ class Compiler:
 
     def compileIf_S(self, if_: If_S) -> list[str]:
         code: list[str] = []
+        n = self.count["loop"]
+        self.count["loop"] += 1
+        code.extend(self.compileExpression(if_.if_conditional))
+        code.append(f"goto if_false_{n} false")
+        code.extend(self.compileStatement(if_.if_statement_list))
+        code.append(f"goto if_end_{n} all")
+        code.append(f"label if_false_{n}")
+        for i in range(if_.elif_n):
+            code.extend(self.compileExpression(if_.elif_conditional_list[i]))
+            code.append(f"goto elif_{i}_{n} false")
+            code.extend(self.ccompileStatement(if_.elif_statement_list[i]))
+            code.append(f"goto if_end_{n} all")
+            code.append(f"label elif_{i}_{n}")
+        if if_.else_:
+            code.extend(self.compileStatement(if_.else_statement))
+        code.append(f"label if_end_{n}")
         return code
 
     def compileWhile_S(self, while_: While_S) -> list[str]:
