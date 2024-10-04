@@ -143,6 +143,15 @@ class Compiler:
 
     def compileWhile_S(self, while_: While_S) -> list[str]:
         code: list[str] = []
+        n = self.count["loop"]
+        self.count["loop"] += 1
+        code.append(f"label while_start_{n}")
+        code.extend(self.compileExpression(while_.conditional))
+        code.append(f"goto while_end_{n} false")
+        for s in while_.statement_list:
+            code.extend(self.compileStatement(s))
+        code.append(f"goto while_start_{n} all")
+        code.append(f"lable while_end_{n}")
         return code
 
     def compileReturn_S(self, return_: Return_S) -> list[str]:
