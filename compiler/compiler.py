@@ -124,17 +124,20 @@ class Compiler:
         self.count["loop"] += 1
         code.extend(self.compileExpression(if_.if_conditional))
         code.append(f"goto if_false_{n} false")
-        code.extend(self.compileStatement(if_.if_statement_list))
+        for s in if_.if_statement_list:
+            code.extend(self.compileStatement(s))
         code.append(f"goto if_end_{n} all")
         code.append(f"label if_false_{n}")
         for i in range(if_.elif_n):
             code.extend(self.compileExpression(if_.elif_conditional_list[i]))
             code.append(f"goto elif_{i}_{n} false")
-            code.extend(self.ccompileStatement(if_.elif_statement_list[i]))
+            for s in if_.elif_statement_list[i]:
+                code.extend(self.compileStatement(s))
             code.append(f"goto if_end_{n} all")
             code.append(f"label elif_{i}_{n}")
         if if_.else_:
-            code.extend(self.compileStatement(if_.else_statement))
+            for s in if_.else_statement_list:
+                code.extend(self.compileStatement(s))
         code.append(f"label if_end_{n}")
         return code
 
