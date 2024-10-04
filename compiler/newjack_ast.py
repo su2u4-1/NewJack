@@ -262,12 +262,14 @@ class For_S:
     def __init__(
         self,
         location: tuple[int, int],
-        for_range: tuple[Integer, Integer, Integer],
+        for_count_integer: Identifier,
+        for_range: tuple[Expression, Expression, Expression],
         statement_list: list["Statement"],
         else_: bool = False,
         else_statement_list: list["Statement"] = [],
     ) -> None:
         self.location = location
+        self.for_count_integer = for_count_integer
         self.for_range = for_range
         self.statement_list = statement_list
         self.else_ = else_

@@ -274,27 +274,22 @@ class Parser:
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
         self.get()
-        if self.now.type != "integer":
-            self.error("must be integer")
-        i_0 = Integer(self.now.location, self.now.content)
-        self.get()
+        if self.now.type != "identifier":
+            self.error("must be identifier")
+        for_count_integer = Identifier(self.now.location, self.now.content)
+        i_0 = self.parse_Expression()
         if self.now == Token("symbol", ")"):
-            for_range = (Integer(self.now.location, "0"), i_0, Integer(self.now.location, "1"))
+            i_1 = Expression(self.now.location, [Term(self.now.location, Integer(self.now.location, "0"))])
+            i_2 = Expression(self.now.location, [Term(self.now.location, Integer(self.now.location, "1"))])
+            for_range = (i_1, i_0, i_2)
         else:
             if self.now != Token("symbol", ";"):
                 self.error("missing symbol ';'")
-            self.get()
-            if self.now.type != "integer":
-                self.error("must be integer")
-            i_1 = Integer(self.now.location, self.now.content)
-            self.get()
+            i_1 = self.parse_Expression()
             if self.now != Token("symbol", ";"):
                 self.error("missing symbol ';'")
-            self.get()
-            if self.now.type != "integer":
-                self.error("must be integer")
-            for_range = (i_0, i_1, Integer(self.now.location, self.now.content))
-            self.get()
+            i_2 = self.parse_Expression()
+            for_range = (i_0, i_1, i_2)
             if self.now != Token("symbol", ")"):
                 self.error("missing symbol ')'")
         self.get()
@@ -307,9 +302,9 @@ class Parser:
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
             s1 = self.parse_Statements()
-            return For_S(location, for_range, s0, True, s1)
+            return For_S(location, for_count_integer, for_range, s0, True, s1)
         else:
-            return For_S(location, for_range, s0)
+            return For_S(location, for_count_integer, for_range, s0)
 
     def parse_Return(self) -> Return_S:
         location = self.now.location

@@ -20,10 +20,10 @@ code:
     110 + [register](3 bit) + [jump code](2 bit)
         - If register $C J-code 0, jump to address 'a'
         - J-code:
-            00 >
-            01 ==
-            10 <
-            11 !=
+            00 null
+            01 true
+            10 false
+            11 all
 
     [operation] $[a] $[b] $[c]
     2 byte

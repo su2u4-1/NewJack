@@ -7,9 +7,19 @@ class Compiler:
         self.ast = ast
         self.scope: dict[str, dict[str, tuple[str, int]]] = {"global": {}, "argument": {}, "attriable": {}}
         self.err_list: list[CompileError] = []
-        self.count: dict[str, int] = {"global": 0, "argument": 0, "attriable": 0, "local": 0, "subroutine": 0, "class": 0, "loop": 0}
+        self.count: dict[str, int] = {
+            "global": 0,
+            "argument": 0,
+            "attriable": 0,
+            "local": 0,
+            "subroutine": 0,
+            "class": 0,
+            "loop": 0,
+            "if": 0,
+        }
         self.now: dict[str, str] = {}
         self.obj_attr: dict[str, dict[str, tuple[str, int]]] = {}
+        self.loop: list[int] = []
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         self.err_list.append(CompileError(text, self.ast.file, location))
@@ -39,6 +49,7 @@ class Compiler:
         n = self.count["subroutine"]
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
+        self.now["subroutine_type"] = subroutine.return_type.content
         if subroutine.kind == "method":
             self.scope["argument"]["self"] = ("argument", 0)
             self.count["argument"] += 1
@@ -115,13 +126,16 @@ class Compiler:
         code: list[str] = []
         code.extend(self.compileGetVariable(let.var))
         code.extend(self.compileExpression(let.expression))
-        code.append("pop term 0\npop address 0\npush term 0\npop memory 0")
+        code.append("pop term 0")
+        code.append("pop address 0")
+        code.append("push term 0")
+        code.append("pop memory 0")
         return code
 
     def compileIf_S(self, if_: If_S) -> list[str]:
         code: list[str] = []
-        n = self.count["loop"]
-        self.count["loop"] += 1
+        n = self.count["if"]
+        self.count["if"] += 1
         code.extend(self.compileExpression(if_.if_conditional))
         code.append(f"goto if_false_{n} false")
         for s in if_.if_statement_list:
@@ -145,22 +159,74 @@ class Compiler:
         code: list[str] = []
         n = self.count["loop"]
         self.count["loop"] += 1
+        self.loop.append(n)
         code.append(f"label while_start_{n}")
         code.extend(self.compileExpression(while_.conditional))
-        code.append(f"goto while_end_{n} false")
+        if while_.else_:
+            code.append(f"goto while_end_{n} false")
+        else:
+            code.append(f"goto loop_end_{n} false")
         for s in while_.statement_list:
             code.extend(self.compileStatement(s))
         code.append(f"goto while_start_{n} all")
-        code.append(f"lable while_end_{n}")
+        if while_.else_:
+            code.append(f"lable while_end_{n}")
+            for s in while_.else_statement_list:
+                code.extend(self.compileStatement(s))
+        code.append(f"label loop_end_{n}")
+        if self.loop.pop() != n:
+            self.error("loop level error", while_.location)
+        return code
+
+    def compileFor_S(self, for_: For_S) -> list[str]:
+        code: list[str] = []
+        n = self.count["loop"]
+        self.count["loop"] += 1
+        self.loop.append(n)
+        cn = self.count["local"]
+        self.count["local"] += 1
+        self.scope[self.now["subroutine_name"]][for_.for_count_integer.content] = ("int", cn)
+        code.extend(self.compileExpression(for_.for_range[0]))
+        code.append(f"push local {cn}")
+        code.append("pop address 0")
+        code.append("pop memory 0")
+        code.append(f"label for_start_{n}")
+        for s in for_.statement_list:
+            code.extend(self.compileStatement(s))
+        code.extend(self.compileExpression(for_.for_range[2]))
+        code.append(f"push local {cn}")
+        code.append("pop address 0")
+        code.append("push memory 0")
+        code.append("add")
+        code.append("pop memory 0")
+        code.extend(self.compileExpression(for_.for_range[1]))
+        code.append(f"goto for_start_{n} true")
+        if for_.else_:
+            for s in for_.else_statement_list:
+                code.extend(self.compileStatement(s))
+        code.append(f"label loop_end_{n}")
+        if self.loop.pop() != n:
+            self.error("loop level error", for_.location)
         return code
 
     def compileReturn_S(self, return_: Return_S) -> list[str]:
         code: list[str] = []
+        if return_.expression is None:
+            if self.now["subroutine_type"] == "void":
+                code.append("push constant 0")
+            else:
+                self.error(f"muse be return {self.now["subroutine_type"]}", return_.location)
+        else:
+            code.extend(self.compileExpression(return_.expression))
+        code.append("return")
         return code
 
     def compileBreak_S(self, break_: Break_S) -> list[str]:
-        code: list[str] = []
-        return code
+        if len(self.loop) == 0:
+            self.error("The break statement must be inside a loop", break_.location)
+            return []
+        else:
+            return [f"goto loop_end_{self.loop[-1]} all"]
 
     def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []

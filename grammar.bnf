@@ -13,7 +13,7 @@
 <do_S> ::= "do" <call> ";"
 <if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"elif" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
 <while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
-<for_S> ::= "for" "(" <integer> [";" <integer> ";" <integer>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
+<for_S> ::= "for" "("<identifier'name'> "," <expression> [";" <conditional> ";" <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
 <return_S> ::= "return" [<expression>] ";"
 <break_S> ::= "break" ";"
 <continue_S> ::= "continue" ";"
