@@ -1,7 +1,7 @@
-from compiler.lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
-from compiler.lexer import lexer
-from compiler.parser import Parser
-from compiler.compiler import Compiler
+from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
+from lexer import lexer
+from parser import Parser
+from NJCompiler import Compiler
 
 if __name__ == "__main__":
     while True:
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     tokens = lexer(source)
     parser = Parser(tokens)
     try:
-        ast = parser.main(get_one_path(path, ""))
+        ast = parser.main(get_one_path(path, ".nj"))
     except CompileError as e:
         print(e.show(source[source.index("//" + e.file) + e.line]))
         exit()

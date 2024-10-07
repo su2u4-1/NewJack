@@ -414,7 +414,7 @@ class Class:
 class Root:
     def __init__(self, location: tuple[int, int], file: str, class_list: list[Class]) -> None:
         self.location = location
-        self.name = os.path.split(os.path.abspath(self.file))[1].split(".")[0]
+        self.name = os.path.split(os.path.abspath(file))[1].split(".")[0]
         self.file = file
         self.class_list = class_list
 

@@ -1,6 +1,6 @@
 class Test{
     constructor Test new(int a, int b){
-        attr int a, b = a, b;
+        attr int a, b = 1, 2;
         do self.a[2](pass);
         let b = 2;
         return self;

@@ -1,5 +1,5 @@
-from compiler.newjack_ast import *
-from compiler.lib import CompileError, CompileErrorGroup
+from newjack_ast import *
+from lib import CompileError, CompileErrorGroup
 
 
 class Compiler:
@@ -37,6 +37,7 @@ class Compiler:
         n = self.count["class"]
         self.count["class"] += 1
         self.now["class_name"] = class_.name.content
+        self.scope[class_.name.content] = {}
         for i in class_.var_list:
             code.extend(self.compileVar_S(i))
         for i in class_.subroutine_list:
@@ -50,6 +51,7 @@ class Compiler:
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
         self.now["subroutine_type"] = subroutine.return_type.content
+        self.scope[subroutine.name.content] = {}
         if subroutine.kind == "method":
             self.scope["argument"]["self"] = ("argument", 0)
             self.count["argument"] += 1
@@ -339,7 +341,7 @@ class Compiler:
                     var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
                     break
             else:
-                self.error("unknown identifier", var.var.location)
+                self.error(f"unknown identifier {var.var.content}", var.var.location)
         else:
             var_info = self.compileGetVariable(var.var)
         if var.index is not None:

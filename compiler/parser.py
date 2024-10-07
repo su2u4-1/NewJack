@@ -1,7 +1,7 @@
 from typing import NoReturn
 
-from compiler.lib import Token, Tokens, CompileError, Precedence, Operator
-from compiler.newjack_ast import *
+from lib import Token, Tokens, CompileError, Precedence, Operator
+from newjack_ast import *
 
 
 class Parser:

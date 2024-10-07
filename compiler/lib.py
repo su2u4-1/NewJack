@@ -109,7 +109,9 @@ class CompileError(Exception):
     def show(self, source: str) -> str:
         if source.endswith("\n"):
             source = source[:-1]
-        return f'File "{self.file}", line {self.line}, in {self.index}\nparser Error: {self.text}\n{source}' + " " * (self.index - 1) + "^"
+        return (
+            f'File "{self.file}", line {self.line}, in {self.index}\nparser Error: {self.text}\n{source}\n' + " " * (self.index - 1) + "^"
+        )
 
 
 class CompileErrorGroup(Exception):
