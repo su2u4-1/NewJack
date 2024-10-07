@@ -28,7 +28,6 @@ Keyword = {
     "continue",
     "false",
     "true",
-    "none",
     "self",
     "int",
     "bool",

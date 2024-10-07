@@ -35,7 +35,7 @@
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
 <keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
-<keyword_content> ::= "false" | "true" | "none" | "self"
+<keyword_content> ::= "false" | "true" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "!"
 <operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&" | "<<" | ">>"
 <logical_operator> ::= "==" | "!=" | ">=" | "<=" | ">" | "<"

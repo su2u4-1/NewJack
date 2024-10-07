@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Self, Union
+from typing import Literal, Optional, Self, Sequence, Union
 import os.path
 
 from lib import Keyword
@@ -60,13 +60,13 @@ class Integer:
 class Float:
     def __init__(self, location: tuple[int, int], content: str) -> None:
         self.location = location
-        self.content = float(content)
+        self.a, self.b = content.split(".")
 
     def show(self) -> list[str]:
-        return [f"float: {self.content}"]
+        return [f"float: {self.a}.{self.b}"]
 
     def __str__(self) -> str:
-        return str(self.content)
+        return f"{self.a}.{self.b}"
 
 
 class String:
@@ -111,7 +111,7 @@ class Term:
     def __init__(
         self,
         location: tuple[int, int],
-        content: Union[Integer, Float, Char, String, "Call", "GetVariable", "Expression", Self, Literal["false", "true", "none", "self"]],
+        content: Union[Integer, Float, Char, String, "Call", "GetVariable", "Expression", Self, Literal["false", "true", "self"]],
         neg: Optional[Literal["-", "!"]] = None,
     ) -> None:
         self.location = location
@@ -130,9 +130,10 @@ class Term:
 
 
 class Expression:
-    def __init__(self, location: tuple[int, int], content: list[Term | Op]) -> None:
+    def __init__(self, location: tuple[int, int], content: Sequence[Term | Op]) -> None:
+        """content: Stores Op and Term sequences converted to reverse Polish notation"""
         self.location = location
-        self.content = content  # postfix
+        self.content = content
 
     def show(self) -> list[str]:
         s = ["expression:"]
@@ -250,7 +251,7 @@ class Return_S:
 
 
 class Break_S:
-    def __init__(self, n: Integer, location: tuple[int, int]) -> None:
+    def __init__(self, location: tuple[int, int], n: Integer) -> None:
         self.location = location
         self.n = n
 

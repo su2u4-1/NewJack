@@ -226,17 +226,97 @@ class Compiler:
             self.error("The break statement must be inside a loop", break_.location)
             return []
         else:
-            code = [f"goto loop_end_{self.loop[-break_.n.content]} all"]
-            self.loop = self.loop[:-break_.n.content]
-            return code
+            self.loop = self.loop[: -break_.n.content]
+            return [f"goto loop_end_{self.loop[-break_.n.content]} all"]
 
     def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []
+        code.append(f"variable: name: {var.name}, kind: {var.kind}, type: {var.type}")  # test
         return code
 
     def compileExpression(self, expression: Expression) -> list[str]:
         code: list[str] = []
+        for i in expression.content:
+            if isinstance(i, Term):
+                code.extend(self.compileTerm(i))
+            else:
+                code.extend(self.compileOp(i))
         return code
+
+    def compileTerm(self, term: Term) -> list[str]:
+        code: list[str] = []
+        if isinstance(term.content, Integer):
+            code.append(f"push constant {term.content.content}")
+        elif isinstance(term.content, Float):
+            code.append(f"push constant {term.content.a}")
+            code.append(f"push constant {term.content.b}")
+            code.append("call built_in.float 2")
+        elif isinstance(term.content, Char):
+            code.append(f"push constant {ord(term.content.content)}")
+            code.append("call built_in.char 1")
+        elif isinstance(term.content, String):
+            for i in term.content.content:
+                code.append(f"push constant {ord(i)}")
+            code.append(f"call built_in.string {len(term.content.content)}")
+        elif isinstance(term.content, Call):
+            code.extend(self.compileCall(term.content))
+        elif isinstance(term.content, GetVariable):
+            code.extend(self.compileGetVariable(term.content))
+        elif isinstance(term.content, Expression):
+            code.extend(self.compileExpression(term.content))
+        elif isinstance(term.content, Term):
+            code.extend(self.compileTerm(term.content))
+        else:
+            if term.content == "false":
+                code.append("push constant 0")
+            elif term.content == "true":
+                code.append("push constant 1")
+            elif term.content == "self":
+                if "self" in self.scope["argument"]:
+                    code.append("push argument 0")
+                else:
+                    self.error("self must be in method", term.location)
+            else:
+                self.error(f"unknown keyword {term.content}", term.location)
+        if term.neg is not None:
+            if term.neg == "-":
+                code.append("call built_in.neg 1")
+            elif term.neg == "!":
+                code.append("call built_in.invert 1")
+        return code
+
+    def compileOp(self, op: Op) -> list[str]:
+        if op.content == "+":
+            return ["call built_in.add 2"]
+        elif op.content == "-":
+            return ["call built_in.sub 2"]
+        elif op.content == "*":
+            return ["call built_in.mul 2"]
+        elif op.content == "/":
+            return ["call built_in.div 2"]
+        elif op.content == "|":
+            return ["call built_in.or 2"]
+        elif op.content == "&":
+            return ["call built_in.and 2"]
+        elif op.content == "<<":
+            return ["call built_in.lm 2"]
+        elif op.content == ">>":
+            return ["call built_in.rm 2"]
+        elif op.content == "==":
+            return ["call built_in.eq 2"]
+        elif op.content == "!=":
+            return ["call built_in.neq 2"]
+        elif op.content == ">=":
+            return ["call built_in.geq 2"]
+        elif op.content == "<=":
+            return ["call built_in.leq 2"]
+        elif op.content == ">":
+            return ["call built_in.gt 2"]
+        elif op.content == "<":
+            return ["call built_in.lt 2"]
+        else:
+            self.error(f"unknown op {op.content}", op.location)
+            return []
 
     def compileCall(self, call: Call) -> list[str]:
         code: list[str] = []

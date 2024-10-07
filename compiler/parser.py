@@ -319,13 +319,13 @@ class Parser:
     def parse_Break(self) -> Break_S:
         location = self.now.location
         self.get()
-        if self.now.type == "identifier":
-            n = Identifier(self.now.location, self.now.content)
+        if self.now.type == "integer":
+            n = Integer(self.now.location, self.now.content)
         elif self.now == Token("symbol", ";"):
-            n = Identifier(self.now.location, "1")
+            n = Integer(self.now.location, "1")
         else:
             self.error("missing symbol ';'")
-        return Break_S(n, location)
+        return Break_S(location, n)
 
     def parse_ExpressionList(self) -> list[Expression]:
         output: list[Expression] = []
@@ -372,17 +372,14 @@ class Parser:
         elif self.now.type == "float":
             output = Term(self.now.location, Float(self.now.location, self.now.content))
             self.get()
-        elif self.now == Tokens("keyword", ("true", "false", "none")):
+        elif self.now == Tokens("keyword", ("true", "false", "self")):
             if self.now == Token("keyword", "true"):
                 output = Term(self.now.location, "true")
                 self.get()
             elif self.now == Token("keyword", "false"):
                 output = Term(self.now.location, "false")
                 self.get()
-            elif self.now == Token("keyword", "none"):
-                output = Term(self.now.location, "none")
-                self.get()
-            elif self.now == Token("keyword", "self"):
+            else:  # self.now == Token("keyword", "self")
                 output = Term(self.now.location, "self")
                 self.get()
         elif self.now == Tokens("symbol", ("-", "!", "(")):
@@ -392,7 +389,7 @@ class Parser:
                     self.error("missing symbol ')'")
             elif self.now == Token("symbol", "-"):
                 output = Term(self.now.location, self.parse_Term(), "-")
-            elif self.now == Token("symbol", "!"):
+            else:  # self.now == Token("symbol", "!")
                 output = Term(self.now.location, self.parse_Term(), "!")
         elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
             var = self.parse_Variable(GetVariable(self.now.location, Identifier(self.now.location, self.now.content)))
@@ -410,6 +407,7 @@ class Parser:
                 output = Term(location, var)
         else:
             self.error(f"unknown Term '{self.now}'")
+            output = Term(location, "none")
         return output
 
     def parse_Variable(self, var: GetVariable = GetVariable((-1, -1), Identifier((-1, -1), "none"))) -> GetVariable:
