@@ -319,9 +319,13 @@ class Parser:
     def parse_Break(self) -> Break_S:
         location = self.now.location
         self.get()
-        if self.now != Token("symbol", ";"):
+        if self.now.type == "identifier":
+            n = Identifier(self.now.location, self.now.content)
+        elif self.now == Token("symbol", ";"):
+            n = Identifier(self.now.location, "1")
+        else:
             self.error("missing symbol ';'")
-        return Break_S(location)
+        return Break_S(n, location)
 
     def parse_ExpressionList(self) -> list[Expression]:
         output: list[Expression] = []

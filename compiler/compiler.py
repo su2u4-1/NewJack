@@ -222,11 +222,13 @@ class Compiler:
         return code
 
     def compileBreak_S(self, break_: Break_S) -> list[str]:
-        if len(self.loop) == 0:
+        if len(self.loop) < break_.n.content:
             self.error("The break statement must be inside a loop", break_.location)
             return []
         else:
-            return [f"goto loop_end_{self.loop[-1]} all"]
+            code = [f"goto loop_end_{self.loop[-break_.n.content]} all"]
+            self.loop = self.loop[:-break_.n.content]
+            return code
 
     def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []

@@ -15,7 +15,7 @@
 <while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
 <for_S> ::= "for" "("<identifier'name'> "," <expression> [";" <conditional> ";" <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
 <return_S> ::= "return" [<expression>] ";"
-<break_S> ::= "break" ";"
+<break_S> ::= "break" [<Integer>] ";"
 <continue_S> ::= "continue" ";"
 <var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
 <expression> ::= <term> [{<operator> <term>}]

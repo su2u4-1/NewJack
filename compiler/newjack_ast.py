@@ -250,9 +250,9 @@ class Return_S:
 
 
 class Break_S:
-    def __init__(self, location: tuple[int, int]) -> None:
+    def __init__(self, n: Integer, location: tuple[int, int]) -> None:
         self.location = location
-        pass
+        self.n = n
 
     def show(self) -> list[str]:
         return ["break_S"]
