@@ -1,7 +1,7 @@
 from typing import NoReturn
 
 from lib import Token, Tokens, CompileError, Precedence, Operator
-from newjack_ast import *
+from AST import *
 
 
 class Parser:
@@ -16,7 +16,7 @@ class Parser:
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
             location = self.now.location
-        raise CompileError(text, self.file, location)
+        raise CompileError(text, self.file, location, "parser")
 
     def get(self) -> None:
         self.index += 1
@@ -149,6 +149,10 @@ class Parser:
                 output.append(self.parse_Break())
             elif self.now == Token("symbol", "}"):
                 break
+            elif self.now == Token("keyword", "pass"):
+                self.get()
+                if self.now != Token("symbol", ";"):
+                    self.error("missing symbol ';'")
             else:
                 self.error(f"unknown {self.now.type} '{self.now.content}'")
         return output
@@ -403,6 +407,7 @@ class Parser:
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
                 output = Term(location, Call(self.now.location, var, e))
+                self.get()
             else:
                 output = Term(location, var)
         else:
@@ -412,8 +417,8 @@ class Parser:
 
     def parse_Variable(self, var: GetVariable = GetVariable((-1, -1), Identifier((-1, -1), "none"))) -> GetVariable:
         if self.next().type == "identifier" or self.next() == Token("keyword", "self"):
-            var = GetVariable(self.now.location, Identifier(self.now.location, self.now.content))
             self.get()
+            var = GetVariable(self.now.location, Identifier(self.now.location, self.now.content))
         elif self.now == Tokens("symbol", (".", "[")):
             if self.now == Token("symbol", "."):
                 self.get()

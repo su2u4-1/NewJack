@@ -1,4 +1,4 @@
-from newjack_ast import *
+from AST import *
 from lib import CompileError, CompileErrorGroup
 
 
@@ -22,7 +22,7 @@ class Compiler:
         self.loop: list[int] = []
 
     def error(self, text: str, location: tuple[int, int]) -> None:
-        self.err_list.append(CompileError(text, self.ast.file, location))
+        self.err_list.append(CompileError(text, self.ast.file, location, "compiler"))
 
     def main(self) -> list[str]:
         code: list[str] = ["label start"]
@@ -34,7 +34,6 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
-        n = self.count["class"]
         self.count["class"] += 1
         self.now["class_name"] = class_.name.content
         self.scope[class_.name.content] = {}
@@ -47,20 +46,26 @@ class Compiler:
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
-        n = self.count["subroutine"]
         self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
         self.now["subroutine_type"] = subroutine.return_type.content
+        self.now["subroutine_kind"] = subroutine.kind
         self.scope[subroutine.name.content] = {}
         if subroutine.kind == "method":
             self.scope["argument"]["self"] = ("argument", 0)
             self.count["argument"] += 1
+        elif subroutine.kind == "constructor":
+            n = 0
+            for i in subroutine.statement_list:
+                if isinstance(i, Var_S):
+                    n += len(i.var_list)
+            code.append(f"alloc heap {n}")
+            code.append("pop term 1")
         for i in subroutine.argument_list:
             code.extend(self.compileVariable(i))
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         if subroutine.kind == "constructor":
-            code.insert(1, f"alloc heap {self.count["attriable"]}")
             self.obj_attr[self.now["class_name"]] = self.scope["attriable"]
         return code
 
@@ -89,27 +94,19 @@ class Compiler:
             self.error("'value' redundant 'variable'", var.location)
         for i, j in zip(var.var_list, var.expression_list):
             code.extend(self.compileExpression(j))
-            if i.kind == "global":
-                t = "global"
-            elif i.kind == "argument":
-                t = self.now["class_name"]
-            elif i.kind == "attriable":
-                t = self.now["class_name"]
-            else:
+            if i.kind == "local":
                 t = self.now["subroutine_name"]
+            else:
+                t = i.kind
             code.append(f"pop {i.kind} {self.count[i.kind]}")
             self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
             self.count[i.kind] += 1
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
-                if i.kind == "global":
-                    t = "global"
-                elif i.kind == "argument":
-                    t = self.now["class_name"]
-                elif i.kind == "attriable":
-                    t = self.now["class_name"]
-                else:
+                if i.kind == "local":
                     t = self.now["subroutine_name"]
+                else:
+                    t = i.kind
                 if i.type.content in ("int", "bool", "float", "char"):
                     code.append("push constant 0")
                 else:
@@ -276,8 +273,12 @@ class Compiler:
             elif term.content == "self":
                 if "self" in self.scope["argument"]:
                     code.append("push argument 0")
+                elif self.now["subroutine_kind"] == "constructor":
+                    code.append("push term 1")
+                    code.append("pop address 0")
+                    code.append("push memory 0")
                 else:
-                    self.error("self must be in method", term.location)
+                    self.error("self must be in method or constructor", term.location)
             else:
                 self.error(f"unknown keyword {term.content}", term.location)
         if term.neg is not None:
@@ -338,6 +339,9 @@ class Compiler:
             for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
                 if var.var.content in self.scope[i]:
                     t = "local" if i == self.now["subroutine_name"] else i
+                    var_info["kind"] = t
+                    var_info["name"] = var.var.content
+                    var_info["type"] = self.scope[i][var.var.content][0]
                     var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
                     break
             else:

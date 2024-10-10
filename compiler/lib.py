@@ -100,17 +100,20 @@ class Tokens:
 
 
 class CompileError(Exception):
-    def __init__(self, text: str, file: str, location: tuple[int, int]) -> None:
+    def __init__(self, text: str, file: str, location: tuple[int, int], kind: str) -> None:
         self.file = file
         self.line = location[0]
         self.index = location[1]
         self.text = text
+        self.kind = kind
 
     def show(self, source: str) -> str:
         if source.endswith("\n"):
             source = source[:-1]
         return (
-            f'File "{self.file}", line {self.line}, in {self.index}\nparser Error: {self.text}\n{source}\n' + " " * (self.index - 1) + "^"
+            f'File "{self.file}", line {self.line}, in {self.index}\n{self.kind} Error: {self.text}\n{source}\n'
+            + " " * (self.index - 1)
+            + "^"
         )
 
 

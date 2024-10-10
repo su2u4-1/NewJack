@@ -1,8 +1,9 @@
 class Test{
     constructor Test new(int a, int b){
         attr int a, b = 1, 2;
-        do self.a[2](pass);
-        let b = 2;
+        var Test2 c = Test2.new(pass);
+        do c.ff(pass);
+        let self.b = 2;
         return self;
     }
 
@@ -19,5 +20,9 @@ class Test2{
     function void test1(pass){
         var int b;
         let b = 1*2+3-5+8/2;
+    }
+
+    method void ff(pass){
+        pass;
     }
 }
