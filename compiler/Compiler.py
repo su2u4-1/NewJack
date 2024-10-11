@@ -30,13 +30,13 @@ class Compiler:
             self.scope["global"][c.name.content] = ("class", i)
         for i, c in enumerate(self.ast.class_list):
             for s in c.subroutine_list:
-                if s.type in self.scope["global"] and self.scope["global"][s.type][0] == "class":
-                    self.scope[c.name.content][s.name.content] = (s.kind, self.scope["global"][s.type][1])
-                elif s.type in ("int", "char", "float", "char", "list", "string", "bool"):
+                if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == "class":
+                    self.scope[c.name.content][s.name.content] = (s.kind, self.scope["global"][s.return_type.content][1])
+                elif s.return_type.content in ("int", "char", "float", "char", "list", "string", "bool", "void"):
                     self.scope[c.name.content][s.name.content] = (s.kind, -1)
                 else:
                     self.scope[c.name.content][s.name.content] = (s.kind, -2)
-                    self.error(f"unknown type {s.type}", s.location)
+                    self.error(f"unknown type {s.return_type.content}", s.location)
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
         if len(self.err_list) > 0:
@@ -344,21 +344,21 @@ class Compiler:
 
     def compileGetVariable(self, var: GetVariable) -> dict[str, str]:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        # if isinstance(var.var, Identifier):
-        #     for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
-        #         if var.var.content in self.scope[i]:
-        #             t = "local" if i == self.now["subroutine_name"] else i
-        #             var_info["kind"] = t
-        #             var_info["name"] = var.var.content
-        #             var_info["type"] = self.scope[i][var.var.content][0]
-        #             var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
-        #             break
-        #     else:
-        #         self.error(f"unknown identifier {var.var.content}", var.var.location)
-        # else:
-        #     var_info = self.compileGetVariable(var.var)
+        if isinstance(var.var, Identifier):
+            for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
+                if var.var.content in self.scope[i]:
+                    t = "local" if i == self.now["subroutine_name"] else i
+                    var_info["kind"] = t
+                    var_info["name"] = var.var.content
+                    var_info["type"] = self.scope[i][var.var.content][0]
+                    var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
+                    break
+            else:
+                self.error(f"unknown identifier {var.var.content}", var.var.location)
+        else:
+            var_info = self.compileGetVariable(var.var)
         if var.index is not None:
             var_info["code"] += "\n" + "\n".join(self.compileExpression(var.index)) + "\nadd"
         elif var.attr is not None:
-            var_info["code"] += f"\n{self.obj_attr[var_info["type"]][var.attr.content][1]}\nadd"
+            var_info["code"] += f"\n{self.scope[var_info["type"]][var.attr.content][1]}\nadd"
         return var_info
