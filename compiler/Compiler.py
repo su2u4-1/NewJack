@@ -18,7 +18,6 @@ class Compiler:
             "if": 0,
         }
         self.now: dict[str, str] = {}
-        self.obj_attr: dict[str, dict[str, tuple[str, int]]] = {}
         self.loop: list[int] = []
 
     def error(self, text: str, location: tuple[int, int]) -> None:
@@ -26,6 +25,18 @@ class Compiler:
 
     def main(self) -> list[str]:
         code: list[str] = ["label start"]
+        for i, c in enumerate(self.ast.class_list):
+            self.scope[c.name.content] = {}
+            self.scope["global"][c.name.content] = ("class", i)
+        for i, c in enumerate(self.ast.class_list):
+            for s in c.subroutine_list:
+                if s.type in self.scope["global"] and self.scope["global"][s.type][0] == "class":
+                    self.scope[c.name.content][s.name.content] = (s.kind, self.scope["global"][s.type][1])
+                elif s.type in ("int", "char", "float", "char", "list", "string", "bool"):
+                    self.scope[c.name.content][s.name.content] = (s.kind, -1)
+                else:
+                    self.scope[c.name.content][s.name.content] = (s.kind, -2)
+                    self.error(f"unknown type {s.type}", s.location)
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
         if len(self.err_list) > 0:
@@ -34,7 +45,6 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
-        self.count["class"] += 1
         self.now["class_name"] = class_.name.content
         self.scope[class_.name.content] = {}
         for i in class_.var_list:
@@ -46,7 +56,6 @@ class Compiler:
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
-        self.count["subroutine"] += 1
         self.now["subroutine_name"] = subroutine.name.content
         self.now["subroutine_type"] = subroutine.return_type.content
         self.now["subroutine_kind"] = subroutine.kind
@@ -66,7 +75,7 @@ class Compiler:
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         if subroutine.kind == "constructor":
-            self.obj_attr[self.now["class_name"]] = self.scope["attriable"]
+            self.scope[self.now["class_name"]] = self.scope["attriable"]
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
