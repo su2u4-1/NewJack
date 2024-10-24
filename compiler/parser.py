@@ -157,6 +157,12 @@ class Parser:
                 self.error(f"unknown {self.now.type} '{self.now.content}'")
         return output
 
+    def compileType(self) -> Type:
+        # var_type = Type(self.now)
+        self.get()
+        if self.now == Token("symbol", "["):
+            pass
+
     def parse_Var(self, _global: bool = False, _attr: bool = False) -> Var_S:
         location = self.now.location
         if _attr:
@@ -167,10 +173,12 @@ class Parser:
             kind = "local"
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
-            var_type = Identifier(self.now.location, self.now.content)
-            self.get()
+            pass
+            # var_type = Identifier(self.now.location, self.now.content)
+            var_type = self.compileType()
         else:
             self.error("missing variable type")
+        self.get()
         var_list: list[Variable] = []
         if self.now.type == "identifier":
             var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), kind, var_type))

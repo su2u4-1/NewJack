@@ -3,7 +3,7 @@
 <class> ::= "class" <identifier'class_name'> "{" [{<var_S>}] <constructor> {(<var_S> | <subroutine>)} "}"
 <subroutine> ::= ("function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
 <constructor> ::= "constructor" <type> <identifier'name'> "(" (<argument_list> | "pass") ")" "{" {(<statement> | <attr_S>)} "}"
-<type> ::= <identifier'type'> | <built-in_type>
+<type> ::= <identifier'type'> | <built-in_type> ["[" <type> "}"]
 <argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
 <statements> ::= ({<statement>} | "pass")
 <statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
