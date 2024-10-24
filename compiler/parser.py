@@ -120,7 +120,7 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        return Subroutine(location, name, kind, type, self.parse_Statements(_attr), arg_list)
+        return Subroutine(location, name, kind, type, self.parse_Statements(_attr), arg_list)  # type: ignore
 
     def parse_Statements(self, _attr: bool = False) -> list[Statement]:
         output: list[Statement] = []
@@ -360,7 +360,7 @@ class Parser:
                 if len(symbol) == 0 or Precedence[symbol[-1].content] < Precedence[self.now.content]:
                     if self.now != Operator:
                         self.error("missing operator")
-                    symbol.append(Op(self.now.location, self.now.content))
+                    symbol.append(Op(self.now.location, self.now.content))  # type: ignore
                     break
                 output.append(symbol.pop())
             if self.next() == Operator:
