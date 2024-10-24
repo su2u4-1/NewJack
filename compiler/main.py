@@ -1,6 +1,6 @@
 from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
 from lexer import lexer
-from Parser import Parser
+from parser import Parser
 from Compiler import Compiler
 
 if __name__ == "__main__":

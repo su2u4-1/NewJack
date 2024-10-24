@@ -5,7 +5,7 @@ from lib import CompileError, CompileErrorGroup
 class Compiler:
     def __init__(self, ast: Root) -> None:
         self.ast = ast
-        self.scope: dict[str, dict[str, tuple[str, int]]] = {"global": {}, "argument": {}, "attriable": {}}
+        self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}, "attriable": {}}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
             "global": 0,
@@ -27,15 +27,15 @@ class Compiler:
         code: list[str] = ["label start"]
         for i, c in enumerate(self.ast.class_list):
             self.scope[c.name.content] = {}
-            self.scope["global"][c.name.content] = ("class", i)
+            self.scope["global"][c.name.content] = (type_class, i)
         for i, c in enumerate(self.ast.class_list):
             for s in c.subroutine_list:
-                if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == "class":
-                    self.scope[c.name.content][s.name.content] = (s.kind, self.scope["global"][s.return_type.content][1])
+                if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
+                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], self.scope["global"][s.return_type.content][1])
                 elif s.return_type.content in ("int", "char", "float", "char", "list", "string", "bool", "void"):
-                    self.scope[c.name.content][s.name.content] = (s.kind, -1)
+                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -1)
                 else:
-                    self.scope[c.name.content][s.name.content] = (s.kind, -2)
+                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -2)
                     self.error(f"unknown type {s.return_type.content}", s.location)
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
@@ -61,7 +61,7 @@ class Compiler:
         self.now["subroutine_kind"] = subroutine.kind
         self.scope[subroutine.name.content] = {}
         if subroutine.kind == "method":
-            self.scope["argument"]["self"] = ("argument", 0)
+            self.scope["argument"]["self"] = (type_argument, 0)
             self.count["argument"] += 1
         elif subroutine.kind == "constructor":
             n = 0
@@ -108,7 +108,7 @@ class Compiler:
             else:
                 t = i.kind
             code.append(f"pop {i.kind} {self.count[i.kind]}")
-            self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
+            self.scope[t][i.name.content] = (i.type, self.count[i.kind])
             self.count[i.kind] += 1
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
@@ -116,12 +116,12 @@ class Compiler:
                     t = self.now["subroutine_name"]
                 else:
                     t = i.kind
-                if i.type.content in ("int", "bool", "float", "char"):
+                if i.type.outside.content in ("int", "bool", "float", "char"):
                     code.append("push constant 0")
                 else:
-                    code.append(f"call {i.type.content}.init")
+                    code.append(f"call {i.type.outside.content}.init")
                 code.append(f"pop {i.kind} {self.count[i.kind]}")
-                self.scope[t][i.name.content] = (i.type.content, self.count[i.kind])
+                self.scope[t][i.name.content] = (i.type, self.count[i.kind])
                 self.count[i.kind] += 1
         return code
 
@@ -193,7 +193,7 @@ class Compiler:
         self.loop.append(n)
         cn = self.count["local"]
         self.count["local"] += 1
-        self.scope[self.now["subroutine_name"]][for_.for_count_integer.content] = ("int", cn)
+        self.scope[self.now["subroutine_name"]][for_.for_count_integer.content] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
         code.append(f"push local {cn}")
         code.append("pop address 0")
@@ -344,21 +344,22 @@ class Compiler:
 
     def compileGetVariable(self, var: GetVariable) -> dict[str, str]:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        if isinstance(var.var, Identifier):
-            for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
-                if var.var.content in self.scope[i]:
-                    t = "local" if i == self.now["subroutine_name"] else i
-                    var_info["kind"] = t
-                    var_info["name"] = var.var.content
-                    var_info["type"] = self.scope[i][var.var.content][0]
-                    var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
-                    break
-            else:
-                self.error(f"unknown identifier {var.var.content}", var.var.location)
-        else:
-            var_info = self.compileGetVariable(var.var)
-        if var.index is not None:
-            var_info["code"] += "\n" + "\n".join(self.compileExpression(var.index)) + "\nadd"
-        elif var.attr is not None:
-            var_info["code"] += f"\n{self.scope[var_info["type"]][var.attr.content][1]}\nadd"
+        # TODO
+        # if isinstance(var.var, Identifier):
+        #     for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
+        #         if var.var.content in self.scope[i]:
+        #             t = "local" if i == self.now["subroutine_name"] else i
+        #             var_info["kind"] = t
+        #             var_info["name"] = var.var.content
+        #             var_info["type"] = self.scope[i][var.var.content][0]
+        #             var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
+        #             break
+        #     else:
+        #         self.error(f"unknown identifier {var.var.content}", var.var.location)
+        # else:
+        #     var_info = self.compileGetVariable(var.var)
+        # if var.index is not None:
+        #     var_info["code"] += "\n" + "\n".join(self.compileExpression(var.index)) + "\nadd"
+        # elif var.attr is not None:
+        #     var_info["code"] += f"\n{self.scope[var_info["type"]][var.attr.content][1]}\nadd"
         return var_info

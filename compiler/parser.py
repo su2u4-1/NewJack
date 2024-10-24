@@ -94,7 +94,7 @@ class Parser:
         if self.now == Token("keyword", "pass"):
             self.get()
         elif self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
-            arg_type = Identifier(self.now.location, self.now.content)
+            arg_type = self.compileType()
             self.get()
             if self.now.type == "identifier":
                 arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
@@ -104,7 +104,7 @@ class Parser:
             while self.now == Token("symbol", ","):
                 self.get()
                 if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
-                    arg_type = Identifier(self.now.location, self.now.content)
+                    arg_type = self.compileType()
                 else:
                     self.error("the symbol ',' must be followed by a argument type")
                 self.get()
@@ -158,10 +158,14 @@ class Parser:
         return output
 
     def compileType(self) -> Type:
-        # var_type = Type(self.now)
+        var_type = Type(self.now.location, Identifier(self.now.location, self.now.content))
         self.get()
         if self.now == Token("symbol", "["):
-            pass
+            var_type.inside = self.compileType()
+            if self.now != Token("symbol", "]"):
+                self.error("[ not closed")
+            self.get()
+        return var_type
 
     def parse_Var(self, _global: bool = False, _attr: bool = False) -> Var_S:
         location = self.now.location
@@ -173,12 +177,9 @@ class Parser:
             kind = "local"
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
-            pass
-            # var_type = Identifier(self.now.location, self.now.content)
             var_type = self.compileType()
         else:
             self.error("missing variable type")
-        self.get()
         var_list: list[Variable] = []
         if self.now.type == "identifier":
             var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), kind, var_type))
