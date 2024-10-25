@@ -55,25 +55,34 @@ class Parser:
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         s_list: list[Subroutine] = []
-        var_list: list[Var_S] = []
+        attr_list: list[tuple[str, Type]] = []
+        # var_list: list[Var_S] = []
         while True:
             self.get()
-            if self.now == Tokens("keyword", ("constructor", "function", "method")):
+            if self.now == Token("keyword", "describe"):
+                self.get()
+                if self.now != Token("symbol", "{"):
+                    self.error("must be symbol '{'")
+                self.get()
+                while self.now != Token("symbol", "}"):
+                    if self.now.type != "identifier":
+                        self.error(f"must be identifier, not {self.now.type} '{self.now.content}'")
+                    attr_name = self.now.content
+                    self.get()
+                    if self.now != Token("symbol", ":"):
+                        self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
+                    attr_list.append((attr_name, self.parse_Type()))
+            elif self.now == Tokens("keyword", ("constructor", "function", "method")):
                 s_list.append(self.parse_Subroutine())
-            elif self.now == Token("keyword", "var"):
-                var_list.append(self.parse_Var(_global=True))
             elif self.now == Token("symbol", "}"):
                 break
             else:
                 self.error("missing symbol '}'")
-        return Class(location, name, var_list, s_list)
+        return Class(location, name, attr_list, s_list)
 
     def parse_Subroutine(self) -> Subroutine:
         location = self.now.location
-        _attr = False
-        if self.now == Token("keyword", "constructor"):
-            _attr = True
-        elif self.now != Tokens("keyword", ("function", "method")):
+        if self.now != Tokens("keyword", ("constructor", "function", "method")):
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'")
         kind = self.now.content
         self.get()
@@ -94,7 +103,7 @@ class Parser:
         if self.now == Token("keyword", "pass"):
             self.get()
         elif self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
-            arg_type = self.compileType()
+            arg_type = self.parse_Type()
             self.get()
             if self.now.type == "identifier":
                 arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
@@ -104,7 +113,7 @@ class Parser:
             while self.now == Token("symbol", ","):
                 self.get()
                 if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
-                    arg_type = self.compileType()
+                    arg_type = self.parse_Type()
                 else:
                     self.error("the symbol ',' must be followed by a argument type")
                 self.get()
@@ -120,19 +129,14 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        return Subroutine(location, name, kind, type, self.parse_Statements(_attr), arg_list)  # type: ignore
+        return Subroutine(location, name, kind, type, self.parse_Statements(), arg_list)  # type: ignore
 
-    def parse_Statements(self, _attr: bool = False) -> list[Statement]:
+    def parse_Statements(self) -> list[Statement]:
         output: list[Statement] = []
         while True:
             self.get()
             if self.now == Token("keyword", "var"):
                 output.append(self.parse_Var())
-            elif self.now == Token("keyword", "attr"):
-                if _attr:
-                    output.append(self.parse_Var(False, _attr))
-                else:
-                    self.error("attriable must be declared in the constructor")
             elif self.now == Token("keyword", "let"):
                 output.append(self.parse_Let())
             elif self.now == Token("keyword", "do"):
@@ -157,39 +161,33 @@ class Parser:
                 self.error(f"unknown {self.now.type} '{self.now.content}'")
         return output
 
-    def compileType(self) -> Type:
+    def parse_Type(self) -> Type:
         var_type = Type(self.now.location, Identifier(self.now.location, self.now.content))
         self.get()
         if self.now == Token("symbol", "["):
-            var_type.inside = self.compileType()
+            var_type.inside = self.parse_Type()
             if self.now != Token("symbol", "]"):
                 self.error("[ not closed")
             self.get()
         return var_type
 
-    def parse_Var(self, _global: bool = False, _attr: bool = False) -> Var_S:
+    def parse_Var(self) -> Var_S:
         location = self.now.location
-        if _attr:
-            kind = "attriable"
-        elif _global:
-            kind = "global"
-        else:
-            kind = "local"
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
-            var_type = self.compileType()
+            var_type = self.parse_Type()
         else:
             self.error("missing variable type")
         var_list: list[Variable] = []
         if self.now.type == "identifier":
-            var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), kind, var_type))
+            var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "local", var_type))
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
         self.get()
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), kind, var_type))
+                var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "local", var_type))
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
             self.get()

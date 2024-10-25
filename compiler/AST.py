@@ -230,10 +230,12 @@ class Subroutine:
 
 
 class Class:
-    def __init__(self, location: tuple[int, int], name: Identifier, var_list: list[Var_S], subroutine_list: list[Subroutine]) -> None:
+    def __init__(
+        self, location: tuple[int, int], name: Identifier, attr_list: list[tuple[str, Type]], subroutine_list: list[Subroutine]
+    ) -> None:
         self.location = location
         self.name = name
-        self.var_list = var_list
+        self.attr_list = attr_list
         self.subroutine_list = subroutine_list
 
 

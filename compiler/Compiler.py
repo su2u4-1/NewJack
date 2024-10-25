@@ -5,10 +5,11 @@ from lib import CompileError, CompileErrorGroup
 class Compiler:
     def __init__(self, ast: Root) -> None:
         self.ast = ast
-        self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}, "attriable": {}}
+        self.global_: dict[str, dict[str, tuple[str, Type]]] = {}  # {class: {name: (function, return_type)}}
+        self.attr: dict[str, dict[str, tuple[Type, int]]] = {}  # {class: {name: (type, index), name: (type, index)}}
+        self.local: dict[str, dict[str, tuple[Type, int]]] = {}  # {class.subroutine: {name: (type, index), name: (type, index)}}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
-            "global": 0,
             "argument": 0,
             "attriable": 0,
             "local": 0,
@@ -17,7 +18,7 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now: dict[str, str] = {}
+        self.now: dict[str, str] = {"class_name": "", "subroutine_name": "", "subroutine_type": "", "subroutine_kind": ""}
         self.loop: list[int] = []
 
     def error(self, text: str, location: tuple[int, int]) -> None:
@@ -47,8 +48,8 @@ class Compiler:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
         self.now["class_name"] = class_.name.content
         self.scope[class_.name.content] = {}
-        for i in class_.var_list:
-            code.extend(self.compileVar_S(i))
+        for i in class_.attr_list:
+            pass
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
         code.insert(1, f"alloc heap {self.count["global"]}")
