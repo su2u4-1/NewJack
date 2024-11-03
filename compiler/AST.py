@@ -1,23 +1,7 @@
 from typing import Literal, Optional, Sequence, Union
 import os.path
 
-
-class Identifier:
-    def __init__(self, location: tuple[int, int], content: str) -> None:
-        self.location = location
-        self.content = content
-
-    def __str__(self) -> str:
-        return self.content
-
-
-class Integer:
-    def __init__(self, location: tuple[int, int], content: str) -> None:
-        self.location = location
-        self.content = int(content)
-
-    def __str__(self) -> str:
-        return str(self.content)
+from lib import Token
 
 
 class Float:
@@ -34,17 +18,11 @@ class String:
         self.location = location
         self.content = content
 
-    def __str__(self) -> str:
-        return self.content
-
 
 class Char:
     def __init__(self, location: tuple[int, int], content: str) -> None:
         self.location = location
         self.content = content[0]
-
-    def __str__(self) -> str:
-        return self.content
 
 
 class Op:
@@ -54,26 +32,39 @@ class Op:
         self.location = location
         self.content = content
 
-    def __str__(self) -> str:
-        return self.content
-
 
 class Type:
-    def __init__(self, location: tuple[int, int], outside: Identifier, inside: Optional["Type"] = None) -> None:
+    def __init__(self, location: tuple[int, int], outside: str, inside: Optional["Type"] = None) -> None:
         self.location = location
         self.outside = outside
         self.inside = inside
+
+    def __repr__(self) -> str:
+        if self.inside is None:
+            return self.outside
+        else:
+            return f"{self.outside}[{self.inside}]"
 
 
 class Term:
     def __init__(
         self,
         location: tuple[int, int],
-        content: Union[Integer, Float, Char, String, "Call", "GetVariable", "Expression", "Term", Literal["false", "true", "self"]],
+        content: Union[int, Float, Char, String, "Call", "GetVariable", "Expression", "Term", Literal["false", "true", "self"], Token],
         neg: Optional[Literal["-", "!"]] = None,
     ) -> None:
         self.location = location
-        self.content = content
+        if isinstance(content, Token):
+            if content.type == "string":
+                self.content = content.content
+            elif content.type == "char":
+                self.content = Char((-1, -1), content.content)
+            elif content.type == "integer":
+                self.content = int(content.content)
+            elif content.type == "float":
+                self.content = Float(content.location, content.content)
+        else:
+            self.content = content
         self.neg = neg
 
 
@@ -88,9 +79,9 @@ class GetVariable:
     def __init__(
         self,
         location: tuple[int, int],
-        var: "GetVariable | Identifier",
+        var: "GetVariable | str",
         index: Optional[Expression] = None,
-        attr: Optional[Identifier] = None,
+        attr: Optional[str] = None,
     ) -> None:
         self.location = location
         self.var = var
@@ -111,9 +102,7 @@ class Call:
 
 
 class Variable:
-    def __init__(
-        self, location: tuple[int, int], name: Identifier, kind: Literal["global", "argument", "attriable", "local"], type: Type
-    ) -> None:
+    def __init__(self, location: tuple[int, int], name: str, kind: Literal["global", "argument", "attriable", "local"], type: Type) -> None:
         self.location = location
         self.name = name
         self.kind: Literal["global", "argument", "attriable", "local"] = kind
@@ -147,7 +136,7 @@ class Return_S:
 
 
 class Break_S:
-    def __init__(self, location: tuple[int, int], n: Integer) -> None:
+    def __init__(self, location: tuple[int, int], n: int) -> None:
         self.location = location
         self.n = n
 
@@ -156,7 +145,7 @@ class For_S:
     def __init__(
         self,
         location: tuple[int, int],
-        for_count_integer: Identifier,
+        for_count_integer: str,
         for_range: tuple[Expression, Expression, Expression],
         statement_list: list["Statement"],
         else_: bool = False,
@@ -215,9 +204,9 @@ class Subroutine:
     def __init__(
         self,
         location: tuple[int, int],
-        name: Identifier,
+        name: str,
         kind: Literal["constructor", "method", "function"],
-        return_type: Identifier,
+        return_type: Type,
         statement_list: list[Statement],
         argument_list: list[Variable] = [],
     ) -> None:
@@ -230,9 +219,7 @@ class Subroutine:
 
 
 class Class:
-    def __init__(
-        self, location: tuple[int, int], name: Identifier, attr_list: list[tuple[str, Type]], subroutine_list: list[Subroutine]
-    ) -> None:
+    def __init__(self, location: tuple[int, int], name: str, attr_list: list[tuple[str, Type]], subroutine_list: list[Subroutine]) -> None:
         self.location = location
         self.name = name
         self.attr_list = attr_list
@@ -247,11 +234,5 @@ class Root:
         self.class_list = class_list
 
 
-type_class = Type((-1, -1), Identifier((-1, -1), "class"))
-type_subroutine = {
-    "constructor": Type((-1, -1), Identifier((-1, -1), "constructor")),
-    "function": Type((-1, -1), Identifier((-1, -1), "function")),
-    "method": Type((-1, -1), Identifier((-1, -1), "method")),
-}
-type_int = Type((-1, -1), Identifier((-1, -1), "int"))
-type_argument = Type((-1, -1), Identifier((-1, -1), "argument"))
+type_int = Type((-1, -1), "int")
+type_argument = Type((-1, -1), "argument")
