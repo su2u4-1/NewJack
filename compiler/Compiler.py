@@ -17,7 +17,7 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now: dict[str, str] = {}
+        self.now: dict[str, str] = {"class_name": "", "subroutine_name": "", "subroutine_type": "", "subroutine_kind": ""}
         self.loop: list[int] = []
 
     def error(self, text: str, location: tuple[int, int]) -> None:
@@ -28,6 +28,9 @@ class Compiler:
         for i, c in enumerate(self.ast.class_list):
             self.scope[c.name.content] = {}
             self.scope["global"][c.name.content] = (type_class, i)
+            for a in c.attr_list:
+                pass
+                # TODO: declare attriable
         for i, c in enumerate(self.ast.class_list):
             for s in c.subroutine_list:
                 if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
@@ -47,8 +50,6 @@ class Compiler:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
         self.now["class_name"] = class_.name.content
         self.scope[class_.name.content] = {}
-        for i in class_.var_list:
-            code.extend(self.compileVar_S(i))
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
         code.insert(1, f"alloc heap {self.count["global"]}")
@@ -239,7 +240,7 @@ class Compiler:
 
     def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []
-        # TODO
+        # TODO: declare arguments
         return code
 
     def compileExpression(self, expression: Expression) -> list[str]:
@@ -344,12 +345,12 @@ class Compiler:
 
     def compileGetVariable(self, var: GetVariable) -> list[str]:
         code: list[str] = []
-        # TODO
+        # TODO: get variable address
         return code
 
     def compileGetVarInfo(self, var: GetVariable) -> dict[str, str]:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        # TODO
+        # TODO: get variable info
         # if isinstance(var.var, Identifier):
         #     for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
         #         if var.var.content in self.scope[i]:
