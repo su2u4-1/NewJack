@@ -1,14 +1,13 @@
 # NewJack grammar
 <code> ::= {<class>}
-<class> ::= "class" <identifier'class_name'> "{" [{<var_S>}] <constructor> {(<var_S> | <subroutine>)} "}"
-<subroutine> ::= ("function" | "method") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
-<constructor> ::= "constructor" <type> <identifier'name'> "(" (<argument_list> | "pass") ")" "{" {(<statement> | <attr_S>)} "}"
+<class> ::= "class" <identifier'class_name'> "{" <describe> {<subroutine>} "}"
+<describe> ::= "describe" "{" [{<identifier'var_name'> ":" <type>}] "}"
+<subroutine> ::= ("function" | "method" | "constructor") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
 <type> ::= <identifier'type'> | <built-in_type> ["[" <type> "}"]
 <argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
 <statements> ::= ({<statement>} | "pass")
 <statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
 <var_S> ::= "var" <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
-<attr_S> ::= "attr" <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
 <let_S> ::= "let" <var> "=" <expression> ";"
 <do_S> ::= "do" <call> ";"
 <if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"elif" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
@@ -33,7 +32,7 @@
 <0-9> ::= "0" | <1-9>
 <1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
-<keyword> ::= "class" | "var" | "attr" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
+<keyword> ::= "class" | "var" | "discribe" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "!"

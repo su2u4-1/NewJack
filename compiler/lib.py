@@ -10,7 +10,7 @@ atoZ = set(atoz + AtoZ)
 Keyword = {
     "class",
     "var",
-    "attr",
+    "describe",
     "constructor",
     "function",
     "method",
