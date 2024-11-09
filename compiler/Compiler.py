@@ -239,7 +239,7 @@ class Compiler:
 
     def compileVariable(self, var: Variable) -> list[str]:
         code: list[str] = []
-        code.append(f"variable: name: {var.name}, kind: {var.kind}, type: {var.type}")  # test
+        # TODO
         return code
 
     def compileExpression(self, expression: Expression) -> list[str]:
@@ -332,7 +332,7 @@ class Compiler:
 
     def compileCall(self, call: Call) -> list[str]:
         code: list[str] = []
-        var_info = self.compileGetVariable(call.var)
+        var_info = self.compileGetVarInfo(call.var)
         if var_info["kind"] == "method":
             code.append("\n".join(var_info["code"].split("\n")[:-2]))
         elif var_info["kind"] != "function" and var_info["kind"] != "constructor":
@@ -342,7 +342,12 @@ class Compiler:
         code.append(f"call {var_info["type"]}.{var_info["name"]} {len(call.expression_list)}")
         return code
 
-    def compileGetVariable(self, var: GetVariable) -> dict[str, str]:
+    def compileGetVariable(self, var: GetVariable) -> list[str]:
+        code: list[str] = []
+        # TODO
+        return code
+
+    def compileGetVarInfo(self, var: GetVariable) -> dict[str, str]:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
         # TODO
         # if isinstance(var.var, Identifier):
