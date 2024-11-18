@@ -20,6 +20,8 @@ if __name__ == "__main__":
     except CompileError as e:
         print(e.show(source[source.index("//" + e.file) + e.line]))
         exit()
+    print(ast)
+    exit()
     compiler = Compiler(ast)
     try:
         code = compiler.main()

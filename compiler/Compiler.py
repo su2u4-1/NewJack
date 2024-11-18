@@ -33,13 +33,15 @@ class Compiler:
                 # TODO: declare attriable
         for i, c in enumerate(self.ast.class_list):
             for s in c.subroutine_list:
-                if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
-                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], self.scope["global"][s.return_type.content][1])
-                elif s.return_type.content in ("int", "char", "float", "char", "list", "string", "bool", "void"):
-                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -1)
-                else:
-                    self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -2)
-                    self.error(f"unknown type {s.return_type.content}", s.location)
+                pass
+                # TODO: declare subroutines
+                # if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
+                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], self.scope["global"][s.return_type.content][1])
+                # elif s.return_type.content in ("int", "char", "float", "char", "list", "string", "bool", "void"):
+                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -1)
+                # else:
+                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -2)
+                #     self.error(f"unknown type {s.return_type.content}", s.location)
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
         if len(self.err_list) > 0:

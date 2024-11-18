@@ -104,7 +104,6 @@ class Parser:
             self.get()
         elif self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
             arg_type = self.parse_Type()
-            self.get()
             if self.now.type == "identifier":
                 arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
             else:
@@ -116,7 +115,6 @@ class Parser:
                     arg_type = self.parse_Type()
                 else:
                     self.error("the symbol ',' must be followed by a argument type")
-                self.get()
                 if self.now.type == "identifier":
                     arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
                 else:

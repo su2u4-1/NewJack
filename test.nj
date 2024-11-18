@@ -1,6 +1,9 @@
 class Test{
+    describe{
+        a: int
+        b: int
+    }
     constructor Test new(int a, int b){
-        attr int a, b = 1, 2;
         var Test2 c = Test2.new(pass);
         do c.ff(pass);
         let self.b = 2;
