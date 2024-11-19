@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from lib import Token, Tokens, CompileError, Precedence, Operator
+from lib import Token, Tokens, CompileError, Precedence, Operator, built_in_type
 from AST import *
 
 
@@ -71,7 +71,13 @@ class Parser:
                     self.get()
                     if self.now != Token("symbol", ":"):
                         self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
+                    self.get()
+                    if self.now != built_in_type or self.now.type == "identifier":
+                        self.error("must be built-in type or identifier")
                     attr_list.append((attr_name, self.parse_Type()))
+                    if self.now != Token("symbol", ";"):
+                        self.error("missing symbol ';'")
+                    self.get()
             elif self.now == Tokens("keyword", ("constructor", "function", "method")):
                 s_list.append(self.parse_Subroutine())
             elif self.now == Token("symbol", "}"):
@@ -86,7 +92,7 @@ class Parser:
             self.error("the subroutine must start with keyword 'constructor', 'method' or 'function'")
         kind = self.now.content
         self.get()
-        if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
+        if self.now == built_in_type or self.now.type == "identifier":
             type = Identifier(self.now.location, self.now.content)
         else:
             self.error("missing return type")
@@ -102,7 +108,7 @@ class Parser:
         arg_list: list[Variable] = []
         if self.now == Token("keyword", "pass"):
             self.get()
-        elif self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
+        elif self.now == built_in_type or self.now.type == "identifier":
             arg_type = self.parse_Type()
             if self.now.type == "identifier":
                 arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
@@ -111,7 +117,7 @@ class Parser:
             self.get()
             while self.now == Token("symbol", ","):
                 self.get()
-                if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void")) or self.now.type == "identifier":
+                if self.now == built_in_type or self.now.type == "identifier":
                     arg_type = self.parse_Type()
                 else:
                     self.error("the symbol ',' must be followed by a argument type")

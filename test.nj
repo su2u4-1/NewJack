@@ -1,7 +1,7 @@
 class Test{
     describe{
-        a: int
-        b: int
+        a: int;
+        b: int;
     }
     constructor Test new(int a, int b){
         var Test2 c = Test2.new(pass);
@@ -16,8 +16,11 @@ class Test{
 }
 
 class Test2{
+    describe{
+        a: int;
+    }
     constructor Test2 new(pass){
-        attr int a;
+        return self;
     }
 
     function void test1(pass){

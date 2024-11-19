@@ -157,6 +157,7 @@ class CompileErrorGroup(Exception):
 
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
+built_in_type = Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void"))
 
 
 def read_from_path(path: str) -> list[str]:
