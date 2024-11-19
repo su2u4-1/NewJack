@@ -1,27 +1,47 @@
-from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
+from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup, docs
 from lexer import lexer
 from parser import Parser
 from Compiler import Compiler
 
 if __name__ == "__main__":
-    while True:
-        path = input("file(s) path (input 'exit' cancel): ")
-        if path == "exit":
-            exit()
-        try:
-            source = read_from_path(path)
-            break
-        except FileNotFoundError as e:
-            print(e)
+    path = input("file(s) path (input 'exit' cancel): ")
+    if path == "exit":
+        exit()
+    path = path.split()
+    arg: list[str] = []
+    for i in path:
+        if i.startswith("-"):
+            arg.append(i)
+    path = path[0]
+    if "-h" in arg or "--help" in arg:
+        if len(arg) == 1:
+            for k, v in docs.items():
+                print(f"{k}  {v}")
+        else:
+            for i in arg:
+                if i in docs:
+                    print(f"{i}  {docs[i]}")
+        exit()
+    try:
+        source = read_from_path(path)
+    except FileNotFoundError as e:
+        print(e)
+        exit()
     tokens = lexer(source)
     parser = Parser(tokens)
     try:
         ast = parser.main(get_one_path(path, ".nj"))
     except CompileError as e:
-        print(e.show(source[source.index("//" + e.file) + e.line]))
+        s = e.show(source[source.index("//" + e.file) + e.line])
+        print(s[0])
+        if "--debug" in arg or "-d" in arg:
+            print("-" * s[1])
+            raise e
         exit()
-    print(ast)
-    exit()
+    if "--showast" in arg or "-a" in arg:
+        print(ast)
+    if "--nocompiler" or "-c" in arg:
+        exit()
     compiler = Compiler(ast)
     try:
         code = compiler.main()

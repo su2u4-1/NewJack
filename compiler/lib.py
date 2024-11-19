@@ -81,6 +81,16 @@ Precedence = {
     "&": 1,
     "|": 1,
 }
+docs = {
+    "--debug": "     Enables debug mode, showing detailed stack traces and errors when exceptions occur.",
+    "-d": "          Short form for --debug.",
+    "--showast": "   Displays the Abstract Syntax Tree (AST) generated during parsing.",
+    "-a": "          Short form for --showast.",
+    "--nocompiler": "Stops the program after parsing; skips the compilation step.",
+    "-c": "          Short form for --nocompiler.",
+    "--help": "      Displays this help message explaining all command-line options.",
+    "-h": "          Short form for --help.",
+}
 
 
 class Token:
@@ -134,14 +144,11 @@ class CompileError(Exception):
         self.text = text
         self.kind = kind
 
-    def show(self, source: str) -> str:
+    def show(self, source: str) -> tuple[str, int]:
         if source.endswith("\n"):
             source = source[:-1]
-        return (
-            f'File "{self.file}", line {self.line}, in {self.index}\n{self.kind} Error: {self.text}\n{source}\n'
-            + " " * (self.index - 1)
-            + "^"
-        )
+        info = f'File "{self.file}", line {self.line}, in {self.index}'
+        return info + f"\n{self.kind} Error: {self.text}\n{source}\n" + " " * (self.index - 1) + "^", len(info)
 
 
 class CompileErrorGroup(Exception):
