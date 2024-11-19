@@ -83,13 +83,9 @@ Precedence = {
 }
 docs = {
     "--debug": "Enables debug mode, showing detailed stack traces and errors when exceptions occur.",
-    "-d": "Short form for --debug.",
     "--showast": "Displays the Abstract Syntax Tree (AST) generated during parsing.",
-    "-a": "Short form for --showast.",
     "--compile": "Proceeds to compile the program after parsing, generating .vm output.",
-    "-c": "Short form for --compile.",
     "--help": "Displays the help message for all or specific command-line options.",
-    "-h": "Short form for --help.",
 }
 
 
@@ -143,6 +139,7 @@ class CompileError(Exception):
         self.index = location[1]
         self.text = text
         self.kind = kind
+        self.traceback = ""
 
     def show(self, source: str) -> tuple[str, int]:
         if source.endswith("\n"):

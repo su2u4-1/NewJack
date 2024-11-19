@@ -1,19 +1,17 @@
 from typing import NoReturn
-from inspect import stack
 
 from lib import Token, Tokens, CompileError, Precedence, Operator, built_in_type
 from AST import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], debug_flag: bool = False) -> None:
+    def __init__(self, tokens: list[Token]) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
         self.file = ""
         self.now = tokens[0]
-        self.debug_flag = debug_flag
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
@@ -28,8 +26,6 @@ class Parser:
         if self.now.type == "file":
             self.file = self.now.content
             self.get()
-        if self.debug_flag:
-            print(stack()[1].function, self.now)
 
     def next(self) -> Token:
         if self.index >= self.length:

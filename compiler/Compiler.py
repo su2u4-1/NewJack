@@ -1,9 +1,11 @@
+from traceback import format_stack
+
 from AST import *
 from lib import CompileError, CompileErrorGroup
 
 
 class Compiler:
-    def __init__(self, ast: Root) -> None:
+    def __init__(self, ast: Root, debug_flag: bool = False) -> None:
         self.ast = ast
         self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}, "attriable": {}}
         self.err_list: list[CompileError] = []
@@ -17,11 +19,17 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now: dict[str, str] = {"class_name": "", "subroutine_name": "", "subroutine_type": "", "subroutine_kind": ""}
+        self.now_class: Class = Class((-1, -1), Identifier((-1, -1), "None"), [], [])
+        self.now_subroutine: Subroutine = Subroutine(
+            (-1, -1), Identifier((-1, -1), "None"), "method", Type((-1, -1), Identifier((-1, -1), "None")), [], []
+        )
         self.loop: list[int] = []
+        self.debug_flag = debug_flag
 
     def error(self, text: str, location: tuple[int, int]) -> None:
-        self.err_list.append(CompileError(text, self.ast.file, location, "compiler"))
+        i = CompileError(text, self.ast.file, location, "compiler")
+        i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
+        self.err_list.append(i)
 
     def main(self) -> list[str]:
         code: list[str] = ["label start"]
@@ -33,7 +41,7 @@ class Compiler:
                 # TODO: declare attriable
         for i, c in enumerate(self.ast.class_list):
             for s in c.subroutine_list:
-                pass
+                s
                 # TODO: declare subroutines
                 # if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
                 #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], self.scope["global"][s.return_type.content][1])
@@ -50,7 +58,7 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
-        self.now["class_name"] = class_.name.content
+        self.now_class = class_
         self.scope[class_.name.content] = {}
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
@@ -59,9 +67,7 @@ class Compiler:
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
-        self.now["subroutine_name"] = subroutine.name.content
-        self.now["subroutine_type"] = subroutine.return_type.content
-        self.now["subroutine_kind"] = subroutine.kind
+        self.now_subroutine = subroutine
         self.scope[subroutine.name.content] = {}
         if subroutine.kind == "method":
             self.scope["argument"]["self"] = (type_argument, 0)
@@ -78,7 +84,7 @@ class Compiler:
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         if subroutine.kind == "constructor":
-            self.scope[self.now["class_name"]] = self.scope["attriable"]
+            self.scope[self.now_class.name.content] = self.scope["attriable"]
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -107,7 +113,7 @@ class Compiler:
         for i, j in zip(var.var_list, var.expression_list):
             code.extend(self.compileExpression(j))
             if i.kind == "local":
-                t = self.now["subroutine_name"]
+                t = self.now_subroutine.name.content
             else:
                 t = i.kind
             code.append(f"pop {i.kind} {self.count[i.kind]}")
@@ -116,7 +122,7 @@ class Compiler:
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
                 if i.kind == "local":
-                    t = self.now["subroutine_name"]
+                    t = self.now_subroutine.name.content
                 else:
                     t = i.kind
                 if i.type.outside.content in ("int", "bool", "float", "char"):
@@ -196,7 +202,7 @@ class Compiler:
         self.loop.append(n)
         cn = self.count["local"]
         self.count["local"] += 1
-        self.scope[self.now["subroutine_name"]][for_.for_count_integer.content] = (type_int, cn)
+        self.scope[self.now_subroutine.name.content][for_.for_count_integer.content] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
         code.append(f"push local {cn}")
         code.append("pop address 0")
@@ -285,7 +291,7 @@ class Compiler:
             elif term.content == "self":
                 if "self" in self.scope["argument"]:
                     code.append("push argument 0")
-                elif self.now["subroutine_kind"] == "constructor":
+                elif self.now_subroutine.kind == "constructor":
                     code.append("push term 1")
                     code.append("pop address 0")
                     code.append("push memory 0")
