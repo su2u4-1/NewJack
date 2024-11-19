@@ -15,6 +15,7 @@ if __name__ == "__main__":
         if i.startswith("-"):
             arg.append(i)
     path = path[0]
+
     if "-h" in arg or "--help" in arg:
         if len(arg) == 1:
             for k, v in docs.items():
@@ -24,13 +25,24 @@ if __name__ == "__main__":
                 if i in docs:
                     print(f"{i}  {docs[i]}")
         exit()
+
     try:
         source = read_from_path(path)
     except FileNotFoundError as e:
         print(e)
         exit()
-    tokens = lexer(source)
-    parser = Parser(tokens)
+
+    try:
+        tokens = lexer(source, get_one_path(path, ".nj"))
+    except CompileError as e:
+        s = e.show(source[source.index("//" + e.file) + e.line])
+        print(s[0])
+        if "--debug" in arg or "-d" in arg:
+            print("-" * s[1])
+            raise e
+        exit()
+
+    parser = Parser(tokens, "--debug" in arg or "-d" in arg)
     try:
         ast = parser.main(get_one_path(path, ".nj"))
     except CompileError as e:
@@ -40,15 +52,27 @@ if __name__ == "__main__":
             print("-" * s[1])
             raise e
         exit()
+
     if "--showast" in arg or "-a" in arg:
         print(ast)
+
     if "--compile" in arg or "-c" in arg:
         compiler = Compiler(ast)
         try:
             code = compiler.main()
         except CompileErrorGroup as e:
             for i in e.exceptions:
-                print(i.show(source[source.index("//" + i.file) + i.line]))
+                s = i.show(source[source.index("//" + i.file) + i.line])
+                print(s[0])
+                if "--debug" in arg or "-d" in arg:
+                    print("-" * s[1])
+                    print(i.__traceback__)
+                    print("-" * s[1])
             exit()
-        with open(get_one_path(path, ".vm"), "w+") as f:
-            f.write("\n".join(code))
+
+        try:
+            with open(get_one_path(path, ".vm"), "w+") as f:
+                f.write("\n".join(code))
+        except OSError as e:
+            print(f"Error writing to file: {e}")
+            exit()

@@ -1,7 +1,7 @@
-from lib import Token, Symbol, Number, atoZ, Keyword
+from lib import Token, Symbol, Number, atoZ, Keyword, CompileError
 
 
-def lexer(source: list[str]) -> list[Token]:
+def lexer(source: list[str], file: str) -> list[Token]:
     tokens: list[Token] = []
     content = ""
     state = ""
@@ -14,8 +14,7 @@ def lexer(source: list[str]) -> list[Token]:
             file_start = i
             continue
         if state == "string":
-            print("error: string not closed\nlocation:", location)
-            exit()
+            raise CompileError("string not closed", file, location, "lexer")
         for j, char in enumerate(line):
             p = pp
             pp = char
@@ -124,11 +123,8 @@ def lexer(source: list[str]) -> list[Token]:
                 content = char
                 location = (i - file_start, j + 1)
             elif char not in (" ", "\t", "\n"):
-                print(f"error: illegal symbol '{char}'\nlocation:", (i - file_start, j + 1))
-                exit()
+                raise CompileError(f"illegal symbol '{char}'", file, (i - file_start, j + 1), "lexer")
 
     if state != "":
-        print("error:", state)
-        print("location:", location)
-        exit()
+        raise CompileError(state, file, location, "lexer")
     return tokens

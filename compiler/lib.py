@@ -102,7 +102,7 @@ class Token:
         self.location = location
 
     def __str__(self) -> str:
-        return f"<{self.type}> {self.content} [{self.line}, {self.index}]"
+        return f"<{self.type}> {self.content} ({self.line}, {self.index})"
 
     def __eq__(self, value: object) -> bool:
         if type(value) == Token:
@@ -147,8 +147,13 @@ class CompileError(Exception):
     def show(self, source: str) -> tuple[str, int]:
         if source.endswith("\n"):
             source = source[:-1]
-        info = f'File "{self.file}", line {self.line}, in {self.index}'
-        return info + f"\n{self.kind} Error: {self.text}\n{source}\n" + " " * (self.index - 1) + "^", len(info)
+        info = [
+            f'File "{self.file}", line {self.line}, in {self.index}',
+            f"{self.kind} Error: {self.text}",
+            source,
+            " " * (self.index - 1) + "^",
+        ]
+        return "\n".join(info), max(len(i) for i in info)
 
 
 class CompileErrorGroup(Exception):

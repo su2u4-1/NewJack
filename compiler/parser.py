@@ -6,14 +6,14 @@ from AST import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: list[Token], debug_flag: bool = False) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
         self.file = ""
         self.now = tokens[0]
-        self.debug_flag = False
+        self.debug_flag = debug_flag
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
@@ -212,6 +212,7 @@ class Parser:
 
     def parse_Let(self) -> Let_S:
         location = self.now.location
+        self.get()
         var = self.parse_Variable()
         if self.now != Token("symbol", "="):
             self.error("missing symbol '='")
@@ -222,6 +223,7 @@ class Parser:
 
     def parse_Do(self) -> Do_S:
         location = self.now.location
+        self.get()
         call = self.parse_Call()
         self.get()
         if self.now != Token("symbol", ";"):
@@ -411,8 +413,7 @@ class Parser:
             else:  # self.now == Token("symbol", "!")
                 output = Term(self.now.location, self.parse_Term(), "!")
         elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
-            self.debug_flag = True
-            var = self.parse_Variable(GetVariable(self.now.location, Identifier(self.now.location, self.now.content)))
+            var = self.parse_Variable()
             if self.now == Token("symbol", "("):
                 if self.next() == Token("keyword", "pass"):
                     self.get()
@@ -426,15 +427,13 @@ class Parser:
                 self.get()
             else:
                 output = Term(location, var)
-            self.debug_flag = False
         else:
             self.error(f"unknown Term '{self.now}'")
             output = Term(location, "none")
         return output
 
     def parse_Variable(self, var: Optional[GetVariable] = None) -> GetVariable:
-        if self.now.type == "identifier" or self.now == Token("keyword", "self"):
-            self.get()
+        if var is None and (self.now.type == "identifier" or self.now == Token("keyword", "self")):
             var = GetVariable(self.now.location, Identifier(self.now.location, self.now.content))
         elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, GetVariable):
             if self.now == Token("symbol", "."):

@@ -1,88 +1,26 @@
-Root: path:C:\Users\joey2\code\NewJack\test
-  ├─class: name:Test
-  │ ├─arg_list:
-  │ └─subroutine:
-  │   ├─subroutine: kind:constructor type:Test name:new
-  │   │ ├─arg_list:
-  │   │ │ ├─var: kind:argument type:int name:a
-  │   │ │ └─var: kind:argument type:int name:b
-  │   │ └─statement:
-  │   │   ├─var_S:
-  │   │   │ ├─var_list:
-  │   │   │ │ ├─var: kind:attriable type:int name:a
-  │   │   │ │ └─var: kind:attriable type:int name:b
-  │   │   │ └─expression_list:
-  │   │   │   ├─expression:
-  │   │   │   │   └─term:
-  │   │   │   │       └─getVar:
-  │   │   │   │           └─identifier: a
-  │   │   │   └─expression:
-  │   │   │       └─term:
-  │   │   │           └─getVar:
-  │   │   │               └─identifier: b
-  │   │   ├─do_S:
-  │   │   │   └─call:
-  │   │   │     │ └─getVar:
-  │   │   │     │   │ └─identifier: a
-  │   │   │     │   └─index:
-  │   │   │     │     └─expression:
-  │   │   │     │         └─term:
-  │   │   │     │             └─integer: 2
-  │   │   │     └─arg:
-  │   │   ├─let_S:
-  │   │   │ ├─var:
-  │   │   │ │ └─getVar:
-  │   │   │ │     └─identifier: b
-  │   │   │ └─expression:
-  │   │   │   └─expression:
-  │   │   │       └─term:
-  │   │   │           └─integer: 2
-  │   │   └─return_S:
-  │   │       └─expression:
-  │   │           └─term:
-  │   │               └─getVar:
-  │   │                   └─keyword: self
-  │   └─subroutine: kind:method type:void name:test0
-  │     ├─arg_list:
-  │     └─statement:
-  │       └─return_S
-  └─class: name:Test2
-    ├─arg_list:
-    └─subroutine:
-      ├─subroutine: kind:constructor type:Test2 name:new
-      │ ├─arg_list:
-      │ └─statement:
-      │   └─var_S:
-      │     ├─var_list:
-      │     │ └─var: kind:attriable type:int name:a
-      │     └─expression_list:
-      └─subroutine: kind:function type:void name:test1
-        ├─arg_list:
-        └─statement:
-          ├─var_S:
-          │ ├─var_list:
-          │ │ └─var: kind:local type:int name:b
-          │ └─expression_list:
-          └─let_S:
-            ├─var:
-            │ └─getVar:
-            │     └─identifier: b
-            └─expression:
-              └─expression:
-                  ├─term:
-                  │   └─integer: 1
-                  ├─term:
-                  │   └─integer: 2
-                  ├─operator: *
-                  ├─term:
-                  │   └─integer: 3
-                  ├─operator: +
-                  ├─term:
-                  │   └─integer: 5
-                  ├─operator: -
-                  │ term:
-                  │   └─integer: 8
-                  ├─term:
-                  │   └─integer: 2
-                  ├─operator: /
-                  └─operator: +
+file: D:\NewJack\test.nj
+class(Test)
+    attr:
+        a: int
+        b: int
+    subroutine:
+        constructor new(argument a: int, argument b: int) -> Test
+            var_s:
+                local c: Test2 = Test2[None]()
+            do c[None]()
+            let_s:
+                self[None] = 2
+            return self
+        method test0() -> void
+            return None
+class(Test2)
+    attr:
+        a: int
+    subroutine:
+        constructor new() -> Test2
+            return self
+        function test1() -> void
+            var_s:
+            let_s:
+                b = 1 2 * 3 + 5 - 8 2 / +
+        method ff() -> void
