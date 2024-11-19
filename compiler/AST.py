@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Sequence, Union
+from typing import Literal, Optional, Sequence, Union, Iterable
 import os.path
 
 
@@ -6,6 +6,9 @@ class Identifier:
     def __init__(self, location: tuple[int, int], content: str) -> None:
         self.location = location
         self.content = content
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return self.content
@@ -16,6 +19,9 @@ class Integer:
         self.location = location
         self.content = int(content)
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         return str(self.content)
 
@@ -24,6 +30,9 @@ class Float:
     def __init__(self, location: tuple[int, int], content: str) -> None:
         self.location = location
         self.a, self.b = content.split(".")
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return f"{self.a}.{self.b}"
@@ -34,6 +43,9 @@ class String:
         self.location = location
         self.content = content
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         return f'"{self.content}"'
 
@@ -42,6 +54,9 @@ class Char:
     def __init__(self, location: tuple[int, int], content: str) -> None:
         self.location = location
         self.content = content[0]
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return f"'{self.content}'"
@@ -54,6 +69,9 @@ class Op:
         self.location = location
         self.content = content
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         return self.content
 
@@ -63,6 +81,9 @@ class Type:
         self.location = location
         self.outside = outside
         self.inside = inside
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         if self.inside is None:
@@ -82,6 +103,9 @@ class Term:
         self.content = content
         self.neg = neg
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         if self.neg is None:
             return str(self.content)
@@ -94,6 +118,9 @@ class Expression:
         """content: Stores Op and Term sequences converted to reverse Polish notation"""
         self.location = location
         self.content = content
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return " ".join(str(i) for i in self.content)
@@ -117,6 +144,9 @@ class GetVariable:
             elif attr is not None:
                 self.attr = attr
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         if self.attr is None and self.index is None:
             return str(self.var)
@@ -132,6 +162,9 @@ class Call:
         self.var = var
         self.expression_list = expression_list
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         return f"{self.var}({(str(i) for i in self.expression_list)})"
 
@@ -145,6 +178,9 @@ class Variable:
         self.kind: Literal["global", "argument", "attriable", "local"] = kind
         self.type = type
 
+    def show(self) -> list[str]:
+        return [str(self)]
+
     def __str__(self) -> str:
         return f"{self.kind} {self.name}: {self.type}"
 
@@ -155,11 +191,11 @@ class Var_S:
         self.var_list = var_list
         self.expression_list = expression_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = ["var_s:"]
         for v, e in zip(self.var_list, self.expression_list):
-            t.append(f"{v} = {e}")
-        return "\n    ".join(t)
+            t.append(f"    {v} = {e}")
+        return t
 
 
 class Do_S:
@@ -167,8 +203,8 @@ class Do_S:
         self.location = location
         self.call = call
 
-    def __str__(self) -> str:
-        return str(self.call)
+    def show(self) -> list[str]:
+        return self.call.show()
 
 
 class Let_S:
@@ -177,14 +213,17 @@ class Let_S:
         self.var = var
         self.expression = expression
 
-    def __str__(self) -> str:
-        return f"let_s:\n    {self.var} = {self.expression}"
+    def show(self) -> list[str]:
+        return ["let_s:", f"    {self.var} = {self.expression}"]
 
 
 class Return_S:
     def __init__(self, location: tuple[int, int], expression: Optional[Expression] = None) -> None:
         self.location = location
         self.expression = expression
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return f"return {self.expression}"
@@ -194,6 +233,9 @@ class Break_S:
     def __init__(self, location: tuple[int, int], n: Integer) -> None:
         self.location = location
         self.n = n
+
+    def show(self) -> list[str]:
+        return [str(self)]
 
     def __str__(self) -> str:
         return f"break {self.n}"
@@ -216,15 +258,15 @@ class For_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = [f"for({self.for_count_integer}, {self.for_range[0]}; {self.for_range[1]}; {self.for_range[2]})"]
         for s in self.statement_list:
-            t.append(f"    {s}")
+            t.extend(ident(s.show()))
         if self.else_:
             t.append("for-else")
             for s in self.else_statement_list:
-                t.append(f"    {s}")
-        return "\n".join(t)
+                t.extend(ident(s.show()))
+        return t
 
 
 class If_S:
@@ -248,7 +290,8 @@ class If_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
+        # 這裡
         t = [f"if({self.if_conditional})"]
         for s in self.if_statement_list:
             t.append(f"    {s}")
@@ -260,7 +303,7 @@ class If_S:
             t.append("else")
             for s in self.else_statement_list:
                 t.append(f"    {s}")
-        return "\n".join(t)
+        return t
 
 
 class While_S:
@@ -278,7 +321,7 @@ class While_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = [f"while({self.conditional})"]
         for s in self.statement_list:
             t.append(f"    {s}")
@@ -286,7 +329,7 @@ class While_S:
             t.append("while-else")
             for s in self.else_statement_list:
                 t.append(f"    {s}")
-        return "\n".join(t)
+        return t
 
 
 Statement = Var_S | Do_S | Let_S | Return_S | Break_S | For_S | If_S | While_S
@@ -309,11 +352,11 @@ class Subroutine:
         self.statement_list = statement_list
         self.argument_list = argument_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = [f"{self.kind} {self.name}({(str(i) for i in self.argument_list)}) -> {self.return_type}"]
         for s in self.statement_list:
             t.append(f"    {s}")
-        return "\t".join(t)
+        return t
 
 
 class Class:
@@ -325,7 +368,7 @@ class Class:
         self.attr_list = attr_list
         self.subroutine_list = subroutine_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = [f"class({self.name})"]
         t.append("attr:")
         for a in self.attr_list:
@@ -333,7 +376,7 @@ class Class:
         t.append("subroutine:")
         for s in self.subroutine_list:
             t.append(f"    {s}")
-        return "\n".join(t)
+        return t
 
 
 class Root:
@@ -343,11 +386,15 @@ class Root:
         self.file = file
         self.class_list = class_list
 
-    def __str__(self) -> str:
+    def show(self) -> list[str]:
         t = [f"file: {self.file}"]
         for c in self.class_list:
-            t.append(f"    {c}")
-        return "\n".join(t)
+            t.extend(c.show())
+        return t
+
+
+def ident(content: Iterable[str]) -> Iterable[str]:
+    return ("    " + i for i in content)
 
 
 type_class = Type((-1, -1), Identifier((-1, -1), "class"))
