@@ -1,4 +1,5 @@
 from typing import NoReturn
+from inspect import stack
 
 from lib import Token, Tokens, CompileError, Precedence, Operator, built_in_type
 from AST import *
@@ -12,6 +13,7 @@ class Parser:
         self.length = len(tokens)
         self.file = ""
         self.now = tokens[0]
+        self.debug_flag = False
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
@@ -26,6 +28,8 @@ class Parser:
         if self.now.type == "file":
             self.file = self.now.content
             self.get()
+        if self.debug_flag:
+            print(stack()[1].function, self.now)
 
     def next(self) -> Token:
         if self.index >= self.length:
@@ -407,6 +411,7 @@ class Parser:
             else:  # self.now == Token("symbol", "!")
                 output = Term(self.now.location, self.parse_Term(), "!")
         elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
+            self.debug_flag = True
             var = self.parse_Variable(GetVariable(self.now.location, Identifier(self.now.location, self.now.content)))
             if self.now == Token("symbol", "("):
                 if self.next() == Token("keyword", "pass"):
@@ -421,16 +426,17 @@ class Parser:
                 self.get()
             else:
                 output = Term(location, var)
+            self.debug_flag = False
         else:
             self.error(f"unknown Term '{self.now}'")
             output = Term(location, "none")
         return output
 
-    def parse_Variable(self, var: GetVariable = GetVariable((-1, -1), Identifier((-1, -1), "none"))) -> GetVariable:
-        if self.next().type == "identifier" or self.next() == Token("keyword", "self"):
+    def parse_Variable(self, var: Optional[GetVariable] = None) -> GetVariable:
+        if self.now.type == "identifier" or self.now == Token("keyword", "self"):
             self.get()
             var = GetVariable(self.now.location, Identifier(self.now.location, self.now.content))
-        elif self.now == Tokens("symbol", (".", "[")):
+        elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, GetVariable):
             if self.now == Token("symbol", "."):
                 self.get()
                 if self.now.type == "identifier":
@@ -441,6 +447,8 @@ class Parser:
                 var.index = self.parse_Expression()
                 if self.now != Token("symbol", "]"):
                     self.error("missing symbol ']'")
+        else:
+            self.error(f"must be identifier or keyword 'self', not {self.now.type} '{self.now.content}'")
         self.get()
         if self.now == Tokens("symbol", (".", "[")):
             var = self.parse_Variable(var)

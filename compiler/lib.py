@@ -82,14 +82,14 @@ Precedence = {
     "|": 1,
 }
 docs = {
-    "--debug": "     Enables debug mode, showing detailed stack traces and errors when exceptions occur.",
-    "-d": "          Short form for --debug.",
-    "--showast": "   Displays the Abstract Syntax Tree (AST) generated during parsing.",
-    "-a": "          Short form for --showast.",
-    "--nocompiler": "Stops the program after parsing; skips the compilation step.",
-    "-c": "          Short form for --nocompiler.",
-    "--help": "      Displays this help message explaining all command-line options.",
-    "-h": "          Short form for --help.",
+    "--debug": "Enables debug mode, showing detailed stack traces and errors when exceptions occur.",
+    "-d": "Short form for --debug.",
+    "--showast": "Displays the Abstract Syntax Tree (AST) generated during parsing.",
+    "-a": "Short form for --showast.",
+    "--compile": "Proceeds to compile the program after parsing, generating .vm output.",
+    "-c": "Short form for --compile.",
+    "--help": "Displays the help message for all or specific command-line options.",
+    "-h": "Short form for --help.",
 }
 
 

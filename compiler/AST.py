@@ -166,7 +166,7 @@ class Call:
         return [str(self)]
 
     def __str__(self) -> str:
-        return f"{self.var}({(str(i) for i in self.expression_list)})"
+        return f"{self.var}({", ".join(str(i) for i in self.expression_list)})"
 
 
 class Variable:
@@ -197,6 +197,9 @@ class Var_S:
             t.append(f"    {v} = {e}")
         return t
 
+    def __str__(self) -> str:
+        return "\n".join(self.show())
+
 
 class Do_S:
     def __init__(self, location: tuple[int, int], call: Call) -> None:
@@ -204,7 +207,10 @@ class Do_S:
         self.call = call
 
     def show(self) -> list[str]:
-        return self.call.show()
+        return ["do " + self.call.show()[0]]
+
+    def __str__(self) -> str:
+        return self.show()[0]
 
 
 class Let_S:
@@ -215,6 +221,9 @@ class Let_S:
 
     def show(self) -> list[str]:
         return ["let_s:", f"    {self.var} = {self.expression}"]
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 class Return_S:
@@ -268,6 +277,9 @@ class For_S:
                 t.extend(ident(s.show()))
         return t
 
+    def __str__(self) -> str:
+        return "\n".join(self.show())
+
 
 class If_S:
     def __init__(
@@ -291,19 +303,21 @@ class If_S:
         self.else_statement_list = else_statement_list
 
     def show(self) -> list[str]:
-        # 這裡
         t = [f"if({self.if_conditional})"]
         for s in self.if_statement_list:
-            t.append(f"    {s}")
+            t.extend(ident(s.show()))
         for i in range(self.elif_n):
             t.append(f"elif({self.elif_conditional_list[i]})")
             for s in self.elif_statement_list[i]:
-                t.append(f"    {s}")
+                t.extend(ident(s.show()))
         if self.else_:
             t.append("else")
             for s in self.else_statement_list:
-                t.append(f"    {s}")
+                t.extend(ident(s.show()))
         return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 class While_S:
@@ -324,12 +338,15 @@ class While_S:
     def show(self) -> list[str]:
         t = [f"while({self.conditional})"]
         for s in self.statement_list:
-            t.append(f"    {s}")
+            t.extend(ident(s.show()))
         if self.else_:
             t.append("while-else")
             for s in self.else_statement_list:
-                t.append(f"    {s}")
+                t.extend(ident(s.show()))
         return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 Statement = Var_S | Do_S | Let_S | Return_S | Break_S | For_S | If_S | While_S
@@ -353,10 +370,13 @@ class Subroutine:
         self.argument_list = argument_list
 
     def show(self) -> list[str]:
-        t = [f"{self.kind} {self.name}({(str(i) for i in self.argument_list)}) -> {self.return_type}"]
+        t = [f"{self.kind} {self.name}({", ".join(str(i) for i in self.argument_list)}) -> {self.return_type}"]
         for s in self.statement_list:
-            t.append(f"    {s}")
+            t.extend(ident(s.show()))
         return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 class Class:
@@ -370,13 +390,16 @@ class Class:
 
     def show(self) -> list[str]:
         t = [f"class({self.name})"]
-        t.append("attr:")
+        t.append("    attr:")
         for a in self.attr_list:
-            t.append(f"    {a[0]}: {a[1]}")
-        t.append("subroutine:")
+            t.append(f"        {a[0]}: {a[1]}")
+        t.append("    subroutine:")
         for s in self.subroutine_list:
-            t.append(f"    {s}")
+            t.extend(ident(ident(s.show())))
         return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 class Root:
@@ -391,6 +414,9 @@ class Root:
         for c in self.class_list:
             t.extend(c.show())
         return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

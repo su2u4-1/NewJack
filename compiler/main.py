@@ -3,6 +3,8 @@ from lexer import lexer
 from parser import Parser
 from Compiler import Compiler
 
+# 修改建議: https://chatgpt.com/share/673c4288-c0bc-8013-83df-a25c86eceac9
+
 if __name__ == "__main__":
     path = input("file(s) path (input 'exit' cancel): ")
     if path == "exit":
@@ -40,14 +42,13 @@ if __name__ == "__main__":
         exit()
     if "--showast" in arg or "-a" in arg:
         print(ast)
-    if "--nocompiler" or "-c" in arg:
-        exit()
-    compiler = Compiler(ast)
-    try:
-        code = compiler.main()
-    except CompileErrorGroup as e:
-        for i in e.exceptions:
-            print(i.show(source[source.index("//" + i.file) + i.line]))
-        exit()
-    with open(get_one_path(path, ".vm"), "w+") as f:
-        f.write("\n".join(code))
+    if "--compile" in arg or "-c" in arg:
+        compiler = Compiler(ast)
+        try:
+            code = compiler.main()
+        except CompileErrorGroup as e:
+            for i in e.exceptions:
+                print(i.show(source[source.index("//" + i.file) + i.line]))
+            exit()
+        with open(get_one_path(path, ".vm"), "w+") as f:
+            f.write("\n".join(code))
