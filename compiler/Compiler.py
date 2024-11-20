@@ -8,7 +8,9 @@ from constant import *
 class Compiler:
     def __init__(self, ast: Root, debug_flag: bool = False) -> None:
         self.ast = ast
-        self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}, "attriable": {}}
+        self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}}
+        self.global_: dict[str, tuple[Type, int]] = {}
+        self.attribale: dict[str, dict[str, tuple[Type, int]]] = {}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
             "global": 0,
@@ -35,22 +37,15 @@ class Compiler:
     def main(self) -> list[str]:
         code: list[str] = ["label start"]
         for i, c in enumerate(self.ast.class_list):
-            self.scope[c.name.content] = {}
-            self.scope["global"][c.name.content] = (type_class, i)
+            self.count["attriable"] = 0
+            self.attribale[c.name.content] = {}
+            self.global_[c.name.content] = (type_class, i)
             for a in c.attr_list:
-                pass
-                # TODO: declare attriable
-        for i, c in enumerate(self.ast.class_list):
+                self.attribale[c.name.content][a[0]] = (a[1], self.count["attriable"])
+                self.count["attriable"] += 1
             for s in c.subroutine_list:
-                s
-                # TODO: declare subroutines
-                # if s.return_type.content in self.scope["global"] and self.scope["global"][s.return_type.content][0] == type_class:
-                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], self.scope["global"][s.return_type.content][1])
-                # elif s.return_type.content in ("int", "char", "float", "char", "list", "string", "bool", "void"):
-                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -1)
-                # else:
-                #     self.scope[c.name.content][s.name.content] = (type_subroutine[s.kind], -2)
-                #     self.error(f"unknown type {s.return_type.content}", s.location)
+                self.global_[f"{c.name.content}.{s.name.content}"] = (type_subroutine[s.kind], self.count["subroutine"])
+                self.count["subroutine"] += 1
         for i in self.ast.class_list:
             code.extend(self.compileClass(i))
         if len(self.err_list) > 0:
@@ -230,10 +225,10 @@ class Compiler:
     def compileReturn_S(self, return_: Return_S) -> list[str]:
         code: list[str] = []
         if return_.expression is None:
-            if self.now["subroutine_type"] == "void":
+            if self.now_subroutine.return_type == type_void:
                 code.append("push constant 0")
             else:
-                self.error(f"muse be return {self.now["subroutine_type"]}", return_.location)
+                self.error(f"muse be return {self.now_subroutine.return_type}", return_.location)
         else:
             code.extend(self.compileExpression(return_.expression))
         code.append("return")
@@ -359,22 +354,18 @@ class Compiler:
 
     def compileGetVarInfo(self, var: GetVariable) -> dict[str, str]:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        # TODO: get variable info
-        # if isinstance(var.var, Identifier):
-        #     for i in (self.now["subroutine_name"], "argument", "attriable", "global"):
-        #         if var.var.content in self.scope[i]:
-        #             t = "local" if i == self.now["subroutine_name"] else i
-        #             var_info["kind"] = t
-        #             var_info["name"] = var.var.content
-        #             var_info["type"] = self.scope[i][var.var.content][0]
-        #             var_info["code"] = f"push {t} {self.scope[i][var.var.content][1]}"
-        #             break
-        #     else:
-        #         self.error(f"unknown identifier {var.var.content}", var.var.location)
-        # else:
-        #     var_info = self.compileGetVariable(var.var)
-        # if var.index is not None:
-        #     var_info["code"] += "\n" + "\n".join(self.compileExpression(var.index)) + "\nadd"
-        # elif var.attr is not None:
-        #     var_info["code"] += f"\n{self.scope[var_info["type"]][var.attr.content][1]}\nadd"
+        if isinstance(var.var, Identifier):
+            var_info["name"] += var.var.content
+            info = self.findVar(var.var.content)
+            var_info["type"] = var_type
+        else:
+            var_info = self.compileGetVarInfo(var.var)
+        if var.attr is not None:
+            var_info["name"] += "." + var.attr.content
+        if var.index is not None:
+            var_info["name"] += "[]"
         return var_info
+
+    def findVar(self, var: str) -> tuple[str, Type, int]:
+        pass
+        # TODO: search variable
