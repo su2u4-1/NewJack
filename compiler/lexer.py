@@ -1,4 +1,5 @@
-from lib import Token, Symbol, Number, atoZ, Keyword, CompileError
+from lib import Token, CompileError
+from constant import *
 
 
 def lexer(source: list[str], file: str) -> list[Token]:

@@ -1,8 +1,10 @@
 import argparse
-from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup, docs
+
+from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
 from lexer import lexer
 from parser import Parser
 from Compiler import Compiler
+from constant import *
 
 
 def compile_file(path: str, args: argparse.Namespace) -> None:

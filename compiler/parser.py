@@ -1,7 +1,8 @@
 from typing import NoReturn
 
-from lib import Token, Tokens, CompileError, Precedence, Operator, built_in_type
+from lib import Token, Tokens, CompileError
 from AST import *
+from constant import *
 
 
 class Parser:

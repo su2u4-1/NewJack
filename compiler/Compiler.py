@@ -2,6 +2,7 @@ from traceback import format_stack
 
 from AST import *
 from lib import CompileError, CompileErrorGroup
+from constant import *
 
 
 class Compiler:

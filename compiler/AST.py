@@ -91,6 +91,12 @@ class Type:
         else:
             return f"{self.outside}[{self.inside}]"
 
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Type):
+            if self.outside == value.outside and self.inside == value.inside:
+                return True
+        return False
+
 
 class Term:
     def __init__(
@@ -421,13 +427,3 @@ class Root:
 
 def ident(content: Iterable[str]) -> Iterable[str]:
     return ("    " + i for i in content)
-
-
-type_class = Type((-1, -1), Identifier((-1, -1), "class"))
-type_subroutine = {
-    "constructor": Type((-1, -1), Identifier((-1, -1), "constructor")),
-    "function": Type((-1, -1), Identifier((-1, -1), "function")),
-    "method": Type((-1, -1), Identifier((-1, -1), "method")),
-}
-type_int = Type((-1, -1), Identifier((-1, -1), "int"))
-type_argument = Type((-1, -1), Identifier((-1, -1), "argument"))
