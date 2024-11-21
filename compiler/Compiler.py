@@ -1,4 +1,5 @@
 from traceback import format_stack
+from typing import NoReturn
 
 from AST import *
 from lib import CompileError, CompileErrorGroup
@@ -22,14 +23,13 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now_class: Class = Class((-1, -1), Identifier((-1, -1), "None"), [], [])
-        self.now_subroutine: Subroutine = Subroutine(
-            (-1, -1), Identifier((-1, -1), "None"), "method", Type((-1, -1), Identifier((-1, -1), "None")), [], []
-        )
+        none = Identifier((-1, -1), "None")
+        self.now_class: Class = Class((-1, -1), none, [], [])
+        self.now_subroutine: Subroutine = Subroutine((-1, -1), none, "method", Type((-1, -1), none), [], [])
         self.loop: list[int] = []
         self.debug_flag = debug_flag
 
-    def error(self, text: str, location: tuple[int, int]) -> None:
+    def error(self, text: str, location: tuple[int, int]) -> NoReturn:
         i = CompileError(text, self.ast.file, location, "compiler")
         i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
         self.err_list.append(i)
@@ -356,8 +356,8 @@ class Compiler:
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
         if isinstance(var.var, Identifier):
             var_info["name"] += var.var.content
-            info = self.findVar(var.var.content)
-            var_info["type"] = var_type
+            info = self.findVar(var.var.content, var.var.location)
+            var_info["type"] = str(info[1][0])
         else:
             var_info = self.compileGetVarInfo(var.var)
         if var.attr is not None:
@@ -366,6 +366,15 @@ class Compiler:
             var_info["name"] += "[]"
         return var_info
 
-    def findVar(self, var: str) -> tuple[str, Type, int]:
-        pass
+    def findVar(self, var: str, location: tuple[int, int]) -> tuple[str, tuple[Type, int]]:
         # TODO: search variable
+        if var in self.scope["local"]:
+            return "local", self.scope["local"][var]
+        elif var in self.scope["argument"]:
+            return "argument", self.scope["argument"][var]
+        elif var in self.attribale[self.now_class.name.content]:
+            return "attriable", self.attribale[self.now_class.name.content][var]
+        elif var in self.global_:
+            return "global", self.global_[var]
+        else:
+            self.error(f"variable {var} not found", location)
