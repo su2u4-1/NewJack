@@ -1,5 +1,4 @@
 from traceback import format_stack
-from typing import NoReturn
 
 from AST import *
 from lib import CompileError, CompileErrorGroup
@@ -29,7 +28,7 @@ class Compiler:
         self.loop: list[int] = []
         self.debug_flag = debug_flag
 
-    def error(self, text: str, location: tuple[int, int]) -> NoReturn:
+    def error(self, text: str, location: tuple[int, int]) -> None:
         i = CompileError(text, self.ast.file, location, "compiler")
         i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
         self.err_list.append(i)
@@ -378,3 +377,4 @@ class Compiler:
             return "global", self.global_[var]
         else:
             self.error(f"variable {var} not found", location)
+            return "false", (type_void, -1)
