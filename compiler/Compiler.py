@@ -351,30 +351,12 @@ class Compiler:
         # TODO: get variable address
         return code
 
-    def compileGetVarInfo(self, var: GetVariable) -> dict[str, str]:
+    def compileGetVarInfo(self, var: GetVariable, pre_info: Optional[dict[str, str]] = None) -> dict[str, str]:
+        # TODO
         var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        if isinstance(var.var, Identifier):
-            var_info["name"] += var.var.content
-            info = self.findVar(var.var.content, var.var.location)
-            var_info["type"] = str(info[1][0])
-        else:
-            var_info = self.compileGetVarInfo(var.var)
-        if var.attr is not None:
-            var_info["name"] += "." + var.attr.content
-        if var.index is not None:
-            var_info["name"] += "[]"
+        if pre_info is not None:
+            var_info.update(pre_info)
+        if isinstance(var.var, Identifier) and var.var.content == "self":
+            if var.attr is not None:
+                var_info = self.compileGetVarInfo(var.attr)
         return var_info
-
-    def findVar(self, var: str, location: tuple[int, int]) -> tuple[str, tuple[Type, int]]:
-        # TODO: search variable
-        if var in self.scope["local"]:
-            return "local", self.scope["local"][var]
-        elif var in self.scope["argument"]:
-            return "argument", self.scope["argument"][var]
-        elif var in self.attribale[self.now_class.name.content]:
-            return "attriable", self.attribale[self.now_class.name.content][var]
-        elif var in self.global_:
-            return "global", self.global_[var]
-        else:
-            self.error(f"variable {var} not found", location)
-            return "false", (type_void, -1)
