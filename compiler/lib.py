@@ -1,7 +1,8 @@
 import os.path
-from typing import Sequence
+from typing import Sequence, Literal
 
-from constant import TokenType
+from constant import TokenType, type_void
+from AST import Type
 
 
 class Token:
@@ -96,3 +97,10 @@ def read_from_path(path: str) -> list[str]:
 def get_one_path(path: str, extension_name: str) -> str:
     dir_path, file_name = os.path.split(os.path.abspath(path))
     return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
+
+
+class Info:
+    def __init__(self, kind: Literal["global", "attribute", "argument", "local", "void"] = "void", type: Type = type_void):
+        self.kind = kind
+        self.type = type
+        self.code: list[str] = []

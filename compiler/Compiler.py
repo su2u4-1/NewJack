@@ -1,21 +1,22 @@
 from traceback import format_stack
 
 from AST import *
-from lib import CompileError, CompileErrorGroup
+from lib import CompileError, CompileErrorGroup, Info
 from constant import *
 
 
 class Compiler:
     def __init__(self, ast: Root, debug_flag: bool = False) -> None:
         self.ast = ast
-        self.scope: dict[str, dict[str, tuple[Type, int]]] = {"global": {}, "argument": {}}
         self.global_: dict[str, tuple[Type, int]] = {}
-        self.attribale: dict[str, dict[str, tuple[Type, int]]] = {}
+        self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
+        self.argument: dict[str, tuple[Type, int]] = {}
+        self.local: dict[str, tuple[Type, int]] = {}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
             "global": 0,
             "argument": 0,
-            "attriable": 0,
+            "attribute": 0,
             "local": 0,
             "subroutine": 0,
             "class": 0,
@@ -36,12 +37,12 @@ class Compiler:
     def main(self) -> list[str]:
         code: list[str] = ["label start"]
         for i, c in enumerate(self.ast.class_list):
-            self.count["attriable"] = 0
-            self.attribale[c.name.content] = {}
+            self.count["attribute"] = 0
+            self.attribute[c.name.content] = {}
             self.global_[c.name.content] = (type_class, i)
             for a in c.attr_list:
-                self.attribale[c.name.content][a[0]] = (a[1], self.count["attriable"])
-                self.count["attriable"] += 1
+                self.attribute[c.name.content][a[0]] = (a[1], self.count["attribute"])
+                self.count["attribute"] += 1
             for s in c.subroutine_list:
                 self.global_[f"{c.name.content}.{s.name.content}"] = (type_subroutine[s.kind], self.count["subroutine"])
                 self.count["subroutine"] += 1
@@ -54,7 +55,6 @@ class Compiler:
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
         self.now_class = class_
-        self.scope[class_.name.content] = {}
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
         code.insert(1, f"alloc heap {self.count["global"]}")
@@ -63,9 +63,9 @@ class Compiler:
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
         self.now_subroutine = subroutine
-        self.scope[subroutine.name.content] = {}
+        self.local = {}
         if subroutine.kind == "method":
-            self.scope["argument"]["self"] = (type_argument, 0)
+            self.argument["self"] = (type_argument, 0)
             self.count["argument"] += 1
         elif subroutine.kind == "constructor":
             n = 0
@@ -79,7 +79,7 @@ class Compiler:
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         if subroutine.kind == "constructor":
-            self.scope[self.now_class.name.content] = self.scope["attriable"]
+            code.extend(f"alloc {len(self.attribute[self.now_class.name.content])}")
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -106,26 +106,29 @@ class Compiler:
         if len(var.var_list) < len(var.expression_list):
             self.error("'value' redundant 'variable'", var.location)
         for i, j in zip(var.var_list, var.expression_list):
-            code.extend(self.compileExpression(j))
-            if i.kind == "local":
-                t = self.now_subroutine.name.content
+            if i.kind == "global":
+                self.global_[i.name.content] = (i.type, self.count[i.kind])
+            elif i.kind == "attribute":
+                self.attribute[self.now_class.name.content][i.name.content] = (i.type, self.count[i.kind])
+            elif i.kind == "argument":
+                self.argument[i.name.content] = (i.type, self.count[i.kind])
             else:
-                t = i.kind
+                self.local[i.name.content] = (i.type, self.count[i.kind])
+            code.extend(self.compileExpression(j))
             code.append(f"pop {i.kind} {self.count[i.kind]}")
-            self.scope[t][i.name.content] = (i.type, self.count[i.kind])
             self.count[i.kind] += 1
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
-                if i.kind == "local":
-                    t = self.now_subroutine.name.content
+                if i.kind == "global":
+                    self.global_[i.name.content] = (i.type, self.count[i.kind])
+                elif i.kind == "attribute":
+                    self.attribute[self.now_class.name.content][i.name.content] = (i.type, self.count[i.kind])
+                elif i.kind == "argument":
+                    self.argument[i.name.content] = (i.type, self.count[i.kind])
                 else:
-                    t = i.kind
-                if i.type.outside.content in ("int", "bool", "float", "char"):
-                    code.append("push constant 0")
-                else:
-                    code.append(f"call {i.type.outside.content}.init")
+                    self.local[i.name.content] = (i.type, self.count[i.kind])
+                code.append("push constant 0")
                 code.append(f"pop {i.kind} {self.count[i.kind]}")
-                self.scope[t][i.name.content] = (i.type, self.count[i.kind])
                 self.count[i.kind] += 1
         return code
 
@@ -197,7 +200,7 @@ class Compiler:
         self.loop.append(n)
         cn = self.count["local"]
         self.count["local"] += 1
-        self.scope[self.now_subroutine.name.content][for_.for_count_integer.content] = (type_int, cn)
+        self.local[for_.for_count_integer.content] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
         code.append(f"push local {cn}")
         code.append("pop address 0")
@@ -284,7 +287,7 @@ class Compiler:
             elif term.content == "true":
                 code.append("push constant 1")
             elif term.content == "self":
-                if "self" in self.scope["argument"]:
+                if "self" in self.argument:
                     code.append("push argument 0")
                 elif self.now_subroutine.kind == "constructor":
                     code.append("push term 1")
@@ -336,7 +339,8 @@ class Compiler:
 
     def compileCall(self, call: Call) -> list[str]:
         code: list[str] = []
-        var_info = self.compileGetVarInfo(call.var)
+        # TODO
+        # var_info: dict[str, str] = {}
         if var_info["kind"] == "method":
             code.append("\n".join(var_info["code"].split("\n")[:-2]))
         elif var_info["kind"] != "function" and var_info["kind"] != "constructor":
@@ -351,12 +355,38 @@ class Compiler:
         # TODO: get variable address
         return code
 
-    def compileGetVarInfo(self, var: GetVariable, pre_info: Optional[dict[str, str]] = None) -> dict[str, str]:
-        # TODO
-        var_info = {"kind": "", "type": "", "name": "", "code": ""}
-        if pre_info is not None:
-            var_info.update(pre_info)
-        if isinstance(var.var, Identifier) and var.var.content == "self":
-            if var.attr is not None:
-                var_info = self.compileGetVarInfo(var.attr)
+    def GetVarInfo(self, var: GetVariable) -> Info:
+        # TODO: add code
+        if isinstance(var.var, Identifier):
+            var_info = Info()
+            if var.var.content == "self":
+                var_info.type = self.argument["self"][0]
+                var_info.kind = "argument"
+            elif var.var.content in self.local:
+                var_info.type = self.local[var.var.content][0]
+                var_info.kind = "local"
+            elif var.var.content in self.argument:
+                var_info.type = self.argument[var.var.content][0]
+                var_info.kind = "argument"
+            elif var.var.content in self.global_:
+                var_info.type = self.global_[var.var.content][0]
+                var_info.kind = "global"
+            elif self.now_class.name.content + "." + var.var.content in self.global_:
+                var_info.type = self.global_[var.var.content][0]
+                var_info.kind = var_info.type.outside.content
+            else:
+                self.error(f"variable {var} not found", var.location)
+        else:
+            var_info = self.GetVarInfo(var.var)
+        if var.attr is not None:
+            if var.attr.content in self.attribute[var_info.type.outside.content]:
+                var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
+                var_info.kind = "attribute"
+            else:
+                self.error(f"attribute {var.attr.content} not found in {var_info.type.outside.content}", var.attr.location)
+        if var.index is not None:
+            if var_info.type.inside is not None:
+                var_info.type = var_info.type.inside
+            else:
+                self.error(f"variable {var} is not a container", var.index.location)
         return var_info

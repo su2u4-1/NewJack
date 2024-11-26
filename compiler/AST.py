@@ -177,11 +177,11 @@ class Call:
 
 class Variable:
     def __init__(
-        self, location: tuple[int, int], name: Identifier, kind: Literal["global", "argument", "attriable", "local"], type: Type
+        self, location: tuple[int, int], name: Identifier, kind: Literal["global", "argument", "attribute", "local"], type: Type
     ) -> None:
         self.location = location
         self.name = name
-        self.kind: Literal["global", "argument", "attriable", "local"] = kind
+        self.kind: Literal["global", "argument", "attribute", "local"] = kind
         self.type = type
 
     def show(self) -> list[str]:
