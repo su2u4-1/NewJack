@@ -10,6 +10,9 @@ class Identifier:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return self.content
 
@@ -21,6 +24,9 @@ class Integer:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return str(self.content)
@@ -34,6 +40,9 @@ class Float:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return f"{self.a}.{self.b}"
 
@@ -46,6 +55,9 @@ class String:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return f'"{self.content}"'
 
@@ -57,6 +69,9 @@ class Char:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"'{self.content}'"
@@ -72,6 +87,9 @@ class Op:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return self.content
 
@@ -84,6 +102,9 @@ class Type:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         if self.inside is None:
@@ -112,6 +133,9 @@ class Term:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         if self.neg is None:
             return str(self.content)
@@ -127,6 +151,9 @@ class Expression:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return " ".join(str(i) for i in self.content)
@@ -153,13 +180,16 @@ class GetVariable:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         if self.attr is None and self.index is None:
             return str(self.var)
         elif self.attr is None:
-            return f"{self.var}.{self.attr}"
-        else:
             return f"{self.var}[{self.index}]"
+        else:
+            return f"{self.var}.{self.attr}"
 
 
 class Call:
@@ -170,6 +200,9 @@ class Call:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"{self.var}({", ".join(str(i) for i in self.expression_list)})"
@@ -186,6 +219,9 @@ class Variable:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"{self.kind} {self.name}: {self.type}"
@@ -218,6 +254,9 @@ class Do_S:
     def __str__(self) -> str:
         return self.show()[0]
 
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class Let_S:
     def __init__(self, location: tuple[int, int], var: GetVariable, expression: Expression) -> None:
@@ -243,6 +282,9 @@ class Return_S:
     def __str__(self) -> str:
         return f"return {self.expression}"
 
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class Break_S:
     def __init__(self, location: tuple[int, int], n: Integer) -> None:
@@ -254,6 +296,9 @@ class Break_S:
 
     def __str__(self) -> str:
         return f"break {self.n}"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class For_S:
