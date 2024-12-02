@@ -461,13 +461,13 @@ class Root:
         self.class_list = class_list
 
     def show(self) -> list[str]:
-        t = [f"file: {self.file}"]
+        t = [f"    file: {self.file}"]
         for c in self.class_list:
             t.extend(c.show())
         return t
 
     def __str__(self) -> str:
-        return "\n".join(self.show())
+        return "\n    ".join(self.show())
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

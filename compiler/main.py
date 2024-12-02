@@ -1,21 +1,18 @@
-import argparse
+from os.path import isfile, abspath
 
-from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup, docs
+from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup, Args
 from lexer import lexer
 from parser import Parser
 from Compiler import Compiler
 
 
-def compile_file(path: str, args: argparse.Namespace) -> None:
-    """Compile a NewJack file from path."""
-    # Read source code from file
+def compile_file(path: str, args: Args) -> None:
     try:
         source = read_from_path(path)
     except FileNotFoundError as e:
         print(f"input Error: {e}")
         return
 
-    # Tokenization
     try:
         tokens = lexer(source, get_one_path(path, ".nj"))
     except CompileError as e:
@@ -26,7 +23,6 @@ def compile_file(path: str, args: argparse.Namespace) -> None:
             raise e
         return
 
-    # Parsing
     parser = Parser(tokens)
     try:
         ast = parser.main(get_one_path(path, ".nj"))
@@ -42,7 +38,6 @@ def compile_file(path: str, args: argparse.Namespace) -> None:
         print("Abstract Syntax Tree:")
         print(ast)
 
-    # Compile
     if args.compile:
         compiler = Compiler(ast, args.debug)
         try:
@@ -57,7 +52,6 @@ def compile_file(path: str, args: argparse.Namespace) -> None:
                     print("-" * s[1])
             return
 
-        # 寫入檔案
         try:
             with open(get_one_path(path, ".vm"), "w+") as f:
                 f.write("\n".join(code))
@@ -67,47 +61,48 @@ def compile_file(path: str, args: argparse.Namespace) -> None:
             return
 
 
-def parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Compile NewJack files.")
-    parser.add_argument("path", type=str, help="Path to the source file.")
-    parser.add_argument("-d", "--debug", action="store_true", help=docs["--debug"])
-    parser.add_argument("-a", "--showast", action="store_true", help=docs["--showast"])
-    parser.add_argument("-c", "--compile", action="store_true", help=docs["--compile"])
-    return parser.parse_args()
-
-
-def interactive_mode() -> tuple[str, argparse.Namespace]:
-    """Handle interactive mode using input()."""
+def parse_arguments() -> tuple[list[str], Args]:
     path = input("File(s) path (input 'exit' to cancel): ")
-    if path.lower() == "exit":
+    if "exit" in path.lower():
         exit()
-    path = path.split()
-    args: list[str] = []
-    for i in path:
-        if i.startswith("-"):
-            args.append(i)
-    path = path[0]
-
-    # 將參數轉換為 argparse Namespace
-    return path, argparse.Namespace(
-        debug="-d" in args or "--debug" in args,
-        showast="-a" in args or "--showast" in args,
-        compile="-c" in args or "--compile" in args,
-    )
+    args = Args()
+    paths: list[str] = []
+    outpath = False
+    errout = False
+    help = False
+    for i in path.split():
+        if help:
+            args.help.append(i)
+        elif i.startswith("-"):
+            outpath = False
+            errout = False
+            if i in ("-d", "--debug"):
+                args.debug = True
+            elif i in ("-c", "--compile"):
+                args.compile = True
+            elif i in ("-s", "--showast"):
+                args.showast = True
+            elif i in ("-o", "--outpath"):
+                outpath = True
+            elif i in ("-e", "--errout"):
+                errout = True
+            elif i in ("-h", "--help"):
+                help = True
+                args.help.append("--help")
+        elif isfile(abspath(i)):
+            if outpath:
+                args.outpath += abspath(i)
+                outpath = False
+            elif errout:
+                args.errout += abspath(i)
+                errout = False
+            else:
+                paths.append(abspath(i))
+    return paths, args
 
 
 def main():
-    """Main function to handle script logic."""
-    # args = parse_arguments()
-    # path = args.path
-
-    path, args = interactive_mode()
-
-    if path == "exit":
-        exit()
-
-    paths = path.split()
+    paths, args = parse_arguments()
     for file_path in paths:
         print(f"Processing file: {file_path}")
         compile_file(file_path, args)

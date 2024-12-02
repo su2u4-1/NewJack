@@ -1,7 +1,7 @@
 from traceback import format_stack
 
 from AST import *
-from lib import CompileError, CompileErrorGroup, Info, type_class, type_subroutine, type_int, type_void, type_argument
+from lib import CompileError, CompileErrorGroup, Info, type_class, type_subroutine, type_int, type_void, type_argument, format_traceback
 
 
 class Compiler:
@@ -34,8 +34,8 @@ class Compiler:
         self.err_list.append(i)
 
     def main(self) -> list[str]:
+        code: list[str] = ["label start"]
         try:
-            code: list[str] = ["label start"]
             for i, c in enumerate(self.ast.class_list):
                 self.count["attribute"] = 0
                 self.attribute[c.name.content] = {}
@@ -50,19 +50,22 @@ class Compiler:
                 code.extend(self.compileClass(i))
         except Exception as e:
             if self.debug_flag:
-                self.printinfo()
-            raise e
+                self.printinfo(code)
+            print(format_traceback(e))
+            print("\n------------------------------\n")
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
-            self.printinfo()
+            self.printinfo(code)
             exit()
         return code
 
-    def printinfo(self) -> None:
-        print("-------------")
+    def printinfo(self, code: list[str]) -> None:
         for k, v in self.__dict__.items():
-            print(f"{k}:\n{v}\n-------------")
+            print(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
+        print("\ncode:-------------------------\n")
+        print("\n".join(code))
+        print("\n------------------------------\n")
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = [f"label {self.ast.name}.{class_.name}"]
@@ -364,7 +367,7 @@ class Compiler:
         return code
 
     def compileGetVariable(self, var: GetVariable) -> list[str]:
-        code: list[str] = []
+        code: list[str] = ["<compileGetVariable>"]
         # TODO: get variable address
         return code
 
@@ -372,6 +375,7 @@ class Compiler:
         # TODO: add code
         if isinstance(var.var, Identifier):
             var_info = Info()
+            var_info.code.append("<GetVarInfo>")
             var_info.name = var.var.content
             if var.var.content == "self":
                 var_info.type = self.argument["self"][0]

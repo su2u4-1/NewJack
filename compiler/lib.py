@@ -1,5 +1,6 @@
 import os.path
 from typing import Sequence, Literal
+from traceback import format_list, extract_tb
 
 from AST import Type, Identifier
 
@@ -111,10 +112,18 @@ Precedence = {
     "|": 1,
 }
 docs = {
-    "--debug": "Enables debug mode, showing detailed stack traces and errors when exceptions occur.",
-    "--showast": "Displays the Abstract Syntax Tree (AST) generated during parsing.",
-    "--compile": "Proceeds to compile the program after parsing, generating .vm output.",
-    "--help": "Displays the help message for all or specific command-line options.",
+    "--debug": "Activates debug mode, providing detailed stack traces and error information when exceptions occur.",
+    "-d": "Shortcut for --debug.",
+    "--showast": "Displays the Abstract Syntax Tree (AST) generated during the parsing phase.",
+    "-s": "Shortcut for --showast.",
+    "--compile": "Compiles the program after parsing, producing a .vm file as output.",
+    "-c": "Shortcut for --compile.",
+    "--help": "Displays help information. If additional arguments follow this flag, detailed descriptions of those specific options are shown. If no arguments are provided, all available options are displayed.",
+    "-h": "Shortcut for --help.",
+    "--outpath": "Specifies the output directory for the compiled result. If not provided, the output defaults to the source file's directory.",
+    "-o": "Shortcut for --outpath.",
+    "--errout": "Specifies a file to output error and debug messages. If not provided, these messages are printed to the standard output (stdout).",
+    "-e": "Shortcut for --errout.",
 }
 
 
@@ -187,6 +196,33 @@ class CompileErrorGroup(Exception):
         self.exceptions = exceptions
 
 
+class Info:
+    def __init__(self):
+        self.kind: Literal["global", "attribute", "argument", "local", "void", "class", "function", "method", "constructor"] = "void"
+        self.type: Type = type_void
+        self.code: list[str] = []
+        self.name: str = "void"
+
+
+class Args:
+    def __init__(self) -> None:
+        self.debug: bool = False
+        self.showast: bool = False
+        self.compile: bool = False
+        self.outpath: str = ""
+        self.errout: str = ""
+        self.help: list[str] = []
+
+    def print_help(self) -> None:
+        if self.help == ["--help"]:
+            for k, v in docs.items():
+                print(f"{k}: {v}")
+        else:
+            for i in self.help:
+                if i in docs:
+                    print(docs[i])
+
+
 def read_from_path(path: str) -> list[str]:
     path = os.path.abspath(path)
     file: list[str] = []
@@ -212,12 +248,8 @@ def get_one_path(path: str, extension_name: str) -> str:
     return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
 
 
-class Info:
-    def __init__(self):
-        self.kind: Literal["global", "attribute", "argument", "local", "void", "class", "function", "method", "constructor"] = "void"
-        self.type: Type = type_void
-        self.code: list[str] = []
-        self.name: str = "void"
+def format_traceback(e: BaseException) -> str:
+    return "Traceback (most recent call last):\n" + "".join(format_list(extract_tb(e.__traceback__)))
 
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
