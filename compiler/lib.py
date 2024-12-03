@@ -1,6 +1,7 @@
 import os
 from traceback import format_list, extract_tb
 from typing import Sequence, Literal
+
 from AST import Type, Identifier
 
 __all__ = [
@@ -89,17 +90,16 @@ class Token:
     def __init__(self, type: TokenType, content: str, location: tuple[int, int] = (-1, -1)) -> None:
         self.content = content
         self.type = type
-        self.line = location[0]
-        self.index = location[1]
+        self.line, self.index = location
         self.location = location
 
     def __str__(self) -> str:
         return f"<{self.type}> {self.content} ({self.line}, {self.index})"
 
     def __eq__(self, value: object) -> bool:
-        if type(value) == Token:
+        if isinstance(value, Token):
             return self.type == value.type and self.content == value.content
-        elif type(value) == Tokens:
+        elif isinstance(value, Tokens):
             if self.type == value.type:
                 for i in value.content:
                     if i == self.content:
@@ -115,7 +115,7 @@ class Tokens:
         self.type = type
 
     def __eq__(self, value: object) -> bool:
-        if type(value) == Token:
+        if isinstance(value, Token):
             if self.type == value.type:
                 for i in self.content:
                     if i == value.content:

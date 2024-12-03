@@ -1,18 +1,9 @@
 from os.path import isfile, abspath
+
 from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup, Args
 from lexer import lexer
 from parser import Parser
 from Compiler import Compiler
-
-
-def handle_compile_error(e: CompileError, source: list[str], debug: bool):
-    """統一處理單一編譯錯誤的格式化與輸出。"""
-    error_line = source[e.line] if e.line < len(source) else ""
-    error_msg, underline_len = e.show(error_line)
-    print(error_msg)
-    if debug:
-        print("-" * underline_len)
-        raise e
 
 
 def process_file(file_path: str, args: Args):
@@ -25,16 +16,11 @@ def process_file(file_path: str, args: Args):
 
     try:
         tokens = lexer(source, get_one_path(file_path, ".nj"))
-    except CompileError as e:
-        handle_compile_error(e, source, args.debug)
-        return
-
-    parser = Parser(tokens)
-    try:
+        parser = Parser(tokens)
         ast = parser.main(get_one_path(file_path, ".nj"))
     except CompileError as e:
-        handle_compile_error(e, source, args.debug)
-        return
+        # 直接讓錯誤冒泡，讓 traceback 顯示完整路徑
+        raise e
 
     if args.showast:
         print("Abstract Syntax Tree:")
@@ -46,7 +32,7 @@ def process_file(file_path: str, args: Args):
             code = compiler.main()
         except CompileErrorGroup as e:
             for error in e.exceptions:
-                handle_compile_error(error, source, args.debug)
+                print(error.show(source[error.line])[0])  # 顯示每個錯誤訊息
             return
 
         output_path = get_one_path(file_path, ".vm")
@@ -83,7 +69,11 @@ def main():
     paths, args = parse_arguments()
     for file_path in paths:
         print(f"Processing file: {file_path}")
-        process_file(file_path, args)
+        try:
+            process_file(file_path, args)
+        except CompileError as e:
+            print(f"Error during processing {file_path}:")
+            print(e)
 
 
 if __name__ == "__main__":
