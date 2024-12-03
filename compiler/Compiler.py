@@ -5,8 +5,7 @@ from lib import CompileError, CompileErrorGroup, Info, type_class, type_subrouti
 
 
 class Compiler:
-    def __init__(self, ast: Root, debug_flag: bool = False) -> None:
-        self.ast = ast
+    def __init__(self, debug_flag: bool = False) -> None:
         self.global_: dict[str, tuple[Type, int]] = {}
         self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
         self.argument: dict[str, tuple[Type, int]] = {}
@@ -33,7 +32,8 @@ class Compiler:
         i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
         self.err_list.append(i)
 
-    def main(self) -> list[str]:
+    def main(self, ast: Root) -> list[str]:
+        self.ast = ast
         code: list[str] = ["label start"]
         try:
             for i, c in enumerate(self.ast.class_list):

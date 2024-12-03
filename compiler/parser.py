@@ -5,12 +5,12 @@ from AST import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: list[Token], file: str) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
-        self.file = ""
+        self.file = file
         self.now = tokens[0]
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
@@ -23,7 +23,7 @@ class Parser:
         if self.index > self.length:
             raise Exception("Unexpected end of input")
         self.now = self.tokens[self.index - 1]
-        if self.now.type == "file":
+        if self.now.type == "file_name":
             self.file = self.now.content
             self.get()
 
@@ -32,7 +32,7 @@ class Parser:
             raise Exception("Unexpected end of input")
         return self.tokens[self.index]
 
-    def main(self, name: str) -> Root:
+    def main(self) -> Root:
         class_list: list[Class] = []
         while True:
             self.get()
@@ -42,7 +42,7 @@ class Parser:
                 break
             else:
                 self.error("missing keyword 'class'")
-        return Root(self.now.location, name, class_list)
+        return Root(self.now.location, self.file, class_list)
 
     def parse_Class(self) -> Class:
         location = self.now.location

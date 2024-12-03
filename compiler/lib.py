@@ -26,12 +26,12 @@ __all__ = [
     "CompileError",
     "CompileErrorGroup",
     "Info",
-    "read_from_path",
+    "read_source",
     "get_one_path",
 ]
 
 
-TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file"]
+TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file_name"]
 Symbol = {
     "{",
     "}",
@@ -113,18 +113,13 @@ Precedence = {
 }
 docs = {
     "--debug": "Activates debug mode, providing detailed stack traces and error information when exceptions occur.",
-    "-d": "Shortcut for --debug.",
     "--showast": "Displays the Abstract Syntax Tree (AST) generated during the parsing phase.",
-    "-s": "Shortcut for --showast.",
     "--compile": "Compiles the program after parsing, producing a .vm file as output.",
-    "-c": "Shortcut for --compile.",
     "--help": "Displays help information. If additional arguments follow this flag, detailed descriptions of those specific options are shown. If no arguments are provided, all available options are displayed.",
-    "-h": "Shortcut for --help.",
     "--outpath": "Specifies the output directory for the compiled result. If not provided, the output defaults to the source file's directory.",
-    "-o": "Shortcut for --outpath.",
     "--errout": "Specifies a file to output error and debug messages. If not provided, these messages are printed to the standard output (stdout).",
-    "-e": "Shortcut for --errout.",
 }
+match_arg = {"-d": "--debug", "-s": "--showast", "-c": "--compile", "-h": "--help", "-o": "--outpath", "-e": "--errout"}
 
 
 class Token:
@@ -173,8 +168,7 @@ class Tokens:
 class CompileError(Exception):
     def __init__(self, text: str, file: str, location: tuple[int, int], kind: str) -> None:
         self.file = file
-        self.line = location[0]
-        self.index = location[1]
+        self.line, self.index = location
         self.text = text
         self.kind = kind
         self.traceback = ""
@@ -194,6 +188,11 @@ class CompileError(Exception):
 class CompileErrorGroup(Exception):
     def __init__(self, exceptions: Sequence[CompileError]) -> None:
         self.exceptions = exceptions
+
+
+class Continue(Exception):
+    def __init__(self, text: str = "") -> None:
+        self.text = text
 
 
 class Info:
@@ -219,44 +218,37 @@ class Args:
                 print(f"{k:10}", v)
         else:
             for i in self.help:
-                if i in docs:
-                    t = ""
-                    if i == "--help":
-                        continue
-                    elif i == "-d":
-                        t = "--debug"
-                    elif i == "-s":
-                        t = "--showast"
-                    elif i == "-c":
-                        t = "--compile"
-                    elif i == "-h":
-                        t = "--help"
-                    elif i == "-o":
-                        t = "--outpath"
-                    elif i == "-e":
-                        t = "--errout"
+                if i == "--help" or i == "-h":
+                    continue
+                elif i in docs:
                     print(f"{i:10}", docs[i])
-                    if t != "":
-                        print(f"{t:10}", docs[t])
+                elif i in match_arg:
+                    print(f"{i:10} Shortcut for {match_arg[i]}.")
+                    print(f"{match_arg[i]:10}", docs[match_arg[i]])
 
 
-def read_from_path(path: str) -> list[str]:
-    path = os.path.abspath(path)
+def get_path(paths: list[str]) -> list[str]:
     file: list[str] = []
-    if os.path.isdir(path):
-        for f in os.listdir(path):
-            if os.path.isfile(f):
-                file.append(f)
-    elif os.path.isfile(path):
-        file.append(path)
+    for path in paths:
+        path = os.path.abspath(path)
+        if os.path.isdir(path):
+            for f in os.listdir(path):
+                if os.path.isfile(f):
+                    file.append(f)
+        elif os.path.isfile(path):
+            file.append(path)
     if len(file) == 0:
+        raise FileNotFoundError("file not found")
+    return file
+
+
+def read_source(path: str) -> list[str]:
+    source = []
+    if path.endswith(".nj"):
+        with open(path, "r") as f:
+            source = f.readlines()
+    if len(source) == 0:
         raise FileNotFoundError("NewJack(.nj) file not found")
-    source: list[str] = []
-    for i in file:
-        if i.endswith(".nj"):
-            with open(i, "r") as f:
-                source.append("//" + i)
-                source += f.readlines()
     return source
 
 
