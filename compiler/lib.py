@@ -216,11 +216,28 @@ class Args:
     def print_help(self) -> None:
         if self.help == ["--help"]:
             for k, v in docs.items():
-                print(f"{k}: {v}")
+                print(f"{k:10}", v)
         else:
             for i in self.help:
                 if i in docs:
-                    print(docs[i])
+                    t = ""
+                    if i == "--help":
+                        continue
+                    elif i == "-d":
+                        t = "--debug"
+                    elif i == "-s":
+                        t = "--showast"
+                    elif i == "-c":
+                        t = "--compile"
+                    elif i == "-h":
+                        t = "--help"
+                    elif i == "-o":
+                        t = "--outpath"
+                    elif i == "-e":
+                        t = "--errout"
+                    print(f"{i:10}", docs[i])
+                    if t != "":
+                        print(f"{t:10}", docs[t])
 
 
 def read_from_path(path: str) -> list[str]:

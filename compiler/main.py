@@ -98,14 +98,18 @@ def parse_arguments() -> tuple[list[str], Args]:
                 errout = False
             else:
                 paths.append(abspath(i))
+    args.print_help()
     return paths, args
 
 
 def main():
     paths, args = parse_arguments()
-    for file_path in paths:
-        print(f"Processing file: {file_path}")
-        compile_file(file_path, args)
+    if len(paths) == 0:
+        print("No valid input files provided. Use --help for usage information.")
+    else:
+        for file_path in paths:
+            print(f"Processing file: {file_path}")
+            compile_file(file_path, args)
 
 
 if __name__ == "__main__":
