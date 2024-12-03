@@ -1,7 +1,6 @@
-import os.path
-from typing import Sequence, Literal
+import os
 from traceback import format_list, extract_tb
-
+from typing import Sequence, Literal
 from AST import Type, Identifier
 
 __all__ = [
@@ -20,7 +19,7 @@ __all__ = [
     "atoZ",
     "Keyword",
     "Precedence",
-    "docs",
+    # "docs",
     "Token",
     "Tokens",
     "CompileError",
@@ -28,42 +27,15 @@ __all__ = [
     "Info",
     "read_from_path",
     "get_one_path",
+    "Args",
 ]
 
-
 TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file"]
-Symbol = {
-    "{",
-    "}",
-    "[",
-    "]",
-    "(",
-    ")",
-    "=",
-    ";",
-    ",",
-    ".",
-    "!",
-    "+",
-    "-",
-    "*",
-    "/",
-    "|",
-    "&",
-    "==",
-    "!=",
-    ">=",
-    "<=",
-    ">",
-    "<",
-    "<<",
-    ">>",
-    ":",
-}
-Number = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-atoz = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-AtoZ = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
-atoZ = atoz | AtoZ
+Symbol = set("{}[]()=;,.!+-*/|&><:") | {"==", "!=", ">=", "<=", "<<", ">>"}
+Number = set("0123456789")
+atoz = set("abcdefghijklmnopqrstuvwxyz")
+AtoZ = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+atoZ = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 Keyword = {
     "class",
     "var",
@@ -111,20 +83,6 @@ Precedence = {
     "&": 1,
     "|": 1,
 }
-docs = {
-    "--debug": "Activates debug mode, providing detailed stack traces and error information when exceptions occur.",
-    "-d": "Shortcut for --debug.",
-    "--showast": "Displays the Abstract Syntax Tree (AST) generated during the parsing phase.",
-    "-s": "Shortcut for --showast.",
-    "--compile": "Compiles the program after parsing, producing a .vm file as output.",
-    "-c": "Shortcut for --compile.",
-    "--help": "Displays help information. If additional arguments follow this flag, detailed descriptions of those specific options are shown. If no arguments are provided, all available options are displayed.",
-    "-h": "Shortcut for --help.",
-    "--outpath": "Specifies the output directory for the compiled result. If not provided, the output defaults to the source file's directory.",
-    "-o": "Shortcut for --outpath.",
-    "--errout": "Specifies a file to output error and debug messages. If not provided, these messages are printed to the standard output (stdout).",
-    "-e": "Shortcut for --errout.",
-}
 
 
 class Token:
@@ -167,28 +125,26 @@ class Tokens:
             return NotImplemented
 
     def __str__(self) -> str:
-        return f"<{self.type}> " + ", ".join(i for i in self.content)
+        return f"<{self.type}> {', '.join(self.content)}"
 
 
 class CompileError(Exception):
     def __init__(self, text: str, file: str, location: tuple[int, int], kind: str) -> None:
-        self.file = file
-        self.line = location[0]
-        self.index = location[1]
         self.text = text
+        self.file = file
+        self.line, self.index = location
         self.kind = kind
         self.traceback = ""
 
     def show(self, source: str) -> tuple[str, int]:
-        if source.endswith("\n"):
-            source = source[:-1]
+        """格式化錯誤訊息顯示。"""
         info = [
             f'File "{self.file}", line {self.line}, in {self.index}',
             f"{self.kind} Error: {self.text}",
-            source,
+            source.rstrip("\n"),
             " " * (self.index - 1) + "^",
         ]
-        return "\n".join(info), max(len(i) for i in info)
+        return "\n".join(info), max(len(line) for line in info)
 
 
 class CompileErrorGroup(Exception):
@@ -206,63 +162,43 @@ class Info:
 
 class Args:
     def __init__(self) -> None:
-        self.debug: bool = False
-        self.showast: bool = False
-        self.compile: bool = False
-        self.outpath: str = ""
-        self.errout: str = ""
-        self.help: list[str] = []
+        self.debug = False
+        self.showast = False
+        self.compile = False
+        self.outpath = ""
+        self.errout = ""
+        self.help_flags: list[str] = []
 
-    def print_help(self) -> None:
-        if self.help == ["--help"]:
-            for k, v in docs.items():
-                print(f"{k:10}", v)
-        else:
-            for i in self.help:
-                if i in docs:
-                    t = ""
-                    if i == "--help":
-                        continue
-                    elif i == "-d":
-                        t = "--debug"
-                    elif i == "-s":
-                        t = "--showast"
-                    elif i == "-c":
-                        t = "--compile"
-                    elif i == "-h":
-                        t = "--help"
-                    elif i == "-o":
-                        t = "--outpath"
-                    elif i == "-e":
-                        t = "--errout"
-                    print(f"{i:10}", docs[i])
-                    if t != "":
-                        print(f"{t:10}", docs[t])
+    def process_flag(self, flag: str) -> None:
+        """根據標誌設置參數。"""
+        match flag:
+            case "-d" | "--debug":
+                self.debug = True
+            case "-s" | "--showast":
+                self.showast = True
+            case "-c" | "--compile":
+                self.compile = True
+            case "-o" | "--outpath":
+                self.outpath = True
+            case "-e" | "--errout":
+                self.errout = True
+            case _:
+                self.help_flags.append(flag)
 
 
 def read_from_path(path: str) -> list[str]:
-    path = os.path.abspath(path)
-    file: list[str] = []
-    if os.path.isdir(path):
-        for f in os.listdir(path):
-            if os.path.isfile(f):
-                file.append(f)
-    elif os.path.isfile(path):
-        file.append(path)
-    if len(file) == 0:
-        raise FileNotFoundError("NewJack(.nj) file not found")
-    source: list[str] = []
-    for i in file:
-        if i.endswith(".nj"):
-            with open(i, "r") as f:
-                source.append("//" + i)
-                source += f.readlines()
-    return source
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Path not found: {path}")
+    if os.path.isfile(path) and path.endswith(".nj"):
+        with open(path, "r") as f:
+            return f.readlines()
+    raise FileNotFoundError("NewJack(.nj) file not found.")
 
 
-def get_one_path(path: str, extension_name: str) -> str:
+def get_one_path(path: str, extension: str) -> str:
+    """根據路徑替換副檔名。"""
     dir_path, file_name = os.path.split(os.path.abspath(path))
-    return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
+    return os.path.join(dir_path, os.path.splitext(file_name)[0] + extension)
 
 
 def format_traceback(e: BaseException) -> str:
