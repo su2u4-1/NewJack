@@ -44,15 +44,18 @@ class Compiler:
                     self.attribute[c.name.content][a[0]] = (a[1], self.count["attribute"])
                     self.count["attribute"] += 1
                 for s in c.subroutine_list:
-                    self.global_[f"{c.name.content}.{s.name.content}"] = (type_subroutine[s.kind], self.count["subroutine"])
+                    if s.kind == "method":
+                        self.attribute[c.name.content][s.name.content] = (type_subroutine[s.kind], self.count["subroutine"])
+                    else:
+                        self.global_[f"{c.name.content}.{s.name.content}"] = (type_subroutine[s.kind], self.count["subroutine"])
                     self.count["subroutine"] += 1
             for i in self.ast.class_list:
                 code.extend(self.compileClass(i))
         except Exception as e:
-            if self.debug_flag:
-                self.printinfo(code)
-            print(format_traceback(e))
             print("\n------------------------------\n")
+            print(format_traceback(e))
+            print(f"{type(e).__name__}: {e}")
+        print("\n------------------------------\n")
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
@@ -360,7 +363,8 @@ class Compiler:
         if var_info.kind == "method":
             code.append("\n".join(var_info.code))
         elif var_info.kind != "function" and var_info.kind != "constructor":
-            self.error("variable is not method, function or constructor", call.var.location)
+            print(var_info)
+            self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
         code.append(f"call {var_info.type}.{call.var.attr} {len(call.expression_list)}")
@@ -397,11 +401,17 @@ class Compiler:
         else:
             var_info = self.GetVarInfo(var.var)
         if var.attr is not None:
-            if var.attr.content in self.attribute[var_info.name]:
-                var_info.type = self.attribute[var_info.name][var.attr.content][0]
-                var_info.kind = "attribute"
+            if var_info.type.outside.content == "class":
+                if f"{var_info.name}.{var.attr}" in self.global_:
+                    var_info.type = self.global_[f"{var_info.name}.{var.attr}"][0]
+                    var_info.kind = "function"
+                else:
+                    self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
+            elif var.attr.content in self.attribute[var_info.type.outside.content]:
+                var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
+                var_info.kind = "method"
             else:
-                self.error(f"attribute {var.attr.content} not found in {var_info.type.outside.content}", var.attr.location)
+                self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
         if var.index is not None:
             if var_info.type.inside is not None:
                 var_info.type = var_info.type.inside

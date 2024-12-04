@@ -174,6 +174,9 @@ class Info:
         self.code: list[str] = []
         self.name: str = "void"
 
+    def __str__(self) -> str:
+        return f"kind: {self.kind}, type: {self.type}, name: {self.name}, code:\n{"\n".join(self.code)}"
+
 
 class Args:
     def __init__(self) -> None:
