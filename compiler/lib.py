@@ -32,38 +32,11 @@ __all__ = [
 
 
 TokenType = Literal["string", "integer", "symbol", "keyword", "float", "char", "identifier", "file_name"]
-Symbol = {
-    "{",
-    "}",
-    "[",
-    "]",
-    "(",
-    ")",
-    "=",
-    ";",
-    ",",
-    ".",
-    "!",
-    "+",
-    "-",
-    "*",
-    "/",
-    "|",
-    "&",
-    "==",
-    "!=",
-    ">=",
-    "<=",
-    ">",
-    "<",
-    "<<",
-    ">>",
-    ":",
-}
-Number = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-atoz = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-AtoZ = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
-atoZ = atoz | AtoZ
+Symbol = set("{}[]():;,.!+-*/|&>=<") | {"==", "!=", ">=", "<=", "<<", ">>"}
+Number = set("0123456789")
+atoz = set("abcdefghijklmnopqrstuvwxyz")
+AtoZ = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+atoZ = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 Keyword = {
     "class",
     "var",
@@ -126,17 +99,16 @@ class Token:
     def __init__(self, type: TokenType, content: str, location: tuple[int, int] = (-1, -1)) -> None:
         self.content = content
         self.type = type
-        self.line = location[0]
-        self.index = location[1]
+        self.line, self.index = location
         self.location = location
 
     def __str__(self) -> str:
-        return f"<{self.type}> {self.content} ({self.line}, {self.index})"
+        return f"<{self.type}> {self.content} {self.location}"
 
     def __eq__(self, value: object) -> bool:
-        if type(value) == Token:
+        if isinstance(value, Token):
             return self.type == value.type and self.content == value.content
-        elif type(value) == Tokens:
+        elif isinstance(value, Tokens):
             if self.type == value.type:
                 for i in value.content:
                     if i == self.content:
@@ -148,11 +120,11 @@ class Token:
 
 class Tokens:
     def __init__(self, type: TokenType, content: Sequence[str]) -> None:
-        self.content = content
+        self.content = tuple(content)
         self.type = type
 
     def __eq__(self, value: object) -> bool:
-        if type(value) == Token:
+        if isinstance(value, Token):
             if self.type == value.type:
                 for i in self.content:
                     if i == value.content:
@@ -263,8 +235,6 @@ def format_traceback(e: BaseException) -> str:
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
 built_in_type = Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void"))
-
-
 type_class = Type((-1, -1), Identifier((-1, -1), "class"))
 type_subroutine = {
     "constructor": Type((-1, -1), Identifier((-1, -1), "constructor")),

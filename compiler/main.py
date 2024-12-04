@@ -1,4 +1,5 @@
 from os.path import isfile, abspath
+from sys import argv
 
 from lib import get_path, read_source, get_one_path, CompileError, CompileErrorGroup, Args, Continue
 from lexer import lexer
@@ -7,14 +8,14 @@ from AST import Root
 from Compiler import Compiler
 
 
-def process_file(source: list[str], args: Args, file_path: str) -> Root:
+def process_file(source: list[str], arg: Args, file_path: str) -> Root:
     # lexical analysis
     try:
         tokens = lexer(source, file_path)
     except CompileError as e:
         s = e.show(source[e.line])
         print(s[0])
-        if args.debug:
+        if arg.debug:
             print("-" * s[1])
             raise e
         raise Continue()
@@ -25,112 +26,131 @@ def process_file(source: list[str], args: Args, file_path: str) -> Root:
     except CompileError as e:
         s = e.show(source[e.line])
         print(s[0])
-        if args.debug:
+        if arg.debug:
             print("-" * s[1])
             raise e
         raise Continue()
 
-    if args.showast:
+    if arg.showast:
         print("Abstract Syntax Tree:")
         print(ast)
 
     return ast
 
 
-def compile_all_file(ast_list: list[tuple[Root, list[str]]], args: Args) -> list[str]:
+def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[str]:
     code: list[str] = []
+    failed = False
     for ast, source in ast_list:
-        # compile
-        compiler = Compiler(args.debug)
+        compiler = Compiler(arg.debug)
         try:
             code.extend(compiler.main(ast))
         except CompileErrorGroup as e:
             for i in e.exceptions:
                 s = i.show(source[i.line])
                 print(s[0])
-                if args.debug:
+                if arg.debug:
                     print("-" * s[1])
                     print(i.traceback)
                     print("-" * s[1])
+            failed = True
             continue
+    if failed:
+        return []
     return code
 
 
-def parse_arguments() -> tuple[list[str], Args]:
-    path = input("File(s) path (input 'exit' to cancel): ")
-    if "exit" in path.lower():
+def parse_arguments(args: str) -> tuple[list[str], Args]:
+    if "exit" in args.lower():
         exit()
-    args = Args()
+    arg = Args()
     paths: list[str] = []
     outpath = False
     errout = False
     help = False
-    for i in path.split():
+    for i in args.split():
         if help:
-            args.help.append(i)
+            arg.help.append(i)
         elif i.startswith("-"):
             outpath = False
             errout = False
             match i:
                 case "-d" | "--debug":
-                    args.debug = True
+                    arg.debug = True
                 case "-c" | "--compile":
-                    args.compile = True
+                    arg.compile = True
                 case "-s" | "--showast":
-                    args.showast = True
+                    arg.showast = True
                 case "-o" | "--outpath":
                     outpath = True
                 case "-e" | "--errout":
                     errout = True
                 case "-h" | "--help":
                     help = True
-                    args.help.append("--help")
+                    arg.help.append("--help")
                 case _:
                     print(f"Unrecognized argument flag: {i}. Please check your input.")
         elif isfile(abspath(i)):
             if outpath:
-                args.outpath += abspath(i)
+                arg.outpath += abspath(i)
                 outpath = False
             elif errout:
-                args.errout += abspath(i)
+                arg.errout += abspath(i)
                 errout = False
             else:
                 paths.append(abspath(i))
-    args.print_help()
-    return paths, args
+    arg.print_help()
+    return paths, arg
 
 
 def main():
-    paths, args = parse_arguments()
+    # parse arguments
+    if len(argv) == 1:
+        args = input("File(s) path (input 'exit' to cancel): ")
+    else:
+        args = " ".join(argv[1:])
+    paths, arg = parse_arguments(args)
     if len(paths) == 0:
         print("No valid input files provided. Use --help for usage information.")
         return
 
+    # get file path
     try:
         files = get_path(paths)
     except FileNotFoundError as e:
         print(f"input Error: {e}")
         return
 
+    # read and process source
     ast_list: list[tuple[Root, list[str]]] = []
     for i in files:
         source = read_source(i)
         print(f"Processing file: {i}")
         try:
-            ast_list.append((process_file(source, args, i), source))
+            ast_list.append((process_file(source, arg, i), source))
         except Continue:
             print(f"File {i} processing failed")
+        print(f"File {i} processed successfully")
 
-    if args.compile:
+    # compile
+    if arg.compile:
         print("compile start")
-        compile_all_file(ast_list, args)
-        print("compile end")
+        code = compile_all_file(ast_list, arg)
+        if code == []:
+            print("compile failed")
+            return
+        else:
+            print("compile end")
 
-        # TODO: output compiled file
+        # output the compiled file
+        if arg.outpath == "":
+            f_path = get_one_path(paths[0], ".vm")
+        else:
+            f_path = get_one_path(arg.outpath, ".vm")
         try:
-            with open(get_one_path(path, ".vm"), "w+") as f:
+            with open(get_one_path(f_path, ".vm"), "w+") as f:
                 f.write("\n".join(code))
-            print(f"Compile successful: {get_one_path(path, '.vm')}")
+            print(f"Compile successful: {f_path}")
         except OSError as e:
             print(f"output Error : {e}")
 
