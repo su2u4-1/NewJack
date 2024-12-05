@@ -1,7 +1,18 @@
 from traceback import format_stack
 
 from AST import *
-from lib import CompileError, CompileErrorGroup, Info, type_class, type_subroutine, type_int, type_void, type_argument, format_traceback
+from lib import (
+    CompileError,
+    CompileErrorGroup,
+    Info,
+    type_class,
+    type_subroutine,
+    type_int,
+    type_void,
+    type_argument,
+    format_traceback,
+    none,
+)
 
 
 class Compiler:
@@ -21,7 +32,6 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        none = Identifier((-1, -1), "None")
         self.now_class: Class = Class((-1, -1), none, [], [])
         self.now_subroutine: Subroutine = Subroutine((-1, -1), none, "method", Type((-1, -1), none), [], [])
         self.loop: list[int] = []
@@ -97,7 +107,7 @@ class Compiler:
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         if subroutine.kind == "constructor":
-            code.extend(f"alloc {len(self.attribute[self.now_class.name.content])}")
+            code.append(f"alloc heap {len(self.attribute[self.now_class.name.content])}")
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -363,10 +373,10 @@ class Compiler:
         if var_info.kind == "method":
             code.append("\n".join(var_info.code))
         elif var_info.kind != "function" and var_info.kind != "constructor":
-            print(var_info)
             self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
+        print(var_info)  # error: var_info == "method"
         code.append(f"call {var_info.type}.{call.var.attr} {len(call.expression_list)}")
         return code
 

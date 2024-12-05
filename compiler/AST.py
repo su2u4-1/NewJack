@@ -16,6 +16,9 @@ class Identifier:
     def __str__(self) -> str:
         return self.content
 
+    def __eq__(self, value: object) -> bool:
+        return str(self) == str(value)
+
 
 class Integer:
     def __init__(self, location: tuple[int, int], content: str) -> None:

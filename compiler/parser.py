@@ -93,10 +93,9 @@ class Parser:
         kind = self.now.content
         self.get()
         if self.now == built_in_type or self.now.type == "identifier":
-            type = Identifier(self.now.location, self.now.content)
+            type = self.parse_Type()
         else:
             self.error("missing return type")
-        self.get()
         if self.now.type == "identifier":
             name = Identifier(self.now.location, self.now.content)
         else:

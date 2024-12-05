@@ -247,3 +247,4 @@ type_subroutine = {
 type_int = Type((-1, -1), Identifier((-1, -1), "int"))
 type_argument = Type((-1, -1), Identifier((-1, -1), "argument"))
 type_void = Type((-1, -1), Identifier((-1, -1), "void"))
+none = Identifier((-1, -1), "None")
