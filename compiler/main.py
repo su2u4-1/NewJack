@@ -39,12 +39,10 @@ def process_file(source: list[str], arg: Args, file_path: str) -> Root:
 
 
 def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[str]:
-    code: list[str] = []
-    failed = False
+    compiler = Compiler(arg.debug)
     for ast, source in ast_list:
-        compiler = Compiler(arg.debug)
         try:
-            code.extend(compiler.main(ast))
+            compiler.addfile(ast)
         except CompileErrorGroup as e:
             for i in e.exceptions:
                 s = i.show(source[i.line])
@@ -53,11 +51,8 @@ def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[
                     print("-" * s[1])
                     print(i.traceback)
                     print("-" * s[1])
-            failed = True
-            continue
-    if failed:
-        return []
-    return code
+            return []
+    return compiler.returncode()
 
 
 def parse_arguments(args: str) -> tuple[list[str], Args]:

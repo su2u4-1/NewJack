@@ -1,29 +1,29 @@
 code:
     input [value]
     4 byte
-    00 + [value](30 bit)
+    0 + [value](31 bit)
         - Set the value of register 'V'alue to 'value'
-        - value: -1073741824 ~ 1073741823
+        - value: -2147483648 ~ 2147483647
 
     get-label "[abc]"
     4 byte
-    01 + [label](30 bit)
+    1 + [label](31 bit)
         - Set label position to register 'A'ddress
 
     copy $[a] $[b]
     1 byte
-    10 + [register a](3 bit) + [register b](3 bit)
+    11 + [register a](3 bit) + [register b](3 bit)
         - Copy the value of 'a' to 'b'
 
     jump $[a] [J-code]
     1 byte
-    110 + [register](3 bit) + [jump code](2 bit)
+    111 + [register](3 bit) + [jump code](2 bit)
         - If register $C J-code 0, jump to address 'a'
         - J-code:
-            00 null
-            01 true
-            10 false
-            11 all
+            00 !
+            01 >
+            10 <
+            11 =
 
     [operation] $[a] $[b] $[c]
     2 byte

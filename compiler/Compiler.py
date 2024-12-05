@@ -36,15 +36,16 @@ class Compiler:
         self.now_subroutine: Subroutine = Subroutine((-1, -1), none, "method", Type((-1, -1), none), [], [])
         self.loop: list[int] = []
         self.debug_flag = debug_flag
+        self.code: list[str] = ["start"]
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         i = CompileError(text, self.ast.file, location, "compiler")
         i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
         self.err_list.append(i)
 
-    def main(self, ast: Root) -> list[str]:
+    def addfile(self, ast: Root) -> None:
         self.ast = ast
-        code: list[str] = ["label start"]
+        code: list[str] = [f"label {self.ast.file}"]
         try:
             for i, c in enumerate(self.ast.class_list):
                 self.count["attribute"] = 0
@@ -61,6 +62,7 @@ class Compiler:
                     self.count["subroutine"] += 1
             for i in self.ast.class_list:
                 code.extend(self.compileClass(i))
+        # show error info
         except Exception as e:
             print("\n------------------------------\n")
             print(format_traceback(e))
@@ -70,8 +72,13 @@ class Compiler:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
             self.printinfo(code)
-            exit()
-        return code
+        else:
+            self.code.extend(code)
+
+    def returncode(self) -> list[str]:
+        self.code.insert(1, f"alloc heap {self.count["global"]}")
+        self.code.insert(2, f"pop pointer global")
+        return self.code
 
     def printinfo(self, code: list[str]) -> None:
         for k, v in self.__dict__.items():
@@ -85,7 +92,6 @@ class Compiler:
         self.now_class = class_
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
-        code.insert(1, f"alloc heap {self.count["global"]}")
         return code
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
@@ -96,18 +102,12 @@ class Compiler:
             self.argument["self"] = (type_argument, 0)
             self.count["argument"] += 1
         elif subroutine.kind == "constructor":
-            n = 0
-            for i in subroutine.statement_list:
-                if isinstance(i, Var_S):
-                    n += len(i.var_list)
-            code.append(f"alloc heap {n}")
+            code.append(f"alloc heap {len(self.attribute[self.now_class.name.content])}")
             code.append("pop term 1")
         for i in subroutine.argument_list:
             self.compileVariable(i)
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
-        if subroutine.kind == "constructor":
-            code.append(f"alloc heap {len(self.attribute[self.now_class.name.content])}")
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -265,7 +265,7 @@ class Compiler:
             self.loop = self.loop[: -break_.n.content]
             return [f"goto loop_end_{self.loop[-break_.n.content]} all"]
 
-    def compileVariable(self, var: Variable) -> int:
+    def compileVariable(self, var: Variable) -> None:
         if var.kind == "global":
             self.global_[var.name.content] = (var.type, self.count[var.kind])
         elif var.kind == "attribute":
@@ -274,9 +274,6 @@ class Compiler:
             self.argument[var.name.content] = (var.type, self.count[var.kind])
         else:
             self.local[var.name.content] = (var.type, self.count[var.kind])
-        t = self.count[var.kind]
-        self.count[var.kind] += 1
-        return t
 
     def compileExpression(self, expression: Expression) -> list[str]:
         code: list[str] = []
