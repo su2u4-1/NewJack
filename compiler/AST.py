@@ -34,6 +34,9 @@ class Integer:
     def __str__(self) -> str:
         return str(self.content)
 
+    def __int__(self) -> int:
+        return self.content
+
 
 class Float:
     def __init__(self, location: tuple[int, int], content: str) -> None:
@@ -464,7 +467,7 @@ class Root:
         self.class_list = class_list
 
     def show(self) -> list[str]:
-        t = [f"    file: {self.file}"]
+        t = [f"file: {self.file}"]
         for c in self.class_list:
             t.extend(c.show())
         return t
