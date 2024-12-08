@@ -99,6 +99,9 @@ class Op:
     def __str__(self) -> str:
         return self.content
 
+    def __eq__(self, value: object) -> bool:
+        return str(value) == str(self)
+
 
 class Type:
     def __init__(self, location: tuple[int, int], outside: Identifier, inside: Optional["Type"] = None) -> None:

@@ -124,7 +124,7 @@ class Parser:
                     arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
                 else:
                     self.error("missing argument name")
-            self.get()
+                self.get()
         else:
             self.error("missing argument type")
         if self.now != Token("symbol", ")"):
@@ -388,15 +388,12 @@ class Parser:
         elif self.now.type == "float":
             output = Term(self.now.location, Float(self.now.location, self.now.content))
             self.get()
-        elif self.now == Tokens("keyword", ("true", "false", "self")):
+        elif self.now == Tokens("keyword", ("true", "false")):
             if self.now == Token("keyword", "true"):
                 output = Term(self.now.location, "true")
                 self.get()
-            elif self.now == Token("keyword", "false"):
+            else:  # self.now == Token("keyword", "false"):
                 output = Term(self.now.location, "false")
-                self.get()
-            else:  # self.now == Token("keyword", "self")
-                output = Term(self.now.location, "self")
                 self.get()
         elif self.now == Tokens("symbol", ("-", "!", "(")):
             if self.now == Token("symbol", "("):

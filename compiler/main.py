@@ -117,6 +117,7 @@ def main():
         return
 
     # read and process source
+    failed = False
     ast_list: list[tuple[Root, list[str]]] = []
     for i in files:
         source = read_source(i)
@@ -125,7 +126,11 @@ def main():
             ast_list.append((process_file(source, arg, i), source))
         except Continue:
             print(f"File {i} processing failed")
-        print(f"File {i} processed successfully")
+            failed = True
+        else:
+            print(f"File {i} processed successfully")
+    if failed:
+        return
 
     # compile
     if arg.compile:

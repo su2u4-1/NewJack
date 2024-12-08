@@ -101,14 +101,14 @@ class Compiler:
         return code
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
-        code: list[str] = [f"label {self.ast.name}.{subroutine.name}"]
+        code: list[str] = [f"label {self.now_class.name}.{subroutine.name}"]
         self.now_subroutine = subroutine
         self.local = {}
         if subroutine.kind == "method":
             self.argument["self"] = (type_argument, 0)
             self.count["argument"] += 1
         elif subroutine.kind == "constructor":
-            code.append(f"alloc heap {len(self.attribute[str(self.now_class.name)])}")
+            code.append(f"alloc stack {len(self.attribute[str(self.now_class.name)])}")
             code.append("pop term 1")
         for i in subroutine.argument_list:
             self.compileVariable(i)
@@ -328,7 +328,7 @@ class Compiler:
                 else:
                     self.error("self must be in method or constructor", term.location)
             else:
-                self.error(f"unknown keyword {term.content}", term.location)
+                self.error(f"unknown keyword {term}", term.location)
         if term.neg is not None:
             if term.neg == "-":
                 code.append("call built_in.neg 1")
@@ -337,41 +337,40 @@ class Compiler:
         return code
 
     def compileOp(self, op: Op) -> list[str]:
-        if op.content == "+":
+        if op == "+":
             return ["call built_in.add 2"]
-        elif op.content == "-":
+        elif op == "-":
             return ["call built_in.sub 2"]
-        elif op.content == "*":
+        elif op == "*":
             return ["call built_in.mul 2"]
-        elif op.content == "/":
+        elif op == "/":
             return ["call built_in.div 2"]
-        elif op.content == "|":
+        elif op == "|":
             return ["call built_in.or 2"]
-        elif op.content == "&":
+        elif op == "&":
             return ["call built_in.and 2"]
-        elif op.content == "<<":
+        elif op == "<<":
             return ["call built_in.lm 2"]
-        elif op.content == ">>":
+        elif op == ">>":
             return ["call built_in.rm 2"]
-        elif op.content == "==":
+        elif op == "==":
             return ["call built_in.eq 2"]
-        elif op.content == "!=":
+        elif op == "!=":
             return ["call built_in.neq 2"]
-        elif op.content == ">=":
+        elif op == ">=":
             return ["call built_in.geq 2"]
-        elif op.content == "<=":
+        elif op == "<=":
             return ["call built_in.leq 2"]
-        elif op.content == ">":
+        elif op == ">":
             return ["call built_in.gt 2"]
-        elif op.content == "<":
+        elif op == "<":
             return ["call built_in.lt 2"]
         else:
-            self.error(f"unknown op {op.content}", op.location)
+            self.error(f"unknown op {op}", op.location)
             return []
 
     def compileCall(self, call: Call) -> list[str]:
         code: list[str] = []
-        # TODO
         var_info = self.GetVarInfo(call.var)
         if var_info.kind == "method":
             code.append("\n".join(var_info.code))
@@ -379,7 +378,6 @@ class Compiler:
             self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
-        # print(var_info)  # error
         code.append(f"call {var_info.type}.{call.var.attr} {len(call.expression_list)}")
         return code
 
@@ -413,9 +411,8 @@ class Compiler:
                 self.error(f"variable {var} not found", var.location)
         else:
             var_info = self.GetVarInfo(var.var)
-        print(var, var_info, 1)
         if var.attr is not None:
-            if var_info.type.outside.content == "class":
+            if var_info.type.outside == "class":
                 if f"{var_info.name}.{var.attr}" in self.global_:
                     var_info.type = Type((-1, -1), Identifier((-1, -1), var_info.name))
                     var_info.kind = self.global_[f"{var_info.name}.{var.attr}"][0].outside.content  # type: ignore
@@ -423,16 +420,15 @@ class Compiler:
                     self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
             elif var.attr.content in self.attribute[var_info.type.outside.content]:
                 var_info.kind = self.attribute[var_info.type.outside.content][var.attr.content][0].outside.content  # type: ignore
-                if var_info.kind == "method":
-                    var_info.type = Type((-1, -1), Identifier((-1, -1), var_info.name))
-                else:
+                if var_info.kind != "method":
                     var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
             else:
                 self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
-            print(var, var_info, 2)
+            var_info.name += "." + var.attr.content
         if var.index is not None:
             if var_info.type.inside is not None:
                 var_info.type = var_info.type.inside
             else:
                 self.error(f"variable {var} is not a container", var.index.location)
+            var_info.name += f"[{var.index}]"
         return var_info
