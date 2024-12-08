@@ -2,6 +2,19 @@ from lib import Token, CompileError, Number, Symbol, atoZ, Keyword
 
 
 def lexer(source: list[str], file: str) -> list[Token]:
+    """
+    Tokenizes the source code into a list of tokens.
+
+    Args:
+        source (list[str]): The source code lines to be tokenized.
+        file (str): The name of the file being tokenized, used for error reporting.
+
+    Returns:
+        list[Token]: A list of tokens representing the lexical elements of the source code.
+
+    Raises:
+        CompileError: If an invalid symbol is encountered or a string is not properly closed.
+    """
     tokens: list[Token] = []
     content = ""
     state = ""

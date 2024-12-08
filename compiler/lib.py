@@ -146,6 +146,15 @@ class CompileError(Exception):
         self.traceback = ""
 
     def show(self, source: str) -> tuple[str, int]:
+        """
+        Formats the error message with detailed context.
+
+        Args:
+            source (str): The source code line where the error occurred.
+
+        Returns:
+            tuple[str, int]: The formatted error message and its maximum line length for display.
+        """
         if source.endswith("\n"):
             source = source[:-1]
         info = [

@@ -1,3 +1,10 @@
+"""
+AST (Abstract Syntax Tree) module for the NewJack language.
+
+This module defines classes and structures used to represent the abstract syntax tree.
+Each class corresponds to a syntactic construct in the language, such as expressions, statements, and subroutines.
+"""
+
 from typing import Literal, Optional, Sequence, Union, Iterable
 import os.path
 
@@ -154,7 +161,7 @@ class Term:
 
 class Expression:
     def __init__(self, location: tuple[int, int], content: Sequence[Term | Op]) -> None:
-        """content: Stores Op and Term sequences converted to reverse Polish notation"""
+        """content: Stores Op and Term sequences converted to Reverse Polish Notation (RPN)"""
         self.location = location
         self.content = content
 

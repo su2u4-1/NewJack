@@ -8,8 +8,8 @@ from AST import Root
 from Compiler import Compiler
 
 
-def process_file(source: list[str], arg: Args, file_path: str) -> Root:
-    # lexical analysis
+def analyze_file(source: list[str], arg: Args, file_path: str) -> Root:
+    # Tokenize the source code.
     try:
         tokens = lexer(source, file_path)
     except CompileError as e:
@@ -20,7 +20,7 @@ def process_file(source: list[str], arg: Args, file_path: str) -> Root:
             raise e
         raise Continue()
 
-    # parsing
+    # Parse tokens into an AST.
     try:
         ast = Parser(tokens, file_path).main()
     except CompileError as e:
@@ -43,6 +43,7 @@ def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[
     compiler = Compiler(arg.debug)
     for ast, source in ast_list:
         try:
+            # Add the AST to the compiler for further processing.
             compiler.addfile(ast)
         except CompileErrorGroup as e:
             for i in e.exceptions:
@@ -87,7 +88,7 @@ def parse_arguments(args: str) -> tuple[list[str], Args]:
                     help = True
                     arg.help.append("--help")
                 case _:
-                    print(f"Unrecognized argument flag: {i}. Please check your input.")
+                    print(f"Unrecognized flag: {i}. Please refer to the help section for valid options.")
         elif isfile(abspath(i)):
             if outpath:
                 arg.outpath += abspath(i)
@@ -126,7 +127,7 @@ def main():
         source = read_source(i)
         print(f"Processing file: {i}")
         try:
-            ast_list.append((process_file(source, arg, i), source))
+            ast_list.append((analyze_file(source, arg, i), source))
         except Continue:
             print(f"File {i} processing failed")
             failed = True

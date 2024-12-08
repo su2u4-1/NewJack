@@ -33,6 +33,15 @@ class Parser:
         return self.tokens[self.index]
 
     def main(self) -> Root:
+        """
+        Parses the entire input token list and generates a Root node representing the program's AST.
+
+        Returns:
+            Root: The root node of the Abstract Syntax Tree.
+
+        Raises:
+            CompileError: If the input does not conform to the grammar rules.
+        """
         class_list: list[Class] = []
         while True:
             self.get()
@@ -175,6 +184,7 @@ class Parser:
         return var_type
 
     def parse_Var(self) -> Var_S:
+        # Parse variable declarations and init.
         location = self.now.location
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
@@ -420,7 +430,7 @@ class Parser:
             else:
                 output = Term(location, var)
         else:
-            self.error(f"unknown Term '{self.now}'")
+            self.error(f"Unexpected term encountered: {self.now}")
             output = Term(location, "none")
         return output
 
