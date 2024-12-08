@@ -39,6 +39,7 @@ def process_file(source: list[str], arg: Args, file_path: str) -> Root:
 
 
 def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[str]:
+    failed = False
     compiler = Compiler(arg.debug)
     for ast, source in ast_list:
         try:
@@ -51,7 +52,9 @@ def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[
                     print("-" * s[1])
                     print(i.traceback)
                     print("-" * s[1])
-            return []
+            failed = True
+    if failed:
+        return []
     return compiler.returncode()
 
 
@@ -138,6 +141,8 @@ def main():
         code = compile_all_file(ast_list, arg)
         if code == []:
             print("compile failed")
+            return
+        elif arg.debug:
             return
         else:
             print("compile end")

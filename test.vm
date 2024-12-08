@@ -1,4 +1,73 @@
 debug-label start
-alloc heap 0
-pop pointer global
+    alloc heap 0
+    pop pointer global
+    debug-label start D:\NewJack\test.nj
+        debug-label start test.Test
+            label Test.new
+                alloc stack 3
+                pop term 1
+                push constant 1
+                call Test2.new 1
+                pop local None
+                <GetVarInfo>
+                call Test2.ff 0
+                pop term 0
+                <compileGetVariable>
+                call Test2.test1 0
+                pop term 0
+                pop address 0
+                push term 0
+                pop memory 0
+                <compileGetVariable>
+                return
+            label Test.test0
+                push constant 0
+                return
+        debug-label end test.Test
+        debug-label start test.Test2
+            label Test2.new
+                alloc stack 2
+                pop term 1
+                <compileGetVariable>
+                <compileGetVariable>
+                pop term 0
+                pop address 0
+                push term 0
+                pop memory 0
+                <compileGetVariable>
+                return
+            label Test2.test1
+                push constant 0
+                pop local 1
+                <compileGetVariable>
+                push constant 1
+                push constant 2
+                call built_in.mul 2
+                push constant 3
+                call built_in.add 2
+                push constant 5
+                call built_in.sub 2
+                push constant 8
+                push constant 2
+                call built_in.div 2
+                call built_in.add 2
+                pop term 0
+                pop address 0
+                push term 0
+                pop memory 0
+                push constant 0
+                return
+            label Test2.ff
+                <compileGetVariable>
+                <compileGetVariable>
+                push constant 2
+                call built_in.mul 2
+                pop term 0
+                pop address 0
+                push term 0
+                pop memory 0
+                push constant 0
+                return
+        debug-label end test.Test2
+    debug-label end D:\NewJack\test.nj
 debug-label end
