@@ -1,33 +1,42 @@
 code:
     input [value]
-    4 byte
-    0 + [value](31 bit)
+    2 byte
+    000 + [value](12 bit) + extend_or_not(1 bit)
         - Set the value of register 'V'alue to 'value'
-        - value: -2147483648 ~ 2147483647
+        - value: -2048 ~ 2047
+        - value can be extended
 
-    get-label "[abc]"
-    4 byte
-    1 + [label](31 bit)
+    get-label
+    getlb "[abc]"
+    2 byte
+    001 + [label](12 bit) + extend_or_not(1 bit)
         - Set label position to register 'A'ddress
+        - label can be extended
 
     copy $[a] $[b]
-    1 byte
-    11 + [register a](3 bit) + [register b](3 bit)
+    2 byte
+    010 + [register a](3 bit) + [register b](3 bit) + 0_or_1(7 bit)
         - Copy the value of 'a' to 'b'
+        - Not extendable
 
-    jump $[a] [J-code]
-    1 byte
-    111 + [register](3 bit) + [jump code](2 bit)
-        - If register $C J-code 0, jump to address 'a'
+    jump $[a] if $[b] [J-code] $[c]
+    2 byte
+    011 + [register a](3 bit) + [register b](3 bit) + [jump code](3 bit) + [register c](3 bit) + 0_or_1(1 bit)
+        - If register J-code, jump to address 'a'
         - J-code:
-            00 !
-            01 >
-            10 <
-            11 =
+            000 nv Never
+            001 >  b >  c
+            010 == b == c
+            011 >= b >= c
+            100 <  b <  c
+            101 != b != c
+            110 <= b <= c
+            111 aw Always
+        - Not extendable
 
     [operation] $[a] $[b] $[c]
     2 byte
-    1111 [operation](3 bit) + [register a](3 bit) + [register b](3 bit) + [register c](3 bit)
+    100 [operation](3 bit) + [register a](3 bit) + [register b](3 bit) + [register c](3 bit) + 0_or_1(1 bit)
         - Operate $[a] and $[b] and save to $[c]
         - operation:
             000 add
@@ -37,42 +46,46 @@ code:
             100 rmv  # right move
             101 lmv  # left move
             110 and
-            111 _or
+            111 or_
+        - Not extendable
+
+    extend [value]
+    2 byte
+    101 + [value](15 bit) + extend_or_not(1 bit)
+        - if extend_or_not == 1, [extendable value] = [extendable value] + value
+        - value can be extended
 
     label "[abc]"
         - Create label
 
 register:
-    $A: address   000
-    $C: condition 001
-    $D: data      010
-    $L: local     011
-    $N: now       100
-    $M: memory    101
-    $P: pointer   110
-    $V: value     111
+    $A: Address   000
+    $C: Condition 001
+    $D: Data      010
+    $L: Local     011
+    $N: Now       100
+    $M: Memory    101
+    $P: Pointer   110
+    $V: Value     111
+
+    It is not recommended to set $A and $V manually.
+    It is recommended to set commonly used constants to $N.
+    $P and $M have special functions.
+    $C, $D and %L are free to use.
 
 syntactic sugar:
-    jump "[abc]" if $[a] [J-code] $[b]
-        sub $[a] $[b]
-        copy $D $C
+    jump "[abc]" $[b] [J-code] $[c]
         get-label "[abc]"
-        jump $A [J-code]
-
-    jump "[abc]" if $[a] [J-code]
-        copy $[a] $C
-        get-label "[abc]"
-        jump $A [J-code]
-
-    jump "[abc]" [J-code]
-        get-label "[abc]"
-        jump $A [J-code]
-
-    move $[a] $[b]
-        copy $[a] $[b]
-        input 0
-        copy $V $[a]
+        jump $A $[b] [J-code] $[c]
 
     input $[a] [value]
         input [value]
         copy $V $[a]
+
+    load $[a] $[b]
+        copy $[a] $A
+        copy $M $[b]
+
+    store $[a] $[b]
+        copy $[a] $A
+        copy $[b] $M
