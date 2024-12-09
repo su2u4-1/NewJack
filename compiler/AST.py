@@ -1,3 +1,10 @@
+"""
+AST (Abstract Syntax Tree) module for the NewJack language.
+
+This module defines classes and structures used to represent the abstract syntax tree.
+Each class corresponds to a syntactic construct in the language, such as expressions, statements, and subroutines.
+"""
+
 from typing import Literal, Optional, Sequence, Union, Iterable
 import os.path
 
@@ -10,8 +17,14 @@ class Identifier:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return self.content
+
+    def __eq__(self, value: object) -> bool:
+        return str(self) == str(value)
 
 
 class Integer:
@@ -22,8 +35,14 @@ class Integer:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return str(self.content)
+
+    def __int__(self) -> int:
+        return self.content
 
 
 class Float:
@@ -33,6 +52,9 @@ class Float:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"{self.a}.{self.b}"
@@ -46,6 +68,9 @@ class String:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return f'"{self.content}"'
 
@@ -57,6 +82,9 @@ class Char:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"'{self.content}'"
@@ -72,8 +100,14 @@ class Op:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return self.content
+
+    def __eq__(self, value: object) -> bool:
+        return str(value) == str(self)
 
 
 class Type:
@@ -84,6 +118,9 @@ class Type:
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         if self.inside is None:
@@ -112,6 +149,9 @@ class Term:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         if self.neg is None:
             return str(self.content)
@@ -121,12 +161,15 @@ class Term:
 
 class Expression:
     def __init__(self, location: tuple[int, int], content: Sequence[Term | Op]) -> None:
-        """content: Stores Op and Term sequences converted to reverse Polish notation"""
+        """content: Stores Op and Term sequences converted to Reverse Polish Notation (RPN)"""
         self.location = location
         self.content = content
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return " ".join(str(i) for i in self.content)
@@ -153,13 +196,16 @@ class GetVariable:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         if self.attr is None and self.index is None:
             return str(self.var)
         elif self.attr is None:
-            return f"{self.var}.{self.attr}"
-        else:
             return f"{self.var}[{self.index}]"
+        else:
+            return f"{self.var}.{self.attr}"
 
 
 class Call:
@@ -171,21 +217,27 @@ class Call:
     def show(self) -> list[str]:
         return [str(self)]
 
+    def __repr__(self) -> str:
+        return str(self)
+
     def __str__(self) -> str:
         return f"{self.var}({", ".join(str(i) for i in self.expression_list)})"
 
 
 class Variable:
     def __init__(
-        self, location: tuple[int, int], name: Identifier, kind: Literal["global", "argument", "attriable", "local"], type: Type
+        self, location: tuple[int, int], name: Identifier, kind: Literal["global", "argument", "attribute", "local"], type: Type
     ) -> None:
         self.location = location
         self.name = name
-        self.kind: Literal["global", "argument", "attriable", "local"] = kind
+        self.kind: Literal["global", "argument", "attribute", "local"] = kind
         self.type = type
 
     def show(self) -> list[str]:
         return [str(self)]
+
+    def __repr__(self) -> str:
+        return str(self)
 
     def __str__(self) -> str:
         return f"{self.kind} {self.name}: {self.type}"
@@ -218,6 +270,9 @@ class Do_S:
     def __str__(self) -> str:
         return self.show()[0]
 
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class Let_S:
     def __init__(self, location: tuple[int, int], var: GetVariable, expression: Expression) -> None:
@@ -243,6 +298,9 @@ class Return_S:
     def __str__(self) -> str:
         return f"return {self.expression}"
 
+    def __repr__(self) -> str:
+        return str(self)
+
 
 class Break_S:
     def __init__(self, location: tuple[int, int], n: Integer) -> None:
@@ -254,6 +312,9 @@ class Break_S:
 
     def __str__(self) -> str:
         return f"break {self.n}"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class For_S:
@@ -422,7 +483,7 @@ class Root:
         return t
 
     def __str__(self) -> str:
-        return "\n".join(self.show())
+        return "\n    ".join(self.show())
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

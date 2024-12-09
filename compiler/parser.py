@@ -1,17 +1,16 @@
 from typing import NoReturn
 
-from lib import Token, Tokens, CompileError
+from lib import Token, Tokens, CompileError, built_in_type, Operator, Precedence
 from AST import *
-from constant import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: list[Token], file: str) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
-        self.file = ""
+        self.file = file
         self.now = tokens[0]
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
@@ -24,7 +23,7 @@ class Parser:
         if self.index > self.length:
             raise Exception("Unexpected end of input")
         self.now = self.tokens[self.index - 1]
-        if self.now.type == "file":
+        if self.now.type == "file_name":
             self.file = self.now.content
             self.get()
 
@@ -33,7 +32,16 @@ class Parser:
             raise Exception("Unexpected end of input")
         return self.tokens[self.index]
 
-    def main(self, name: str) -> Root:
+    def main(self) -> Root:
+        """
+        Parses the entire input token list and generates a Root node representing the program's AST.
+
+        Returns:
+            Root: The root node of the Abstract Syntax Tree.
+
+        Raises:
+            CompileError: If the input does not conform to the grammar rules.
+        """
         class_list: list[Class] = []
         while True:
             self.get()
@@ -43,7 +51,7 @@ class Parser:
                 break
             else:
                 self.error("missing keyword 'class'")
-        return Root(self.now.location, name, class_list)
+        return Root(self.now.location, self.file, class_list)
 
     def parse_Class(self) -> Class:
         location = self.now.location
@@ -94,10 +102,9 @@ class Parser:
         kind = self.now.content
         self.get()
         if self.now == built_in_type or self.now.type == "identifier":
-            type = Identifier(self.now.location, self.now.content)
+            type = self.parse_Type()
         else:
             self.error("missing return type")
-        self.get()
         if self.now.type == "identifier":
             name = Identifier(self.now.location, self.now.content)
         else:
@@ -126,7 +133,7 @@ class Parser:
                     arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
                 else:
                     self.error("missing argument name")
-            self.get()
+                self.get()
         else:
             self.error("missing argument type")
         if self.now != Token("symbol", ")"):
@@ -177,6 +184,7 @@ class Parser:
         return var_type
 
     def parse_Var(self) -> Var_S:
+        # Parse variable declarations and init.
         location = self.now.location
         self.get()
         if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
@@ -390,15 +398,12 @@ class Parser:
         elif self.now.type == "float":
             output = Term(self.now.location, Float(self.now.location, self.now.content))
             self.get()
-        elif self.now == Tokens("keyword", ("true", "false", "self")):
+        elif self.now == Tokens("keyword", ("true", "false")):
             if self.now == Token("keyword", "true"):
                 output = Term(self.now.location, "true")
                 self.get()
-            elif self.now == Token("keyword", "false"):
+            else:  # self.now == Token("keyword", "false"):
                 output = Term(self.now.location, "false")
-                self.get()
-            else:  # self.now == Token("keyword", "self")
-                output = Term(self.now.location, "self")
                 self.get()
         elif self.now == Tokens("symbol", ("-", "!", "(")):
             if self.now == Token("symbol", "("):
@@ -425,7 +430,7 @@ class Parser:
             else:
                 output = Term(location, var)
         else:
-            self.error(f"unknown Term '{self.now}'")
+            self.error(f"Unexpected term encountered: {self.now}")
             output = Term(location, "none")
         return output
 

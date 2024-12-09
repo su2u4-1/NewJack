@@ -1,117 +1,164 @@
-import argparse
+from os.path import isfile, abspath
+from sys import argv
 
-from lib import read_from_path, get_one_path, CompileError, CompileErrorGroup
+from lib import get_path, read_source, get_one_path, CompileError, CompileErrorGroup, Args, Continue
 from lexer import lexer
 from parser import Parser
+from AST import Root
 from Compiler import Compiler
-from constant import *
 
 
-def compile_file(path: str, args: argparse.Namespace) -> None:
-    """Compile a NewJack file from path."""
-    # Read source code from file
+def analyze_file(source: list[str], arg: Args, file_path: str) -> Root:
+    # Tokenize the source code.
     try:
-        source = read_from_path(path)
+        tokens = lexer(source, file_path)
+    except CompileError as e:
+        s = e.show(source[e.line])
+        print(s[0])
+        if arg.debug:
+            print("-" * s[1])
+            raise e
+        raise Continue()
+
+    # Parse tokens into an AST.
+    try:
+        ast = Parser(tokens, file_path).main()
+    except CompileError as e:
+        s = e.show(source[e.line])
+        print(s[0])
+        if arg.debug:
+            print("-" * s[1])
+            raise e
+        raise Continue()
+
+    if arg.showast:
+        print("Abstract Syntax Tree:")
+        print(ast)
+
+    return ast
+
+
+def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[str]:
+    failed = False
+    compiler = Compiler(arg.debug)
+    for ast, source in ast_list:
+        try:
+            # Add the AST to the compiler for further processing.
+            compiler.addfile(ast)
+        except CompileErrorGroup as e:
+            for i in e.exceptions:
+                s = i.show(source[i.line])
+                print(s[0])
+                if arg.debug:
+                    print("-" * s[1])
+                    print(i.traceback)
+                    print("-" * s[1])
+            failed = True
+    if failed:
+        return []
+    return compiler.returncode()
+
+
+def parse_arguments(args: str) -> tuple[list[str], Args]:
+    if "exit" in args.lower():
+        exit()
+    arg = Args()
+    paths: list[str] = []
+    outpath = False
+    errout = False
+    help = False
+    for i in args.split():
+        if help:
+            arg.help.append(i)
+        elif i.startswith("-"):
+            outpath = False
+            errout = False
+            match i:
+                case "-d" | "--debug":
+                    arg.debug = True
+                case "-c" | "--compile":
+                    arg.compile = True
+                case "-s" | "--showast":
+                    arg.showast = True
+                case "-o" | "--outpath":
+                    outpath = True
+                case "-e" | "--errout":
+                    errout = True
+                case "-h" | "--help":
+                    help = True
+                    arg.help.append("--help")
+                case _:
+                    print(f"Unrecognized flag: {i}. Please refer to the help section for valid options.")
+        elif isfile(abspath(i)):
+            if outpath:
+                arg.outpath += abspath(i)
+                outpath = False
+            elif errout:
+                arg.errout += abspath(i)
+                errout = False
+            else:
+                paths.append(abspath(i))
+    arg.print_help()
+    return paths, arg
+
+
+def main():
+    # parse arguments
+    if len(argv) == 1:
+        args = input("File(s) path (input 'exit' to cancel): ")
+    else:
+        args = " ".join(argv[1:])
+    paths, arg = parse_arguments(args)
+    if len(paths) == 0:
+        print("No valid input files provided. Use --help for usage information.")
+        return
+
+    # get file path
+    try:
+        files = get_path(paths)
     except FileNotFoundError as e:
         print(f"input Error: {e}")
         return
 
-    # Tokenization
-    try:
-        tokens = lexer(source, get_one_path(path, ".nj"))
-    except CompileError as e:
-        s = e.show(source[source.index("//" + e.file) + e.line])
-        print(s[0])
-        if args.debug:
-            print("-" * s[1])
-            raise e
-        return
-
-    # Parsing
-    parser = Parser(tokens)
-    try:
-        ast = parser.main(get_one_path(path, ".nj"))
-    except CompileError as e:
-        s = e.show(source[source.index("//" + e.file) + e.line])
-        print(s[0])
-        if args.debug:
-            print("-" * s[1])
-            raise e
-        return
-
-    if args.showast:
-        print("Abstract Syntax Tree:")
-        print(ast)
-
-    # Compile
-    if args.compile:
-        compiler = Compiler(ast, args.debug)
+    # read and process source
+    failed = False
+    ast_list: list[tuple[Root, list[str]]] = []
+    for i in files:
+        source = read_source(i)
+        print(f"Processing file: {i}")
         try:
-            code = compiler.main()
-        except CompileErrorGroup as e:
-            for i in e.exceptions:
-                s = i.show(source[source.index("//" + i.file) + i.line])
-                print(s[0])
-                if args.debug:
-                    print("-" * s[1])
-                    print(i.traceback)
-                    print("-" * s[1])
+            ast_list.append((analyze_file(source, arg, i), source))
+        except Continue:
+            print(f"File {i} processing failed")
+            failed = True
+        else:
+            print(f"File {i} processed successfully")
+    if failed:
+        return
+
+    # compile
+    if arg.compile:
+        print("compile start")
+        code = compile_all_file(ast_list, arg)
+        if code == []:
+            print("compile failed")
             return
+        elif arg.debug:
+            return
+        else:
+            print("compile end")
 
-        # 寫入檔案
+        # output the compiled file
+        if arg.outpath == "":
+            f_path = get_one_path(paths[0], ".vm")
+        else:
+            f_path = get_one_path(arg.outpath, ".vm")
         try:
-            with open(get_one_path(path, ".vm"), "w+") as f:
+            with open(get_one_path(f_path, ".vm"), "w+") as f:
                 f.write("\n".join(code))
-            print(f"Compile successful: {get_one_path(path, '.vm')}")
+            print(f"Compile successful: {f_path}")
         except OSError as e:
             print(f"output Error : {e}")
-            return
-
-
-def parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Compile NewJack files.")
-    parser.add_argument("path", type=str, help="Path to the source file.")
-    parser.add_argument("-d", "--debug", action="store_true", help=docs["--debug"])
-    parser.add_argument("-a", "--showast", action="store_true", help=docs["--showast"])
-    parser.add_argument("-c", "--compile", action="store_true", help=docs["--compile"])
-    return parser.parse_args()
-
-
-def interactive_mode() -> tuple[str, argparse.Namespace]:
-    """Handle interactive mode using input()."""
-    path = input("File(s) path (input 'exit' to cancel): ")
-    if path.lower() == "exit":
-        exit()
-    path = path.split()
-    args: list[str] = []
-    for i in path:
-        if i.startswith("-"):
-            args.append(i)
-    path = path[0]
-
-    # 將參數轉換為 argparse Namespace
-    return path, argparse.Namespace(
-        debug="-d" in args or "--debug" in args,
-        showast="-a" in args or "--showast" in args,
-        compile="-c" in args or "--compile" in args,
-    )
-
-
-def main():
-    """Main function to handle script logic."""
-    # args = parse_arguments()
-    # path = args.path
-
-    path, args = interactive_mode()
-
-    if path == "exit":
-        exit()
-
-    paths = path.split()
-    for file_path in paths:
-        print(f"Processing file: {file_path}")
-        compile_file(file_path, args)
 
 
 if __name__ == "__main__":
