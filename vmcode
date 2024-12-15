@@ -76,6 +76,7 @@ register:
     # Suggested usage:
         # $L for the local base address
         # $P for the stack top
+        # in constructor or method, "@L 0" == "self"
 
     $[register]
         - Operate on the value in the specified register
@@ -137,6 +138,11 @@ non-standard syntactic sugar:
         - Push the value of $[a] onto the stack
         stor @P $[a]
         addv $P 1 $P
+
+    push [value]
+        - Push the value onto the stack
+        intv [value]
+        push $V
 
     pop @[a] [value]
         - Pop a value from the stack and store it at $[a] offset by [value]

@@ -24,10 +24,10 @@ class Test2{
         return self;
     }
 
-    function void test1(pass){
+    function int test1(pass){
         var int b;
         let b = 1*2+3-5+8/2;
-        return;
+        return b;
     }
 
     method void ff(pass){
