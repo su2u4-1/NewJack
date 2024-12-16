@@ -172,8 +172,8 @@ class CompileErrorGroup(Exception):
 
 
 class Continue(Exception):
-    def __init__(self, text: str = "") -> None:
-        self.text = text
+    def __init__(self) -> None:
+        pass
 
 
 class Info:
@@ -237,6 +237,8 @@ def read_source(path: str) -> list[str]:
 
 
 def get_one_path(path: str, extension_name: str) -> str:
+    if not extension_name.startswith("."):
+        extension_name = "." + extension_name
     dir_path, file_name = os.path.split(os.path.abspath(path))
     return os.path.join(dir_path, file_name.split(".")[0] + extension_name)
 

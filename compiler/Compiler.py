@@ -16,7 +16,7 @@ from lib import (
 
 
 class Compiler:
-    def __init__(self, debug_flag: bool = False) -> None:
+    def __init__(self, errout: list[str], debug_flag: bool = False) -> None:
         self.global_: dict[str, tuple[Type, int]] = {}
         self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
         self.argument: dict[str, tuple[Type, int]] = {}
@@ -37,6 +37,7 @@ class Compiler:
         self.loop: list[int] = []
         self.debug_flag = debug_flag
         self.code: list[str] = ["debug-label start"]
+        self.errout = errout
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         i = CompileError(text, self.ast.file, location, "compiler")
@@ -69,10 +70,10 @@ class Compiler:
             code.append(f"debug-label end {self.ast.file}")
         # show error info
         except Exception as e:
-            print("\n------------------------------\n")
-            print(format_traceback(e))
-            print(f"{type(e).__name__}: {e}")
-        print("\n------------------------------\n")
+            self.errout.append("\n------------------------------\n")
+            self.errout.append(format_traceback(e))
+            self.errout.append(f"{type(e).__name__}: {e}")
+        self.errout.append("\n------------------------------\n")
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
@@ -88,10 +89,10 @@ class Compiler:
 
     def printinfo(self, code: list[str]) -> None:
         for k, v in self.__dict__.items():
-            print(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
-        print("\ncode:-------------------------\n")
-        print("\n".join(code))
-        print("\n------------------------------\n")
+            self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
+        self.errout.append("\ncode:-------------------------\n")
+        self.errout.append("\n".join(code))
+        self.errout.append("\n------------------------------\n")
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = []

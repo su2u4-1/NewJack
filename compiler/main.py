@@ -1,46 +1,50 @@
 from os.path import isfile, abspath
 from sys import argv
 
-from lib import get_path, read_source, get_one_path, CompileError, CompileErrorGroup, Args, Continue
+from lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue
 from lexer import lexer
 from parser import Parser
 from AST import Root
 from Compiler import Compiler
 
 
-def analyze_file(source: list[str], arg: Args, file_path: str) -> Root:
+def analyze_file(source: list[str], arg: Args, file_path: str, errout: list[str]) -> Root:
     # Tokenize the source code.
     try:
         tokens = lexer(source, file_path)
     except CompileError as e:
         s = e.show(source[e.line])
-        print(s[0])
+        errout.append(s[0])
         if arg.debug:
-            print("-" * s[1])
-            raise e
-        raise Continue()
+            errout.append("-" * s[1])
+            errout.append(format_traceback(e))
+            raise
+        else:
+            raise Continue()
 
     # Parse tokens into an AST.
     try:
         ast = Parser(tokens, file_path).main()
     except CompileError as e:
         s = e.show(source[e.line])
-        print(s[0])
+        errout.append(s[0])
         if arg.debug:
-            print("-" * s[1])
-            raise e
-        raise Continue()
+            errout.append("-" * s[1])
+            errout.append(format_traceback(e))
+            raise
+        else:
+            raise Continue()
 
     if arg.showast:
-        print("Abstract Syntax Tree:")
-        print(ast)
+        errout.append("Abstract Syntax Tree:")
+        errout.append(str(ast))
 
     return ast
 
 
-def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[str]:
+def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args, errout: list[str]) -> list[str]:
     failed = False
-    compiler = Compiler(arg.debug)
+    compiler = Compiler(errout, arg.debug)
     for ast, source in ast_list:
         try:
             # Add the AST to the compiler for further processing.
@@ -48,11 +52,11 @@ def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args) -> list[
         except CompileErrorGroup as e:
             for i in e.exceptions:
                 s = i.show(source[i.line])
-                print(s[0])
+                errout.append(s[0])
                 if arg.debug:
-                    print("-" * s[1])
-                    print(i.traceback)
-                    print("-" * s[1])
+                    errout.append("-" * s[1])
+                    errout.append(i.traceback)
+                    errout.append("-" * s[1])
             failed = True
     if failed:
         return []
@@ -102,7 +106,8 @@ def parse_arguments(args: str) -> tuple[list[str], Args]:
     return paths, arg
 
 
-def main():
+def main() -> tuple[list[str], str]:
+    errout: list[str] = []
     # parse arguments
     if len(argv) == 1:
         args = input("File(s) path (input 'exit' to cancel): ")
@@ -111,14 +116,14 @@ def main():
     paths, arg = parse_arguments(args)
     if len(paths) == 0:
         print("No valid input files provided. Use --help for usage information.")
-        return
+        return errout, arg.errout
 
     # get file path
     try:
         files = get_path(paths)
     except FileNotFoundError as e:
-        print(f"input Error: {e}")
-        return
+        errout.append(f"input Error: {e}")
+        return errout, arg.errout
 
     # read and process source
     failed = False
@@ -127,24 +132,24 @@ def main():
         source = read_source(i)
         print(f"Processing file: {i}")
         try:
-            ast_list.append((analyze_file(source, arg, i), source))
+            ast_list.append((analyze_file(source, arg, i, errout), source))
         except Continue:
             print(f"File {i} processing failed")
             failed = True
         else:
             print(f"File {i} processed successfully")
     if failed:
-        return
+        return errout, arg.errout
 
     # compile
     if arg.compile:
         print("compile start")
-        code = compile_all_file(ast_list, arg)
+        code = compile_all_file(ast_list, arg, errout)
         if code == []:
             print("compile failed")
-            return
+            return errout, arg.errout
         elif arg.debug:
-            return
+            return errout, arg.errout
         else:
             print("compile end")
 
@@ -156,10 +161,21 @@ def main():
         try:
             with open(get_one_path(f_path, ".vm"), "w+") as f:
                 f.write("\n".join(code))
-            print(f"Compile successful: {f_path}")
+            errout.append(f"Compile successful: {f_path}")
         except OSError as e:
-            print(f"output Error : {e}")
+            errout.append(f"output Error : {e}")
+
+    return errout, arg.errout
 
 
 if __name__ == "__main__":
-    main()
+    errout, outpath = main()
+    errout = "\n".join(errout)
+    if outpath == "":
+        print(errout)
+    else:
+        extension_name = outpath.split(".")[1]
+        if extension_name == "":
+            extension_name = ".txt"
+        with open(get_one_path(outpath, extension_name), "w+") as f:
+            f.write(errout)

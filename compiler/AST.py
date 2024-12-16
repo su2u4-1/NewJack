@@ -296,7 +296,10 @@ class Return_S:
         return [str(self)]
 
     def __str__(self) -> str:
-        return f"return {self.expression}"
+        if self.expression is None:
+            return "return void"
+        else:
+            return f"return {self.expression}"
 
     def __repr__(self) -> str:
         return str(self)
@@ -483,7 +486,7 @@ class Root:
         return t
 
     def __str__(self) -> str:
-        return "\n    ".join(self.show())
+        return "\n".join(self.show())
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

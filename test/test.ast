@@ -1,4 +1,5 @@
-file: D:\NewJack\test.nj
+Abstract Syntax Tree:
+file: C:\Users\User\NewJack\test\test.nj
 class(Test)
     attr:
         a: int
@@ -6,21 +7,27 @@ class(Test)
     subroutine:
         constructor new(argument a: int, argument b: int) -> Test
             var_s:
-                local c: Test2 = Test2[None]()
-            do c[None]()
+                local c: Test2 = Test2.new(1)
+            do c.ff()
             let_s:
-                self[None] = 2
+                self.b = Test2.test1()
             return self
         method test0() -> void
-            return None
+            return void
 class(Test2)
     attr:
         a: int
     subroutine:
-        constructor new() -> Test2
+        constructor new(argument a: int) -> Test2
+            let_s:
+                self.a = a
             return self
-        function test1() -> void
+        function test1() -> int
             var_s:
             let_s:
                 b = 1 2 * 3 + 5 - 8 2 / +
+            return b
         method ff() -> void
+            let_s:
+                self.a = self.a 2 *
+            return void
