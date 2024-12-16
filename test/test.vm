@@ -58,16 +58,19 @@ debug-label start
                 stor @T $D
                 push @L 0
                 return
-            label Test2.ff     # <- this
-                push $L 0
-                <compileGetVariable>
-                push constant 2
+            label Test2.ff
+                push @L 0
+                pop $D
+                push $D 0
+                push @L 0
+                pop $D
+                push @D 0
+                push 2
                 call built_in.mul 2
-                pop term 0
-                pop address 0
-                push term 0
-                pop memory 0
-                push constant 0
+                pop $D
+                pop $T
+                stor @T $D
+                push @L 0
                 return
         debug-label end test.Test2
     debug-label end D:\NewJack\test.nj
