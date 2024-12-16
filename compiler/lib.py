@@ -249,13 +249,13 @@ def format_traceback(e: BaseException) -> str:
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
 built_in_type = Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void"))
-type_class = Type((-1, -1), Identifier((-1, -1), "class"))
+type_class = Type(Identifier("class"))
 type_subroutine = {
-    "constructor": Type((-1, -1), Identifier((-1, -1), "constructor")),
-    "function": Type((-1, -1), Identifier((-1, -1), "function")),
-    "method": Type((-1, -1), Identifier((-1, -1), "method")),
+    "constructor": Type(Identifier("constructor")),
+    "function": Type(Identifier("function")),
+    "method": Type(Identifier("method")),
 }
-type_int = Type((-1, -1), Identifier((-1, -1), "int"))
-type_argument = Type((-1, -1), Identifier((-1, -1), "argument"))
-type_void = Type((-1, -1), Identifier((-1, -1), "void"))
-none = Identifier((-1, -1), "None")
+type_int = Type(Identifier("int"))
+type_argument = Type(Identifier("argument"))
+type_void = Type(Identifier("void"))
+none = Identifier("None")

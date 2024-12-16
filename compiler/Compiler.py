@@ -32,8 +32,8 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now_class: Class = Class((-1, -1), none, [], [])
-        self.now_subroutine: Subroutine = Subroutine((-1, -1), none, "method", Type((-1, -1), none), [], [])
+        self.now_class: Class = Class(none, [], [])
+        self.now_subroutine: Subroutine = Subroutine(none, "method", Type(none), [], [])
         self.loop: list[int] = []
         self.debug_flag = debug_flag
         self.code: list[str] = ["debug-label start"]
@@ -48,14 +48,15 @@ class Compiler:
         self.ast = ast
         code: list[str] = [f"debug-label start {self.ast.file}"]
         try:
-            # declare attriable, subroutine
+            # declare global, attriable, subroutine
+            for g in ast.global_list:
+                self.compileVariable(g)
             for i, c in enumerate(self.ast.class_list):
                 self.count["attribute"] = 0
                 self.attribute[str(c.name)] = {}
                 self.global_[str(c.name)] = (type_class, i)
                 for a in c.attr_list:
-                    self.attribute[str(c.name)][a[0]] = (a[1], self.count["attribute"])
-                    self.count["attribute"] += 1
+                    self.compileVariable(a)
                 for s in c.subroutine_list:
                     if s.kind == "method":
                         self.attribute[str(c.name)][str(s.name)] = (type_subroutine[s.kind], self.count["subroutine"])
@@ -141,38 +142,32 @@ class Compiler:
         if len(var.var_list) < len(var.expression_list):
             self.error("'value' redundant 'variable'", var.location)
         for i, j in zip(var.var_list, var.expression_list):
-            t = self.compileVariable(i)
+            if i.kind != "local":
+                self.error("must be local", i.location)
+            t = self.compileVariable(i) - 1
             code.extend(self.compileExpression(j))
-            code.append(f"pop {i.kind} {t}")
-            self.count[i.kind] += 1
+            code.append(f"pop @L {t}")
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
-                if i.kind == "global":
-                    self.global_[str(i.name)] = (i.type, self.count[i.kind])
-                elif i.kind == "attribute":
-                    self.attribute[str(self.now_class.name)][str(i.name)] = (i.type, self.count[i.kind])
-                elif i.kind == "argument":
-                    self.argument[str(i.name)] = (i.type, self.count[i.kind])
-                else:
-                    self.local[str(i.name)] = (i.type, self.count[i.kind])
-                code.append("push constant 0")
-                code.append(f"pop {i.kind} {self.count[i.kind]}")
-                self.count[i.kind] += 1
+                if i.kind != "local":
+                    self.error("must be local", i.location)
+                t = self.compileVariable(i) - 1
+                code.append("push 0")
+                code.append(f"pop @L {t}")
         return code
 
     def compileDo_S(self, do: Do_S) -> list[str]:
         result = self.compileCall(do.call)
-        result.append("pop term 0")
+        result.append("pop @T 0")
         return result
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
         code.extend(self.compileGetVariable(let.var))
         code.extend(self.compileExpression(let.expression))
-        code.append("pop term 0")
-        code.append("pop address 0")
-        code.append("push term 0")
-        code.append("pop memory 0")
+        code.append("pop $D")
+        code.append("pop $T")
+        code.append("stor @T $D")
         return code
 
     def compileIf_S(self, if_: If_S) -> list[str]:
@@ -256,7 +251,7 @@ class Compiler:
         code: list[str] = []
         if return_.expression is None:
             if self.now_subroutine.return_type == type_void:
-                code.append("push constant 0")
+                code.append("push 0")
             else:
                 self.error(f"muse be return {self.now_subroutine.return_type}", return_.location)
         else:
@@ -272,7 +267,7 @@ class Compiler:
             self.loop = self.loop[: -int(break_.n)]
             return [f"goto loop_end_{self.loop[-int(break_.n)]} all"]
 
-    def compileVariable(self, var: Variable) -> None:
+    def compileVariable(self, var: Variable) -> int:
         if var.kind == "global":
             self.global_[str(var.name)] = (var.type, self.count[var.kind])
         elif var.kind == "attribute":
@@ -281,6 +276,8 @@ class Compiler:
             self.argument[str(var.name)] = (var.type, self.count[var.kind])
         else:
             self.local[str(var.name)] = (var.type, self.count[var.kind])
+        self.count[var.kind] += 1
+        return self.count[var.kind]
 
     def compileExpression(self, expression: Expression) -> list[str]:
         code: list[str] = []
@@ -294,17 +291,17 @@ class Compiler:
     def compileTerm(self, term: Term) -> list[str]:
         code: list[str] = []
         if isinstance(term.content, Integer):
-            code.append(f"push constant {term.content}")
+            code.append(f"push {term.content}")
         elif isinstance(term.content, Float):
-            code.append(f"push constant {term.content.a}")
-            code.append(f"push constant {term.content.b}")
+            code.append(f"push {term.content.a}")
+            code.append(f"push {term.content.b}")
             code.append("call built_in.float 2")
         elif isinstance(term.content, Char):
-            code.append(f"push constant {ord(term.content.content)}")
+            code.append(f"push {ord(term.content.content)}")
             code.append("call built_in.char 1")
         elif isinstance(term.content, String):
             for i in str(term.content):
-                code.append(f"push constant {ord(i)}")
+                code.append(f"push {ord(i)}")
             code.append(f"call built_in.string {len(term.content.content)}")
         elif isinstance(term.content, Call):
             code.extend(self.compileCall(term.content))
@@ -316,16 +313,12 @@ class Compiler:
             code.extend(self.compileTerm(term.content))
         else:
             if term.content == "false":
-                code.append("push constant 0")
+                code.append("push 0")
             elif term.content == "true":
-                code.append("push constant 1")
+                code.append("push 1")
             elif term.content == "self":
-                if "self" in self.argument:
-                    code.append("push argument 0")
-                elif self.now_subroutine.kind == "constructor":
-                    code.append("push term 1")
-                    code.append("pop address 0")
-                    code.append("push memory 0")
+                if "self" in self.argument or self.now_subroutine.kind == "constructor":
+                    code.append("push @L 0")
                 else:
                     self.error("self must be in method or constructor", term.location)
             else:
@@ -415,7 +408,7 @@ class Compiler:
         if var.attr is not None:
             if var_info.type.outside == "class":
                 if f"{var_info.name}.{var.attr}" in self.global_:
-                    var_info.type = Type((-1, -1), Identifier((-1, -1), var_info.name))
+                    var_info.type = Type(Identifier(var_info.name))
                     var_info.kind = self.global_[f"{var_info.name}.{var.attr}"][0].outside.content  # type: ignore
                 else:
                     self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
@@ -433,3 +426,5 @@ class Compiler:
                 self.error(f"variable {var} is not a container", var.index.location)
             var_info.name += f"[{var.index}]"
         return var_info
+
+    # TODO: fix goto

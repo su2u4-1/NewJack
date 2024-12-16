@@ -43,29 +43,49 @@ class Parser:
             CompileError: If the input does not conform to the grammar rules.
         """
         class_list: list[Class] = []
+        global_list: list[Variable] = []
         while True:
             self.get()
             if self.now == Token("keyword", "class"):
                 class_list.append(self.parse_Class())
+            elif self.now == Token("keyword", "global"):
+                self.get()
+                if self.now != Token("symbol", "{"):
+                    self.error("must be symbol '{'")
+                self.get()
+                while self.now != Token("symbol", "}"):
+                    if self.now.type != "identifier":
+                        self.error(f"must be identifier, not {self.now.type} '{self.now.content}'")
+                    global_name = self.now.content
+                    location = self.now.location
+                    self.get()
+                    if self.now != Token("symbol", ":"):
+                        self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
+                    self.get()
+                    if self.now != built_in_type or self.now.type == "identifier":
+                        self.error("must be built-in type or identifier")
+                    global_list.append(Variable(Identifier(global_name), "global", self.parse_Type(), location))
+                    if self.now != Token("symbol", ";"):
+                        self.error("missing symbol ';'")
+                    self.get()
             elif self.now == Token("keyword", "EOF"):
                 break
             else:
                 self.error("missing keyword 'class'")
-        return Root(self.now.location, self.file, class_list)
+        return Root(self.file, class_list, global_list, self.now.location)
 
     def parse_Class(self) -> Class:
         location = self.now.location
         self.get()
         if self.now.type == "identifier":
-            name = Identifier(self.now.location, self.now.content)
+            name = Identifier(self.now.content, self.now.location)
         else:
             self.error("missing class name")
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         s_list: list[Subroutine] = []
-        attr_list: list[tuple[str, Type]] = []
-        # var_list: list[Var_S] = []
+        attr_list: list[Variable] = []
         while True:
             self.get()
             if self.now == Token("keyword", "describe"):
@@ -77,13 +97,14 @@ class Parser:
                     if self.now.type != "identifier":
                         self.error(f"must be identifier, not {self.now.type} '{self.now.content}'")
                     attr_name = self.now.content
+                    location = self.now.location
                     self.get()
                     if self.now != Token("symbol", ":"):
                         self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
                     self.get()
                     if self.now != built_in_type or self.now.type == "identifier":
                         self.error("must be built-in type or identifier")
-                    attr_list.append((attr_name, self.parse_Type()))
+                    attr_list.append(Variable(Identifier(attr_name), "argument", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
                         self.error("missing symbol ';'")
                     self.get()
@@ -93,7 +114,7 @@ class Parser:
                 break
             else:
                 self.error("missing symbol '}'")
-        return Class(location, name, attr_list, s_list)
+        return Class(name, attr_list, s_list, location)
 
     def parse_Subroutine(self) -> Subroutine:
         location = self.now.location
@@ -106,7 +127,7 @@ class Parser:
         else:
             self.error("missing return type")
         if self.now.type == "identifier":
-            name = Identifier(self.now.location, self.now.content)
+            name = Identifier(self.now.content, self.now.location)
         else:
             self.error("missing subroutine name")
         self.get()
@@ -119,7 +140,7 @@ class Parser:
         elif self.now == built_in_type or self.now.type == "identifier":
             arg_type = self.parse_Type()
             if self.now.type == "identifier":
-                arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
+                arg_list.append(Variable(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
             else:
                 self.error("missing argument name")
             self.get()
@@ -130,7 +151,7 @@ class Parser:
                 else:
                     self.error("the symbol ',' must be followed by a argument type")
                 if self.now.type == "identifier":
-                    arg_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "argument", arg_type))
+                    arg_list.append(Variable(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
                 else:
                     self.error("missing argument name")
                 self.get()
@@ -141,7 +162,7 @@ class Parser:
         self.get()
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
-        return Subroutine(location, name, kind, type, self.parse_Statements(), arg_list)  # type: ignore
+        return Subroutine(name, kind, type, self.parse_Statements(), arg_list, location)  # type: ignore
 
     def parse_Statements(self) -> list[Statement]:
         output: list[Statement] = []
@@ -174,7 +195,7 @@ class Parser:
         return output
 
     def parse_Type(self) -> Type:
-        var_type = Type(self.now.location, Identifier(self.now.location, self.now.content))
+        var_type = Type(Identifier(self.now.content, self.now.location), None, self.now.location)
         self.get()
         if self.now == Token("symbol", "["):
             var_type.inside = self.parse_Type()
@@ -193,25 +214,25 @@ class Parser:
             self.error("missing variable type")
         var_list: list[Variable] = []
         if self.now.type == "identifier":
-            var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "local", var_type))
+            var_list.append(Variable(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
         self.get()
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                var_list.append(Variable(self.now.location, Identifier(self.now.location, self.now.content), "local", var_type))
+                var_list.append(Variable(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
             self.get()
         if self.now == Token("symbol", ";"):
-            return Var_S(location, var_list)
+            return Var_S(var_list, [], location)
         elif self.now == Token("symbol", "="):
             e = self.parse_ExpressionList()
         else:
             self.error("must be symbol ';' or '='")
         if self.now == Token("symbol", ";"):
-            return Var_S(location, var_list, e)
+            return Var_S(var_list, e, location)
         else:
             self.error("the end must be symbol ';'")
 
@@ -224,7 +245,7 @@ class Parser:
         e = self.parse_Expression()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
-        return Let_S(location, var, e)
+        return Let_S(var, e, location)
 
     def parse_Do(self) -> Do_S:
         location = self.now.location
@@ -233,7 +254,7 @@ class Parser:
         self.get()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
-        return Do_S(location, call)
+        return Do_S(call, location)
 
     def parse_If(self) -> If_S:
         location = self.now.location
@@ -268,9 +289,9 @@ class Parser:
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
-            return If_S(location, c0, s0, len(elif_c), elif_s, elif_c, True, self.parse_Statements())
+            return If_S(c0, s0, len(elif_c), elif_s, elif_c, True, self.parse_Statements(), location)
         else:
-            return If_S(location, c0, s0, len(elif_c), elif_s, elif_c)
+            return If_S(c0, s0, len(elif_c), elif_s, elif_c, location=location)
 
     def parse_While(self) -> While_S:
         location = self.now.location
@@ -290,9 +311,9 @@ class Parser:
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
             s1 = self.parse_Statements()
-            return While_S(location, c, s0, True, s1)
+            return While_S(c, s0, True, s1, location)
         else:
-            return While_S(location, c, s0)
+            return While_S(c, s0, location=location)
 
     def parse_For(self) -> For_S:
         location = self.now.location
@@ -302,11 +323,11 @@ class Parser:
         self.get()
         if self.now.type != "identifier":
             self.error("must be identifier")
-        for_count_integer = Identifier(self.now.location, self.now.content)
+        for_count_integer = Identifier(self.now.content, self.now.location)
         i_0 = self.parse_Expression()
         if self.now == Token("symbol", ")"):
-            i_1 = Expression(self.now.location, [Term(self.now.location, Integer(self.now.location, "0"))])
-            i_2 = Expression(self.now.location, [Term(self.now.location, Integer(self.now.location, "1"))])
+            i_1 = Expression([Term(Integer("0", self.now.location), location=self.now.location)], self.now.location)
+            i_2 = Expression([Term(Integer("1", self.now.location), location=self.now.location)], self.now.location)
             for_range = (i_1, i_0, i_2)
         else:
             if self.now != Token("symbol", ";"):
@@ -328,30 +349,30 @@ class Parser:
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
             s1 = self.parse_Statements()
-            return For_S(location, for_count_integer, for_range, s0, True, s1)
+            return For_S(for_count_integer, for_range, s0, True, s1, location)
         else:
-            return For_S(location, for_count_integer, for_range, s0)
+            return For_S(for_count_integer, for_range, s0, location=location)
 
     def parse_Return(self) -> Return_S:
         location = self.now.location
         if self.next() == Token("symbol", ";"):
             self.get()
-            return Return_S(self.now.location)
+            return Return_S(None, self.now.location)
         e = self.parse_Expression()
         if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
-        return Return_S(location, e)
+        return Return_S(e, location)
 
     def parse_Break(self) -> Break_S:
         location = self.now.location
         self.get()
         if self.now.type == "integer":
-            n = Integer(self.now.location, self.now.content)
+            n = Integer(self.now.content, self.now.location)
         elif self.now == Token("symbol", ";"):
-            n = Integer(self.now.location, "1")
+            n = Integer("1", self.now.location)
         else:
             self.error("missing symbol ';'")
-        return Break_S(location, n)
+        return Break_S(n, location)
 
     def parse_ExpressionList(self) -> list[Expression]:
         output: list[Expression] = []
@@ -373,7 +394,7 @@ class Parser:
                 if len(symbol) == 0 or Precedence[symbol[-1].content] < Precedence[self.now.content]:
                     if self.now != Operator:
                         self.error("missing operator")
-                    symbol.append(Op(self.now.location, self.now.content))  # type: ignore
+                    symbol.append(Op(self.now.content, self.now.location))  # type: ignore
                     break
                 output.append(symbol.pop())
             if self.next() == Operator:
@@ -381,39 +402,39 @@ class Parser:
             output.append(self.parse_Term())
         while len(symbol) > 0:
             output.append(symbol.pop())
-        return Expression(location, output)
+        return Expression(output, location)
 
     def parse_Term(self) -> Term:
         self.get()
         location = self.now.location
         if self.now.type == "string":
             if len(self.now.content) == 1:
-                output = Term(self.now.location, Char(self.now.location, self.now.content))
+                output = Term(Char(self.now.content, self.now.location), None, self.now.location)
             else:
-                output = Term(self.now.location, String(self.now.location, self.now.content))
+                output = Term(String(self.now.content, self.now.location), None, self.now.location)
             self.get()
         elif self.now.type == "integer":
-            output = Term(self.now.location, Integer(self.now.location, self.now.content))
+            output = Term(Integer(self.now.content, self.now.location), None, self.now.location)
             self.get()
         elif self.now.type == "float":
-            output = Term(self.now.location, Float(self.now.location, self.now.content))
+            output = Term(Float(self.now.content, self.now.location), None, self.now.location)
             self.get()
         elif self.now == Tokens("keyword", ("true", "false")):
             if self.now == Token("keyword", "true"):
-                output = Term(self.now.location, "true")
+                output = Term("true", None, self.now.location)
                 self.get()
             else:  # self.now == Token("keyword", "false"):
-                output = Term(self.now.location, "false")
+                output = Term("false", None, self.now.location)
                 self.get()
         elif self.now == Tokens("symbol", ("-", "!", "(")):
             if self.now == Token("symbol", "("):
-                output = Term(self.now.location, self.parse_Expression())
+                output = Term(self.parse_Expression(), None, self.now.location)
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
             elif self.now == Token("symbol", "-"):
-                output = Term(self.now.location, self.parse_Term(), "-")
+                output = Term(self.parse_Term(), "-", self.now.location)
             else:  # self.now == Token("symbol", "!")
-                output = Term(self.now.location, self.parse_Term(), "!")
+                output = Term(self.parse_Term(), "!", self.now.location)
         elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
             var = self.parse_Variable()
             if self.now == Token("symbol", "("):
@@ -425,10 +446,10 @@ class Parser:
                     e = self.parse_ExpressionList()
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
-                output = Term(location, Call(self.now.location, var, e))
+                output = Term(Call(var, e, self.now.location), None, location)
                 self.get()
             else:
-                output = Term(location, var)
+                output = Term(var, None, location)
         else:
             self.error(f"Unexpected term encountered: {self.now}")
             output = Term(location, "none")
@@ -436,12 +457,12 @@ class Parser:
 
     def parse_Variable(self, var: Optional[GetVariable] = None) -> GetVariable:
         if var is None and (self.now.type == "identifier" or self.now == Token("keyword", "self")):
-            var = GetVariable(self.now.location, Identifier(self.now.location, self.now.content))
+            var = GetVariable(Identifier(self.now.content, self.now.location), location=self.now.location)
         elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, GetVariable):
             if self.now == Token("symbol", "."):
                 self.get()
                 if self.now.type == "identifier":
-                    var.attr = Identifier(self.now.location, self.now.content)
+                    var.attr = Identifier(self.now.content, self.now.location)
                 else:
                     self.error("must be identifier")
             elif self.now == Token("symbol", "["):
@@ -468,4 +489,4 @@ class Parser:
             e = self.parse_ExpressionList()
         if self.now != Token("symbol", ")"):
             self.error("missing symbol ')'")
-        return Call(location, var, e)
+        return Call(var, e, location)
