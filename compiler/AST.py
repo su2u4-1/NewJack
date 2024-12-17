@@ -453,15 +453,22 @@ class Subroutine:
 
 class Class:
     def __init__(
-        self, name: Identifier, attr_list: list[Variable], subroutine_list: list[Subroutine], location: tuple[int, int] = (-1, -1)
+        self,
+        name: Identifier,
+        attr_list: list[Variable],
+        subroutine_list: list[Subroutine],
+        file_path: str,
+        location: tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.name = name
         self.attr_list = attr_list
         self.subroutine_list = subroutine_list
+        self.file_path = file_path
+        self.file_name = os.path.split(os.path.abspath(file_path))[1].split(".")[0]
 
     def show(self) -> list[str]:
-        t = [f"class({self.name})"]
+        t = [f"class({self.name}), file: {self.file_path}"]
         t.append("    attr:")
         for a in self.attr_list:
             t.append(f"        {a}")
@@ -474,17 +481,18 @@ class Class:
         return "\n".join(self.show())
 
 
+class Global:
+    pass
+
+
 class Root:
-    def __init__(self, file: str, class_list: list[Class], global_list: list[Variable], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, class_list: list[Class], global_list: list[Variable], location: tuple[int, int] = (-1, -1)) -> None:
         self.location = location
-        self.name = os.path.split(os.path.abspath(file))[1].split(".")[0]
-        self.file = file
         self.class_list = class_list
         self.global_list = global_list
 
     def show(self) -> list[str]:
-        t = [f"file: {self.file}"]
-        t.append("    global:")
+        t = ["    global:"]
         for g in self.global_list:
             t.append(f"        {g}")
         for c in self.class_list:

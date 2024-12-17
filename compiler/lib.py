@@ -212,18 +212,18 @@ class Args:
 
 
 def get_path(paths: list[str]) -> list[str]:
-    file: list[str] = []
+    files: list[str] = []
     for path in paths:
         path = os.path.abspath(path)
         if os.path.isdir(path):
             for f in os.listdir(path):
                 if os.path.isfile(f):
-                    file.append(f)
+                    files.append(f)
         elif os.path.isfile(path):
-            file.append(path)
-    if len(file) == 0:
+            files.append(path)
+    if len(files) == 0:
         raise FileNotFoundError("file not found")
-    return file
+    return files
 
 
 def read_source(path: str) -> list[str]:

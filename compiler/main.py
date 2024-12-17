@@ -4,7 +4,7 @@ from sys import argv
 from lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue
 from lexer import lexer
 from parser import Parser
-from AST import Root
+from AST import Class, Global, Root
 from Compiler import Compiler
 
 
@@ -42,16 +42,18 @@ def analyze_file(source: list[str], arg: Args, file_path: str, errout: list[str]
     return ast
 
 
-def compile_all_file(ast_list: list[tuple[Root, list[str]]], arg: Args, errout: list[str]) -> list[str]:
+def compile_all_file(
+    class_list: list[Class], global_: Global, arg: Args, source_dict: dict[str, list[str]], errout: list[str]
+) -> list[str]:
     failed = False
-    compiler = Compiler(errout, arg.debug)
-    for ast, source in ast_list:
+    compiler = Compiler(global_, errout, arg.debug)
+    for ast in class_list:
         try:
             # Add the AST to the compiler for further processing.
             compiler.addfile(ast)
         except CompileErrorGroup as e:
             for i in e.exceptions:
-                s = i.show(source[i.line])
+                s = i.show(source_dict[ast.file_path][i.line])
                 errout.append(s[0])
                 if arg.debug:
                     errout.append("-" * s[1])
@@ -125,14 +127,18 @@ def main() -> tuple[list[str], str]:
         errout.append(f"input Error: {e}")
         return errout, arg.errout
 
-    # read and process source
+    # read source
+    source_dict: dict[str, list[str]] = {}
+
+    # process source
     failed = False
-    ast_list: list[tuple[Root, list[str]]] = []
+    class_list: list[Class] = []
     for i in files:
         source = read_source(i)
         print(f"Processing file: {i}")
         try:
-            ast_list.append((analyze_file(source, arg, i, errout), source))
+            root = analyze_file(source, arg, i, errout)
+            class_list.extend(root.class_list)
         except Continue:
             print(f"File {i} processing failed")
             failed = True
@@ -144,7 +150,7 @@ def main() -> tuple[list[str], str]:
     # compile
     if arg.compile:
         print("compile start")
-        code = compile_all_file(ast_list, arg, errout)
+        code = compile_all_file(class_list, arg, source_dict, errout)
         if code == []:
             print("compile failed")
             return errout, arg.errout

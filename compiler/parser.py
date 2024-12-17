@@ -5,18 +5,18 @@ from AST import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], file: str) -> None:
+    def __init__(self, tokens: list[Token], file_path: str) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
         self.length = len(tokens)
-        self.file = file
+        self.file_path = file_path
         self.now = tokens[0]
 
     def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
             location = self.now.location
-        raise CompileError(text, self.file, location, "parser")
+        raise CompileError(text, self.file_path, location, "parser")
 
     def get(self) -> None:
         self.index += 1
@@ -24,7 +24,6 @@ class Parser:
             raise Exception("Unexpected end of input")
         self.now = self.tokens[self.index - 1]
         if self.now.type == "file_name":
-            self.file = self.now.content
             self.get()
 
     def next(self) -> Token:
@@ -72,7 +71,7 @@ class Parser:
                 break
             else:
                 self.error("missing keyword 'class'")
-        return Root(self.file, class_list, global_list, self.now.location)
+        return Root(class_list, global_list, self.now.location)
 
     def parse_Class(self) -> Class:
         location = self.now.location
@@ -114,7 +113,7 @@ class Parser:
                 break
             else:
                 self.error("missing symbol '}'")
-        return Class(name, attr_list, s_list, location)
+        return Class(name, attr_list, s_list, self.file_path, location)
 
     def parse_Subroutine(self) -> Subroutine:
         location = self.now.location
