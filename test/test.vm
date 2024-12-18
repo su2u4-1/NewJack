@@ -1,7 +1,7 @@
 debug-label start
     alloc 0
     inpv [The address of the pointer to the global]
-    pop $V
+    pop @V
     debug-label start D:\NewJack\test.nj
         debug-label start test.Test
             label Test.new

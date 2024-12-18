@@ -6,7 +6,7 @@ from lib import CompileError, CompileErrorGroup, Info, type_class, type_int, typ
 
 class Compiler:
     def __init__(self, global_: Global, errout: list[str], debug_flag: bool = False) -> None:
-        # [global, local......]
+        # [global, argument0, local0, argument1, local1, ...]
         self.scope: list[dict[str, tuple[Type, int]]] = [{}]
         self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
         self.global_ = global_
@@ -49,9 +49,16 @@ class Compiler:
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
-            self.printinfo(code)
+            self.showCompilerInfo(code)
         else:
             self.code.extend(code)
+
+    def showCompilerInfo(self, code: list[str]) -> None:
+        for k, v in self.__dict__.items():
+            self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
+        self.errout.append("\ncode:-------------------------\n")
+        self.errout.append("\n".join(code))
+        self.errout.append("\n------------------------------\n")
 
     def declare(self, vars: list[DeclareVar] | DeclareVar) -> None:
         if isinstance(vars, DeclareVar):
@@ -75,13 +82,6 @@ class Compiler:
         self.code.insert(2, f"pop pointer global")
         self.code.append("debug-label end")
         return self.code
-
-    def printinfo(self, code: list[str]) -> None:
-        for k, v in self.__dict__.items():
-            self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
-        self.errout.append("\ncode:-------------------------\n")
-        self.errout.append("\n".join(code))
-        self.errout.append("\n------------------------------\n")
 
     def compileClass(self, class_: Class) -> list[str]:
         code: list[str] = []
@@ -363,18 +363,23 @@ class Compiler:
             var_info = Info()
             var_info.code.append("<GetVarInfo>")
             var_info.name = var.var.content
-            if var.var.content == "self":
+            if var.var.content == "self" and self.now_subroutine.kind != "function":
                 var_info.type = self.scope[-2]["self"][0]
                 var_info.kind = "argument"
+                var_info.code.append("push @L 0")
             elif var.var.content in self.scope[-1]:
                 var_info.type = self.scope[-1][var.var.content][0]
                 var_info.kind = "local"
+                var_info.code.append(f"push @L {self.count["argument"] + self.scope[-1][var.var.content][1]}")
             elif var.var.content in self.scope[-2]:
                 var_info.type = self.scope[-2][var.var.content][0]
                 var_info.kind = "argument"
+                var_info.code.append(f"push @L {self.scope[-2][var.var.content][1]}")
             elif var.var.content in self.scope[0]:
                 var_info.type = self.scope[0][var.var.content][0]
                 var_info.kind = "global"
+                var_info.code.append("inpv [The address of the pointer to the global]")
+                var_info.code.append(f"push @V {self.scope[0][var.var.content][1]}")
             elif self.now_class.name.content + "." + var.var.content in self.scope[0]:
                 var_info.type = self.scope[0][self.now_class.name.content + "." + var.var.content][0]
                 var_info.kind = var_info.type.outside.content  # type: ignore

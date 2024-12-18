@@ -496,8 +496,7 @@ class Global:
 
 
 class Root:
-    def __init__(self, class_list: list[Class], global_list: list[DeclareVar], location: tuple[int, int] = (-1, -1)) -> None:
-        self.location = location
+    def __init__(self, class_list: list[Class], global_list: list[DeclareVar]) -> None:
         self.class_list = class_list
         self.global_list = global_list
 

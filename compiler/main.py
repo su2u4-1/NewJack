@@ -1,4 +1,4 @@
-from os.path import isfile, abspath
+from os.path import isfile, abspath, isdir
 from sys import argv
 
 from lib import (
@@ -115,6 +115,8 @@ def parse_arguments(args: str) -> tuple[list[str], Args]:
                 errout = False
             else:
                 paths.append(abspath(i))
+        elif isdir(abspath(i)):
+            paths.append(abspath(i))
     arg.print_help()
     return paths, arg
 
@@ -161,6 +163,7 @@ def main() -> tuple[list[str], str]:
     if failed:
         return errout, arg.errout
 
+    # add class and subroutine to the global
     for i in class_list:
         global_.global_variable.append(DeclareVar(i.name, "global", type_class))
         global_.global_variable.extend(i.attr_list)
@@ -195,6 +198,7 @@ def main() -> tuple[list[str], str]:
 
 
 if __name__ == "__main__":
+    # output error info
     errout, outpath = main()
     errout = "\n".join(errout)
     if outpath == "":
