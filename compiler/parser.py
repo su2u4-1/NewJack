@@ -42,7 +42,7 @@ class Parser:
             CompileError: If the input does not conform to the grammar rules.
         """
         class_list: list[Class] = []
-        global_list: list[Variable] = []
+        global_list: list[DeclareVar] = []
         while True:
             self.get()
             if self.now == Token("keyword", "class"):
@@ -63,7 +63,7 @@ class Parser:
                     self.get()
                     if self.now != built_in_type or self.now.type == "identifier":
                         self.error("must be built-in type or identifier")
-                    global_list.append(Variable(Identifier(global_name), "global", self.parse_Type(), location))
+                    global_list.append(DeclareVar(Identifier(global_name), "global", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
                         self.error("missing symbol ';'")
                     self.get()
@@ -84,7 +84,7 @@ class Parser:
         if self.now != Token("symbol", "{"):
             self.error("missing symbol '{'")
         s_list: list[Subroutine] = []
-        attr_list: list[Variable] = []
+        attr_list: list[DeclareVar] = []
         while True:
             self.get()
             if self.now == Token("keyword", "describe"):
@@ -103,7 +103,7 @@ class Parser:
                     self.get()
                     if self.now != built_in_type or self.now.type == "identifier":
                         self.error("must be built-in type or identifier")
-                    attr_list.append(Variable(Identifier(attr_name), "argument", self.parse_Type(), location))
+                    attr_list.append(DeclareVar(Identifier(attr_name), "argument", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
                         self.error("missing symbol ';'")
                     self.get()
@@ -113,6 +113,8 @@ class Parser:
                 break
             else:
                 self.error("missing symbol '}'")
+            for i in s_list:
+                i.name.content = name.content + "." + i.name.content
         return Class(name, attr_list, s_list, self.file_path, location)
 
     def parse_Subroutine(self) -> Subroutine:
@@ -133,13 +135,13 @@ class Parser:
         if self.now != Token("symbol", "("):
             self.error("missing symbol '('")
         self.get()
-        arg_list: list[Variable] = []
+        arg_list: list[DeclareVar] = []
         if self.now == Token("keyword", "pass"):
             self.get()
         elif self.now == built_in_type or self.now.type == "identifier":
             arg_type = self.parse_Type()
             if self.now.type == "identifier":
-                arg_list.append(Variable(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
+                arg_list.append(DeclareVar(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
             else:
                 self.error("missing argument name")
             self.get()
@@ -150,7 +152,7 @@ class Parser:
                 else:
                     self.error("the symbol ',' must be followed by a argument type")
                 if self.now.type == "identifier":
-                    arg_list.append(Variable(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
+                    arg_list.append(DeclareVar(Identifier(self.now.content, self.now.location), "argument", arg_type, self.now.location))
                 else:
                     self.error("missing argument name")
                 self.get()
@@ -211,16 +213,16 @@ class Parser:
             var_type = self.parse_Type()
         else:
             self.error("missing variable type")
-        var_list: list[Variable] = []
+        var_list: list[DeclareVar] = []
         if self.now.type == "identifier":
-            var_list.append(Variable(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
+            var_list.append(DeclareVar(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
         else:
             self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
         self.get()
         while self.now == Token("symbol", ","):
             self.get()
             if self.now.type == "identifier":
-                var_list.append(Variable(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
+                var_list.append(DeclareVar(Identifier(self.now.content, self.now.location), "local", var_type, self.now.location))
             else:
                 self.error(f"variable name must be identifier, not {self.now.type} '{self.now.content}'")
             self.get()
@@ -454,10 +456,10 @@ class Parser:
             output = Term(location, "none")
         return output
 
-    def parse_Variable(self, var: Optional[GetVariable] = None) -> GetVariable:
+    def parse_Variable(self, var: Optional[Variable] = None) -> Variable:
         if var is None and (self.now.type == "identifier" or self.now == Token("keyword", "self")):
-            var = GetVariable(Identifier(self.now.content, self.now.location), location=self.now.location)
-        elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, GetVariable):
+            var = Variable(Identifier(self.now.content, self.now.location), location=self.now.location)
+        elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, Variable):
             if self.now == Token("symbol", "."):
                 self.get()
                 if self.now.type == "identifier":

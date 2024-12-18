@@ -140,7 +140,7 @@ class Type:
 class Term:
     def __init__(
         self,
-        content: Union[Integer, Float, Char, String, "Call", "GetVariable", "Expression", "Term", Literal["false", "true", "self"]],
+        content: Union[Integer, Float, Char, String, "Call", "Variable", "Expression", "Term", Literal["false", "true", "self"]],
         neg: Optional[Literal["-", "!"]] = None,
         location: tuple[int, int] = (-1, -1),
     ) -> None:
@@ -177,10 +177,10 @@ class Expression:
         return " ".join(str(i) for i in self.content)
 
 
-class GetVariable:
+class Variable:
     def __init__(
         self,
-        var: "GetVariable | Identifier",
+        var: "Variable | Identifier",
         index: Optional[Expression] = None,
         attr: Optional[Identifier] = None,
         location: tuple[int, int] = (-1, -1),
@@ -189,7 +189,7 @@ class GetVariable:
         self.var = var
         self.index = None
         self.attr = None
-        if isinstance(var, GetVariable):
+        if isinstance(var, Variable):
             if index is not None:
                 self.index = index
             elif attr is not None:
@@ -211,7 +211,7 @@ class GetVariable:
 
 
 class Call:
-    def __init__(self, var: GetVariable, expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var: Variable, expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var = var
         self.expression_list = expression_list
@@ -226,7 +226,7 @@ class Call:
         return f"{self.var}({", ".join(str(i) for i in self.expression_list)})"
 
 
-class Variable:
+class DeclareVar:
     def __init__(
         self, name: Identifier, kind: Literal["global", "argument", "attribute", "local"], type: Type, location: tuple[int, int] = (-1, -1)
     ) -> None:
@@ -246,7 +246,7 @@ class Variable:
 
 
 class Var_S:
-    def __init__(self, var_list: list[Variable], expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var_list: list[DeclareVar], expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var_list = var_list
         self.expression_list = expression_list
@@ -277,7 +277,7 @@ class Do_S:
 
 
 class Let_S:
-    def __init__(self, var: GetVariable, expression: Expression, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var: Variable, expression: Expression, location: tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var = var
         self.expression = expression
@@ -431,7 +431,7 @@ class Subroutine:
         kind: Literal["constructor", "method", "function"],
         return_type: Type,
         statement_list: list[Statement],
-        argument_list: list[Variable] = [],
+        argument_list: list[DeclareVar] = [],
         location: tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
@@ -455,7 +455,7 @@ class Class:
     def __init__(
         self,
         name: Identifier,
-        attr_list: list[Variable],
+        attr_list: list[DeclareVar],
         subroutine_list: list[Subroutine],
         file_path: str,
         location: tuple[int, int] = (-1, -1),
@@ -482,25 +482,24 @@ class Class:
 
 
 class Global:
-    pass
-
-
-class Root:
-    def __init__(self, class_list: list[Class], global_list: list[Variable], location: tuple[int, int] = (-1, -1)) -> None:
-        self.location = location
-        self.class_list = class_list
-        self.global_list = global_list
+    def __init__(self) -> None:
+        self.global_variable: list[DeclareVar] = []
 
     def show(self) -> list[str]:
-        t = ["    global:"]
-        for g in self.global_list:
-            t.append(f"        {g}")
-        for c in self.class_list:
-            t.extend(c.show())
+        t = ["global:"]
+        for g in self.global_variable:
+            t.append(f"    {g}")
         return t
 
     def __str__(self) -> str:
         return "\n".join(self.show())
+
+
+class Root:
+    def __init__(self, class_list: list[Class], global_list: list[DeclareVar], location: tuple[int, int] = (-1, -1)) -> None:
+        self.location = location
+        self.class_list = class_list
+        self.global_list = global_list
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

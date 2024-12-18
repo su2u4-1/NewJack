@@ -1,10 +1,21 @@
 from os.path import isfile, abspath
 from sys import argv
 
-from lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue
+from lib import (
+    get_path,
+    read_source,
+    get_one_path,
+    format_traceback,
+    CompileError,
+    CompileErrorGroup,
+    Args,
+    Continue,
+    type_class,
+    type_subroutine,
+)
 from lexer import lexer
 from parser import Parser
-from AST import Class, Global, Root
+from AST import Class, Global, Root, DeclareVar
 from Compiler import Compiler
 
 
@@ -47,13 +58,13 @@ def compile_all_file(
 ) -> list[str]:
     failed = False
     compiler = Compiler(global_, errout, arg.debug)
-    for ast in class_list:
+    for c in class_list:
         try:
             # Add the AST to the compiler for further processing.
-            compiler.addfile(ast)
+            compiler.addclass(c)
         except CompileErrorGroup as e:
             for i in e.exceptions:
-                s = i.show(source_dict[ast.file_path][i.line])
+                s = i.show(source_dict[c.file_path][i.line])
                 errout.append(s[0])
                 if arg.debug:
                     errout.append("-" * s[1])
@@ -129,16 +140,19 @@ def main() -> tuple[list[str], str]:
 
     # read source
     source_dict: dict[str, list[str]] = {}
+    for i in files:
+        source_dict[i] = read_source(i)
 
     # process source
     failed = False
     class_list: list[Class] = []
+    global_ = Global()
     for i in files:
-        source = read_source(i)
         print(f"Processing file: {i}")
         try:
-            root = analyze_file(source, arg, i, errout)
+            root = analyze_file(source_dict[i], arg, i, errout)
             class_list.extend(root.class_list)
+            global_.global_variable.extend(root.global_list)
         except Continue:
             print(f"File {i} processing failed")
             failed = True
@@ -147,10 +161,16 @@ def main() -> tuple[list[str], str]:
     if failed:
         return errout, arg.errout
 
+    for i in class_list:
+        global_.global_variable.append(DeclareVar(i.name, "global", type_class))
+        global_.global_variable.extend(i.attr_list)
+        for j in i.subroutine_list:
+            global_.global_variable.append(DeclareVar(j.name, "global", type_subroutine[j.kind]))
+
     # compile
     if arg.compile:
         print("compile start")
-        code = compile_all_file(class_list, arg, source_dict, errout)
+        code = compile_all_file(class_list, global_, arg, source_dict, errout)
         if code == []:
             print("compile failed")
             return errout, arg.errout
