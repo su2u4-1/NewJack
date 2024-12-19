@@ -156,7 +156,7 @@ class Compiler:
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
-        code.extend(self.GetVarAddress(let.var))
+        code.extend(self.GetVarInfo(let.var).code)
         code.extend(self.compileExpression(let.expression))
         code.append("pop $D")
         code.append("pop $T")
@@ -283,7 +283,7 @@ class Compiler:
         elif isinstance(term.content, Call):
             code.extend(self.compileCall(term.content))
         elif isinstance(term.content, Variable):
-            code.extend(self.GetVarAddress(term.content))
+            code.extend(self.GetVarInfo(term.content).code)
         elif isinstance(term.content, Expression):
             code.extend(self.compileExpression(term.content))
         elif isinstance(term.content, Term):
@@ -352,11 +352,6 @@ class Compiler:
         code.append(f"call {var_info.type}.{call.var.attr} {len(call.expression_list)}")
         return code
 
-    def GetVarAddress(self, var: Variable) -> list[str]:
-        # TODO: get variable address
-        code: list[str] = ["<compileGetVariable>"]
-        return code
-
     def GetVarInfo(self, var: Variable) -> Info:
         # TODO: add code
         if isinstance(var.var, Identifier):
@@ -396,14 +391,17 @@ class Compiler:
                     self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
             elif var.attr.content in self.attribute[var_info.type.outside.content]:
                 var_info.kind = self.attribute[var_info.type.outside.content][var.attr.content][0].outside.content  # type: ignore
-                if var_info.kind != "method":
-                    var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
+                var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
+                var_info.code.append("pop $D")
+                var_info.code.append(f"push @D {self.attribute[var_info.type.outside.content][var.attr.content][1]}")
             else:
                 self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
             var_info.name += "." + var.attr.content
         if var.index is not None:
             if var_info.type.inside is not None:
                 var_info.type = var_info.type.inside
+                var_info.code.extend(self.compileExpression(var.index))
+                var_info.code.append("call built_in.add 2")
             else:
                 self.error(f"variable {var} is not a container", var.index.location)
             var_info.name += f"[{var.index}]"
