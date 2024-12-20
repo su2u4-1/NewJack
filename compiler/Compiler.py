@@ -164,7 +164,6 @@ class Compiler:
         return code
 
     def compileIf_S(self, if_: If_S) -> list[str]:
-        # TODO: add code
         code: list[str] = []
         n = self.count["if"]
         self.count["if"] += 1
@@ -188,7 +187,6 @@ class Compiler:
         return code
 
     def compileWhile_S(self, while_: While_S) -> list[str]:
-        # TODO: add code
         code: list[str] = []
         n = self.count["loop"]
         self.count["loop"] += 1
@@ -212,7 +210,6 @@ class Compiler:
         return code
 
     def compileFor_S(self, for_: For_S) -> list[str]:
-        # TODO: add code
         code: list[str] = []
         n = self.count["loop"]
         self.count["loop"] += 1
@@ -221,11 +218,14 @@ class Compiler:
         self.count["local"] += 1
         self.scope[-1][str(for_.for_count_integer)] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
+        code.append(f"pop @L {self.count["argument"]+cn}")
         code.append(f"label for_start_{n}")
         for s in for_.statement_list:
             code.extend(self.compileStatement(s))
         code.extend(self.compileExpression(for_.for_range[2]))
-        code.append("")
+        code.append(f"push @L {self.count["argument"]+cn}")
+        code.append("call built_in.add 2")
+        code.append(f"pop @L {self.count["argument"]+cn}")
         code.extend(self.compileExpression(for_.for_range[1]))
         code.append(f"goto for_start_{n} true")
         if for_.else_:
@@ -253,7 +253,6 @@ class Compiler:
             self.error("The break statement must be inside a loop", break_.location)
             return []
         else:
-            self.loop = self.loop[: -int(break_.n)]
             return [f"goto loop_end_{self.loop[-int(break_.n)]} all"]
 
     def compileExpression(self, expression: Expression) -> list[str]:

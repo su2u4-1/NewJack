@@ -121,7 +121,7 @@ non-standard syntactic sugar:
 
     push @[a] [value]
         - Push the value at $[a] offset by [value] onto the stack
-        sett 1
+        sett 7
         addv $[a] [value] $T
         load @T $D
         sett 0
@@ -148,7 +148,7 @@ non-standard syntactic sugar:
         - Pop a value from the stack and store it at $[a] offset by [value]
         subv $P 1 $P
         load @P $D
-        sett 1
+        sett 7
         addv $[a] [value] $T
         stor @T $D
         sett 0
@@ -164,6 +164,18 @@ non-standard syntactic sugar:
         subv $P 1 $P
         load @P $D
         copy $[a] $D
+
+    jump "[label]" [true | false | all]
+        getl $D "[label]"
+        if true:
+            pop $C
+        if false:
+            pop $C
+            inpv 0
+            comp $C == $V
+        if all
+            setv $C 1
+        jump $T $C
 
     alloc [value]
         - Allocate memory of size [value] from the heap and return the base address
