@@ -103,7 +103,7 @@ class Parser:
                     self.get()
                     if self.now != built_in_type or self.now.type == "identifier":
                         self.error("must be built-in type or identifier")
-                    attr_list.append(DeclareVar(Identifier(attr_name), "argument", self.parse_Type(), location))
+                    attr_list.append(DeclareVar(Identifier(attr_name), "attribute", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
                         self.error("missing symbol ';'")
                     self.get()
@@ -113,8 +113,8 @@ class Parser:
                 break
             else:
                 self.error("missing symbol '}'")
-            for i in s_list:
-                i.name.content = name.content + "." + i.name.content
+        for i in s_list:
+            i.name.content = name.content + "." + i.name.content
         return Class(name, attr_list, s_list, self.file_path, location)
 
     def parse_Subroutine(self) -> Subroutine:

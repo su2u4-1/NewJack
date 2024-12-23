@@ -228,11 +228,15 @@ class Call:
 
 class DeclareVar:
     def __init__(
-        self, name: Identifier, kind: Literal["global", "argument", "attribute", "local"], type: Type, location: tuple[int, int] = (-1, -1)
+        self,
+        name: Identifier,
+        kind: Literal["class", "constructor", "function", "method", "global", "argument", "attribute", "local"],
+        type: Type,
+        location: tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.name = name
-        self.kind: Literal["global", "argument", "attribute", "local"] = kind
+        self.kind = kind
         self.type = type
 
     def show(self) -> list[str]:

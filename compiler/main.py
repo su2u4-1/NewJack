@@ -1,18 +1,7 @@
 from os.path import isfile, abspath, isdir
 from sys import argv
 
-from lib import (
-    get_path,
-    read_source,
-    get_one_path,
-    format_traceback,
-    CompileError,
-    CompileErrorGroup,
-    Args,
-    Continue,
-    type_class,
-    type_subroutine,
-)
+from lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
 from lexer import lexer
 from parser import Parser
 from AST import Class, Global, Root, DeclareVar
@@ -165,10 +154,10 @@ def main() -> tuple[list[str], str]:
 
     # add class and subroutine to the global
     for i in class_list:
-        global_.global_variable.append(DeclareVar(i.name, "global", type_class))
+        global_.global_variable.append(DeclareVar(i.name, "class", type_class))
         global_.global_variable.extend(i.attr_list)
         for j in i.subroutine_list:
-            global_.global_variable.append(DeclareVar(j.name, "global", type_subroutine[j.kind]))
+            global_.global_variable.append(DeclareVar(j.name, j.kind, j.return_type))  # type: ignore
 
     # compile
     if arg.compile:
@@ -190,7 +179,7 @@ def main() -> tuple[list[str], str]:
         try:
             with open(get_one_path(f_path, ".vm"), "w+") as f:
                 f.write("\n".join(code))
-            errout.append(f"Compile successful: {f_path}")
+            print(f"Compile successful: {f_path}")
         except OSError as e:
             errout.append(f"output Error : {e}")
 

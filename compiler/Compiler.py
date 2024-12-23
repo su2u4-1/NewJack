@@ -1,15 +1,15 @@
 from traceback import format_stack
 
 from AST import *
-from lib import CompileError, CompileErrorGroup, Info, type_class, type_int, type_void, type_argument, format_traceback, none
+from lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
 
 
 class Compiler:
     def __init__(self, global_: Global, errout: list[str], debug_flag: bool = False) -> None:
-        # [global, argument0, local0, argument1, local1, ...]
-        self.scope: list[dict[str, tuple[Type, int]]] = [{}]
+        self.global_: dict[str, tuple[Type, int]] = {}
         self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
-        self.global_ = global_
+        self.argument: dict[str, dict[str, tuple[Type, int]]] = {}
+        self.local: dict[str, dict[str, tuple[Type, int]]] = {}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
             "global": 0,
@@ -35,6 +35,7 @@ class Compiler:
     def addclass(self, c: Class) -> None:
         self.now_class = c
         code: list[str] = []
+        self.err_list = []
         try:
             # compile class
             code.append(f"debug-label start {self.now_class.name}.{c.name}")
@@ -64,22 +65,39 @@ class Compiler:
         if isinstance(vars, DeclareVar):
             vars = [vars]
         for var in vars:
-            if var.kind == "global":
-                if var.type == type_class:
-                    self.count["attribute"] = 0
-                t = self.scope[0]
+            kind = var.kind
+            if var.kind == "class":
+                self.count["attribute"] = 0
+                self.now_class = Class(var.name, [], [], "")
+                self.attribute[str(var.name)] = {}
+                t = self.global_
+                kind = "global"
+            elif var.kind == "method":
+                t = self.attribute[str(self.now_class.name)]
+                kind = "global"
+            elif var.kind in ("global", "function", "constructor"):
+                t = self.global_
+                kind = "global"
             elif var.kind == "attribute":
                 t = self.attribute[str(self.now_class.name)]
             elif var.kind == "argument":
-                t = self.scope[-2]
+                t = self.argument[str(self.now_subroutine.name)]
             else:
-                t = self.scope[-1]
-            t[str(var.name)] = (var.type, self.count[var.kind])
-            self.count[var.kind] += 1
+                t = self.local[str(self.now_subroutine.name)]
+            n = self.count[kind]
+            if var.kind == "constructor":
+                n = 0
+            elif var.kind == "function":
+                n = 1
+            elif var.kind == "method":
+                n = 2
+            t[str(var.name)] = (var.type, n)
+            self.count[kind] += 1
 
     def returncode(self) -> list[str]:
-        self.code.insert(1, f"alloc heap {self.count["global"]}")
-        self.code.insert(2, f"pop pointer global")
+        self.code.insert(1, f"alloc {self.count["global"]}")
+        self.code.insert(2, "inpv [The address of the pointer to the global]")
+        self.code.insert(3, "pop @V")
         self.code.append("debug-label end")
         return self.code
 
@@ -91,24 +109,28 @@ class Compiler:
         return code
 
     def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
-        code: list[str] = [f"label {self.now_class.name}.{subroutine.name}"]
-        self.scope.append(dict())
-        self.scope.append(dict())
+        code: list[str] = []
+        if str(subroutine.name).startswith(str(self.now_class.name) + "."):
+            code.append(f"label {subroutine.name}")
+        else:
+            code.append(f"label {self.now_class.name}.{subroutine.name}")
+        self.argument[str(subroutine.name)] = {}
+        self.local[str(subroutine.name)] = {}
         self.count["argument"] = 0
         self.count["local"] = 0
         self.now_subroutine = subroutine
-        if subroutine.kind == "method":
-            self.scope[-2]["self"] = (type_argument, 0)
+        if subroutine.kind != "function":
+            self.argument[str(subroutine.name)]["self"] = (Type(self.now_class.name), 0)
             self.count["argument"] += 1
-        elif subroutine.kind == "constructor":
-            code.append(f"alloc stack {len(self.attribute[str(self.now_class.name)])}")
-            code.append("pop term 1")
+        if subroutine.kind == "constructor":
+            code.append(f"alloc {len(self.attribute[str(self.now_class.name)])}")
+            code.append("pop @L 0")
         for i in subroutine.argument_list:
             self.declare(i)
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
-        self.scope.pop()
-        self.scope.pop()
+        del self.argument[str(subroutine.name)]
+        del self.local[str(subroutine.name)]
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
@@ -151,7 +173,7 @@ class Compiler:
 
     def compileDo_S(self, do: Do_S) -> list[str]:
         result = self.compileCall(do.call)
-        result.append("pop @T 0")
+        result.append("pop $T")
         return result
 
     def compileLet_S(self, let: Let_S) -> list[str]:
@@ -216,7 +238,7 @@ class Compiler:
         self.loop.append(n)
         cn = self.count["local"]
         self.count["local"] += 1
-        self.scope[-1][str(for_.for_count_integer)] = (type_int, cn)
+        self.local[str(self.now_subroutine.name)][str(for_.for_count_integer)] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
         code.append(f"pop @L {self.count["argument"]+cn}")
         code.append(f"label for_start_{n}")
@@ -348,54 +370,56 @@ class Compiler:
             self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
-        code.append(f"call {var_info.type}.{call.var.attr} {len(call.expression_list)}")
+        if str(var_info.name).startswith(str(var_info.type) + "."):
+            code.append(f"call {var_info.name} {len(call.expression_list)}")
+        else:
+            code.append(f"call {var_info.type}.{var_info.name} {len(call.expression_list)}")
         return code
 
     def GetVarInfo(self, var: Variable) -> Info:
-        # TODO: add code
         if isinstance(var.var, Identifier):
             var_info = Info()
-            var_info.code.append("<GetVarInfo>")
-            var_info.name = var.var.content
-            if var.var.content == "self" and self.now_subroutine.kind != "function":
-                var_info.type = self.scope[-2]["self"][0]
+            var_info.name = str(var.var)
+            if str(var.var) == "self" and self.now_subroutine.kind != "function":
+                var_info.type = self.argument[str(self.now_subroutine.name)]["self"][0]
                 var_info.kind = "argument"
                 var_info.code.append("push @L 0")
-            elif var.var.content in self.scope[-1]:
-                var_info.type = self.scope[-1][var.var.content][0]
+            elif str(var.var) in self.local[str(self.now_subroutine.name)]:
+                var_info.type = self.local[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "local"
-                var_info.code.append(f"push @L {self.count["argument"] + self.scope[-1][var.var.content][1]}")
-            elif var.var.content in self.scope[-2]:
-                var_info.type = self.scope[-2][var.var.content][0]
+                var_info.code.append(f"push @L {self.count["argument"] + self.local[str(self.now_subroutine.name)][str(var.var)][1]}")
+            elif str(var.var) in self.argument[str(self.now_subroutine.name)]:
+                var_info.type = self.argument[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "argument"
-                var_info.code.append(f"push @L {self.scope[-2][var.var.content][1]}")
-            elif var.var.content in self.scope[0]:
-                var_info.type = self.scope[0][var.var.content][0]
+                var_info.code.append(f"push @L {self.argument[str(self.now_subroutine.name)][str(var.var)][1]}")
+            elif str(var.var) in self.global_:
+                var_info.type = self.global_[str(var.var)][0]
                 var_info.kind = "global"
                 var_info.code.append("inpv [The address of the pointer to the global]")
-                var_info.code.append(f"push @V {self.scope[0][var.var.content][1]}")
-            elif self.now_class.name.content + "." + var.var.content in self.scope[0]:
-                var_info.type = self.scope[0][self.now_class.name.content + "." + var.var.content][0]
-                var_info.kind = var_info.type.outside.content  # type: ignore
+                var_info.code.append(f"push @V {self.global_[str(var.var)][1]}")
             else:
                 self.error(f"variable {var} not found", var.location)
         else:
             var_info = self.GetVarInfo(var.var)
         if var.attr is not None:
             if var_info.type.outside == "class":
-                if f"{var_info.name}.{var.attr}" in self.scope[0]:
+                if f"{var_info.name}.{var.attr}" in self.global_:
                     var_info.type = Type(Identifier(var_info.name))
-                    var_info.kind = self.scope[0][f"{var_info.name}.{var.attr}"][0].outside.content  # type: ignore
+                    var_info.kind = ("constructor", "function", "method")[self.global_[f"{var_info.name}.{var.attr}"][1]]
+                    var_info.code = []
                 else:
                     self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
-            elif var.attr.content in self.attribute[var_info.type.outside.content]:
-                var_info.kind = self.attribute[var_info.type.outside.content][var.attr.content][0].outside.content  # type: ignore
-                var_info.type = self.attribute[var_info.type.outside.content][var.attr.content][0]
+            elif str(var.attr) in self.attribute[str(var_info.type.outside)]:
+                var_info.kind = str(self.attribute[str(var_info.type.outside)][str(var.attr)][0].outside)  # type: ignore
                 var_info.code.append("pop $D")
-                var_info.code.append(f"push @D {self.attribute[var_info.type.outside.content][var.attr.content][1]}")
+                var_info.code.append(f"push $D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
+            elif str(var_info.type.outside) + "." + str(var.attr) in self.attribute[str(var_info.type.outside)]:
+                var_info.kind = "method"
+                var_info.name = str(var_info.type.outside)
+                var_info.type = self.attribute[str(var_info.type.outside)][str(var_info.type.outside) + "." + str(var.attr)][0]
             else:
                 self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
-            var_info.name += "." + var.attr.content
+            var_info.name += "." + str(var.attr)
         if var.index is not None:
             if var_info.type.inside is not None:
                 var_info.type = var_info.type.inside

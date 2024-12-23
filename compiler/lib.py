@@ -184,7 +184,7 @@ class Info:
         self.name: str = "void"
 
     def __str__(self) -> str:
-        return f"kind: {self.kind}, type: {self.type}, name: {self.name}, code:\n{"\n".join(self.code)}"
+        return f"kind: {self.kind}, type: {self.type}, name: {self.name}, code:{self.code}"
 
 
 class Args:
