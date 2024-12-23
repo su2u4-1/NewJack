@@ -223,7 +223,7 @@ class Compiler:
             code.extend(self.compileStatement(s))
         code.append(f"goto while_start_{n} all")
         if while_.else_:
-            code.append(f"lable while_end_{n}")
+            code.append(f"label while_end_{n}")
             for s in while_.else_statement_list:
                 code.extend(self.compileStatement(s))
         code.append(f"label loop_end_{n}")
