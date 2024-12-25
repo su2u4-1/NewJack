@@ -8,6 +8,34 @@ Each class corresponds to a syntactic construct in the language, such as express
 from typing import Literal, Optional, Sequence, Union, Iterable
 import os.path
 
+__all__ = [
+    "Identifier",
+    "Integer",
+    "Float",
+    "String",
+    "Char",
+    "Op",
+    "Type",
+    "Term",
+    "Expression",
+    "Variable",
+    "Call",
+    "DeclareVar",
+    "Var_S",
+    "Do_S",
+    "Let_S",
+    "Return_S",
+    "Break_S",
+    "For_S",
+    "If_S",
+    "While_S",
+    "Statement",
+    "Subroutine",
+    "Class",
+    "Global",
+    "Root",
+]
+
 
 class Identifier:
     def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:

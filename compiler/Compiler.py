@@ -1,4 +1,5 @@
 from traceback import format_stack
+from typing import Literal
 
 from AST import *
 from lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
@@ -7,11 +8,13 @@ from lib import CompileError, CompileErrorGroup, Info, type_int, type_void, form
 class Compiler:
     def __init__(self, global_: Global, errout: list[str], debug_flag: bool = False) -> None:
         self.global_: dict[str, tuple[Type, int]] = {}
+        self.subroutine: dict[str, tuple[Type, Literal["class", "constructor", "function", "method"]]] = {}
         self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
         self.argument: dict[str, dict[str, tuple[Type, int]]] = {}
         self.local: dict[str, dict[str, tuple[Type, int]]] = {}
         self.err_list: list[CompileError] = []
         self.count: dict[str, int] = {
+            "subroutine": 0,
             "global": 0,
             "argument": 0,
             "attribute": 0,
@@ -26,6 +29,8 @@ class Compiler:
         self.code: list[str] = ["debug-label start"]
         self.errout = errout
         self.declare(global_.global_variable)
+        if self.debug_flag:
+            self.showCompilerInfo()
 
     def error(self, text: str, location: tuple[int, int]) -> None:
         i = CompileError(text, self.now_class.file_path, location, "compiler")
@@ -38,9 +43,9 @@ class Compiler:
         self.err_list = []
         try:
             # compile class
-            code.append(f"debug-label start {self.now_class.name}.{c.name}")
+            code.append(f"debug-label start {c.file_name}.{c.name}")
             code.extend(self.compileClass(c))
-            code.append(f"debug-label end {self.now_class.name}.{c.name}")
+            code.append(f"debug-label end {c.file_name}.{c.name}")
         # show error info
         except Exception as e:
             self.errout.append("\n------------------------------\n")
@@ -50,49 +55,45 @@ class Compiler:
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
-            self.showCompilerInfo(code)
+            self.showCompilerInfo()
+            self.errout.append("\ncode:-------------------------\n")
+            self.errout.append("\n".join(code))
+            self.errout.append("\n------------------------------\n")
         else:
             self.code.extend(code)
 
-    def showCompilerInfo(self, code: list[str]) -> None:
+    def showCompilerInfo(self) -> None:
         for k, v in self.__dict__.items():
+            if k == "errout":
+                continue
             self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
-        self.errout.append("\ncode:-------------------------\n")
-        self.errout.append("\n".join(code))
-        self.errout.append("\n------------------------------\n")
 
     def declare(self, vars: list[DeclareVar] | DeclareVar) -> None:
         if isinstance(vars, DeclareVar):
             vars = [vars]
         for var in vars:
-            kind = var.kind
-            if var.kind == "class":
-                self.count["attribute"] = 0
-                self.now_class = Class(var.name, [], [], "")
-                self.attribute[str(var.name)] = {}
+            if var.kind in ("class", "constructor", "function", "method"):
+                if var.kind == "class":
+                    self.count["attribute"] = 0
+                    self.now_class = Class(var.name, [], [], "")
+                    self.attribute[str(var.name)] = {}
+                self.subroutine[str(var.name)] = (var.type, var.kind)
+                self.count["subroutine"] += 1
+                continue
+            # elif var.kind == "method":
+            #     t = self.attribute[str(self.now_class.name)]
+            #     self.subroutine[str(var.name)] = (var.type, var.kind)
+            #     var.kind = "subroutine"
+            elif var.kind == "global":
                 t = self.global_
-                kind = "global"
-            elif var.kind == "method":
-                t = self.attribute[str(self.now_class.name)]
-                kind = "global"
-            elif var.kind in ("global", "function", "constructor"):
-                t = self.global_
-                kind = "global"
             elif var.kind == "attribute":
                 t = self.attribute[str(self.now_class.name)]
             elif var.kind == "argument":
                 t = self.argument[str(self.now_subroutine.name)]
             else:
                 t = self.local[str(self.now_subroutine.name)]
-            n = self.count[kind]
-            if var.kind == "constructor":
-                n = 0
-            elif var.kind == "function":
-                n = 1
-            elif var.kind == "method":
-                n = 2
-            t[str(var.name)] = (var.type, n)
-            self.count[kind] += 1
+            t[str(var.name)] = (var.type, self.count[var.kind])
+            self.count[var.kind] += 1
 
     def returncode(self) -> list[str]:
         self.code.insert(1, f"alloc {self.count["global"]}")
@@ -134,19 +135,19 @@ class Compiler:
         return code
 
     def compileStatement(self, statement: Statement) -> list[str]:
-        if type(statement) == Var_S:
+        if isinstance(statement, Var_S):
             return self.compileVar_S(statement)
-        elif type(statement) == Do_S:
+        elif isinstance(statement, Do_S):
             return self.compileDo_S(statement)
-        elif type(statement) == Let_S:
+        elif isinstance(statement, Let_S):
             return self.compileLet_S(statement)
-        elif type(statement) == If_S:
+        elif isinstance(statement, If_S):
             return self.compileIf_S(statement)
-        elif type(statement) == While_S:
+        elif isinstance(statement, While_S):
             return self.compileWhile_S(statement)
-        elif type(statement) == Return_S:
+        elif isinstance(statement, Return_S):
             return self.compileReturn_S(statement)
-        elif type(statement) == Break_S:
+        elif isinstance(statement, Break_S):
             return self.compileBreak_S(statement)
         else:
             self.error(f"unknown statement", statement.location)
@@ -370,10 +371,8 @@ class Compiler:
             self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
-        if str(var_info.name).startswith(str(var_info.type) + "."):
-            code.append(f"call {var_info.name} {len(call.expression_list)}")
-        else:
-            code.append(f"call {var_info.type}.{var_info.name} {len(call.expression_list)}")
+        code.append(f"call {var_info.name} {len(call.expression_list)}")
+        # code.append(f"call {var_info.type}.{var_info.name} {len(call.expression_list)}")
         return code
 
     def GetVarInfo(self, var: Variable) -> Info:
@@ -397,15 +396,18 @@ class Compiler:
                 var_info.kind = "global"
                 var_info.code.append("inpv [The address of the pointer to the global]")
                 var_info.code.append(f"push @V {self.global_[str(var.var)][1]}")
+            elif str(var.var) in self.subroutine:
+                var_info.type = Type(Identifier(self.subroutine[str(var.var)][1]))
             else:
                 self.error(f"variable {var} not found", var.location)
         else:
             var_info = self.GetVarInfo(var.var)
         if var.attr is not None:
+            assert var_info.type.outside.content not in ("constructor", "function", "method")
             if var_info.type.outside == "class":
-                if f"{var_info.name}.{var.attr}" in self.global_:
+                if f"{var_info.name}.{var.attr}" in self.subroutine:
                     var_info.type = Type(Identifier(var_info.name))
-                    var_info.kind = ("constructor", "function", "method")[self.global_[f"{var_info.name}.{var.attr}"][1]]
+                    var_info.kind = self.subroutine[f"{var_info.name}.{var.attr}"][1]
                     var_info.code = []
                 else:
                     self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
@@ -413,10 +415,14 @@ class Compiler:
                 var_info.kind = str(self.attribute[str(var_info.type.outside)][str(var.attr)][0].outside)  # type: ignore
                 var_info.code.append("pop $D")
                 var_info.code.append(f"push $D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
-            elif str(var_info.type.outside) + "." + str(var.attr) in self.attribute[str(var_info.type.outside)]:
+            elif str(var_info.type.outside) + "." + str(var.attr) in self.subroutine:
                 var_info.kind = "method"
                 var_info.name = str(var_info.type.outside)
-                var_info.type = self.attribute[str(var_info.type.outside)][str(var_info.type.outside) + "." + str(var.attr)][0]
+                var_info.type = self.subroutine[str(var_info.type.outside) + "." + str(var.attr)][0]
+            # elif str(var_info.type.outside) + "." + str(var.attr) in self.attribute[str(var_info.type.outside)]:
+            #     var_info.kind = "method"
+            #     var_info.name = str(var_info.type.outside)
+            #     var_info.type = self.attribute[str(var_info.type.outside)][str(var_info.type.outside) + "." + str(var.attr)][0]
             else:
                 self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
             var_info.name += "." + str(var.attr)

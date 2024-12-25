@@ -41,7 +41,7 @@ debug-label start
         label Test2.test1
             push 0
             pop @L 0
-            push $L 0
+            push @L 0
             push 1
             push 2
             call built_in.mul 2
@@ -64,7 +64,7 @@ debug-label start
             push $D 0
             push @L 0
             pop $D
-            push @D 0
+            push $D 0
             push 2
             call built_in.mul 2
             pop $D

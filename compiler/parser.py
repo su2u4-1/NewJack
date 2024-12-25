@@ -1,4 +1,4 @@
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 from lib import Token, Tokens, CompileError, built_in_type, Operator, Precedence
 from AST import *
