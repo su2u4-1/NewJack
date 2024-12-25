@@ -2,7 +2,7 @@ import os.path
 from typing import Sequence, Literal
 from traceback import format_list, extract_tb
 
-from AST import Type, Identifier
+from compiler.AST import Type, Identifier
 
 __all__ = [
     "type_class",

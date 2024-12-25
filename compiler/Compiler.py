@@ -1,8 +1,8 @@
 from traceback import format_stack
 from typing import Literal
 
-from AST import *
-from lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
+from compiler.AST import *
+from compiler.lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
 
 
 class Compiler:

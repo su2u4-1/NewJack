@@ -1,11 +1,11 @@
 from os.path import isfile, abspath, isdir
 from sys import argv
 
-from lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
-from lexer import lexer
-from parser import Parser
-from AST import Class, Global, Root, DeclareVar
-from Compiler import Compiler
+from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
+from compiler.lexer import lexer
+from compiler.parser import Parser
+from compiler.AST import Class, Global, Root, DeclareVar
+from compiler.Compiler import Compiler
 
 
 def analyze_file(source: list[str], arg: Args, file_path: str, errout: list[str]) -> Root:
