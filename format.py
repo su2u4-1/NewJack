@@ -9,19 +9,45 @@ def format_nj(code: list[str]) -> list[str]:
     new_code: list[str] = []
     tokens = lexer(code, "format.nj")
     indent = 0
-    line: list[str] = []
+    line = ""
+    f = True
     for i in tokens:
-        if i.type == "symbol" and i.content == "{":
-            line.append("{")
-            new_code.append("    " * indent + " ".join(line))
-            indent += 1
-            line = []
-        elif i.type == "symbol" and i.content == "}":
-            new_code.append("    " * indent + " ".join(line))
-            indent -= 1
-            line = ["}"]
+        if i.type == "symbol":
+            if i.content == "{":
+                line += " {"
+                new_code.append("    " * indent + line)
+                indent += 1
+                line = ""
+                f = True
+            elif i.content == "}":
+                if line != "":
+                    new_code.append("    " * indent + line)
+                indent -= 1
+                new_code.append("    " * indent + "}")
+                line = ""
+                f = True
+            elif i.content == ";":
+                line += ";"
+                new_code.append("    " * indent + line)
+                line = ""
+                f = True
+            elif i.content in ")]:,":
+                line += i.content
+            elif i.content in ".([":
+                line += i.content
+                f = True
+            else:
+                if f:
+                    line += i.content
+                    f = False
+                else:
+                    line += " " + i.content
         elif i.type in ("string", "integer", "symbol", "keyword", "float", "char", "identifier"):
-            line.append(i.content)
+            if f:
+                line += i.content
+                f = False
+            else:
+                line += " " + i.content
     return new_code
 
 
