@@ -1,37 +1,39 @@
-class Test{
-    describe{
-        a: int;
-        b: int;
+global {
+    g0: int;
+    g1: c1;
+}
+class c0 {
+    describe {
+        attr0: int;
+        attr1: c1;
     }
-    constructor Test new(int a, int b){
-        var Test2 c = Test2.new(1);
-        do c.ff(pass);
-        let self.b = Test2.test1(pass);
-        return self;
+    constructor c0 new(arg0: int) {
+        var int l0 = arg0;
+        let g0 = arg0;
+        let l0 = l0 * l0;
+        let self.attr0 = arg0;
+        let self.attr1 = c1.new(l0);
     }
-
-    method void test0(pass){
-        return;
+    method bool m0(pass) {
+        var l1;
+        let l1 = self.attr1.m1();
+        let self.attr0 = c1.f1();
+        if(l1 == self.attr0) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
-
-class Test2{
-    describe{
-        a: int;
+class c1 {
+    constructor c1 new(arg0: int) {
+        let g0 = arg0;
     }
-    constructor Test2 new(int a){
-        let self.a = a;
-        return self;
+    method int m1(pass) {
+        return g0;
     }
-
-    function int test1(pass){
-        var int b;
-        let b = 1*2+3-5+8/2;
-        return b;
-    }
-
-    method void ff(pass){
-        let self.a = self.a *2;
-        return;
+    function int f1(pass) {
+        return g0;
     }
 }
