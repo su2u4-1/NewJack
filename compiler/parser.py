@@ -459,6 +459,8 @@ class Parser:
         if var is None and (self.now.type == "identifier" or self.now == Token("keyword", "self")):
             var = Variable(Identifier(self.now.content, self.now.location), location=self.now.location)
         elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, Variable):
+            if var.attr is not None or var.index is not None:
+                var = Variable(var, location=var.location)
             if self.now == Token("symbol", "."):
                 self.get()
                 if self.now.type == "identifier":

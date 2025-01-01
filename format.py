@@ -57,16 +57,16 @@ def format_vm(code: list[str]) -> list[str]:
     f = False
     for i in code:
         i = i.strip()
-        if f and (i.startswith("label") or i.startswith("debug-label start")):
+        if f and i.startswith("label") and not (i.startswith("label if") or i.startswith("label loop")):
             indent -= 1
         f = False
         if i.startswith("debug-label end"):
-            indent -= 1
-        elif i == "return":
-            f = True
+            indent -= 2
         new_code.append("    " * indent + i)
-        if i.startswith("label") or i.startswith("debug-label start"):
+        if i.startswith("label") and not (i.startswith("label if") or i.startswith("label loop")) or i.startswith("debug-label start"):
             indent += 1
+        elif not i.startswith("debug-label start"):
+            f = True
     return new_code
 
 

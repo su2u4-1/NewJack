@@ -1,0 +1,90 @@
+debug-label start
+    alloc 2
+    inpv [The address of the pointer to the global]
+    pop @V
+    debug-label start test.c0
+        label c0.new
+            alloc 2
+            pop @L 0
+            push @L 1
+            pop @L 2
+            inpv [The address of the pointer to the global]
+            push @V 0
+            push @L 1
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 2
+            push @L 2
+            push @L 2
+            call built_in.mul 2
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 0
+            push @L 1
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 1
+            push @L 2
+            call c1.new 1
+            pop $D
+            pop $T
+            stor @T $D
+        label c0.m0
+            push 0
+            pop @L 1
+            push @L 1
+            push @L 0
+            pop $D
+            push $D 1
+            call c1.m1 0
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 0
+            call c1.f1 0
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 1
+            push @L 0
+            pop $D
+            push $D 0
+            call built_in.eq 2
+            goto if_false_0 false
+            push 1
+            return
+            goto if_end_0 all
+            label if_false_0
+            push 0
+            return
+            label if_end_0
+    debug-label end test.c0
+    debug-label start test.c1
+        label c1.new
+            alloc 0
+            pop @L 0
+            inpv [The address of the pointer to the global]
+            push @V 0
+            push @L 1
+            pop $D
+            pop $T
+            stor @T $D
+        label c1.m1
+            inpv [The address of the pointer to the global]
+            push @V 0
+            return
+        label c1.f1
+            inpv [The address of the pointer to the global]
+            push @V 0
+            return
+    debug-label end test.c1
+debug-label end

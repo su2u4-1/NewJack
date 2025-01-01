@@ -410,21 +410,18 @@ class Compiler:
                     var_info.kind = self.subroutine[f"{var_info.name}.{var.attr}"][1]
                     var_info.code = []
                 else:
-                    self.error(f"attribute {var.attr} not found in {var_info.name}", var.attr.location)
+                    self.error(f"attribute '{var.attr}' not found in {var_info.name}", var.attr.location)
             elif str(var.attr) in self.attribute[str(var_info.type.outside)]:
-                var_info.kind = str(self.attribute[str(var_info.type.outside)][str(var.attr)][0].outside)  # type: ignore
                 var_info.code.append("pop $D")
                 var_info.code.append(f"push $D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
+                var_info.kind = "attribute"
+                var_info.type = self.attribute[str(var_info.type.outside)][str(var.attr)][0]
             elif str(var_info.type.outside) + "." + str(var.attr) in self.subroutine:
                 var_info.kind = "method"
                 var_info.name = str(var_info.type.outside)
                 var_info.type = self.subroutine[str(var_info.type.outside) + "." + str(var.attr)][0]
-            # elif str(var_info.type.outside) + "." + str(var.attr) in self.attribute[str(var_info.type.outside)]:
-            #     var_info.kind = "method"
-            #     var_info.name = str(var_info.type.outside)
-            #     var_info.type = self.attribute[str(var_info.type.outside)][str(var_info.type.outside) + "." + str(var.attr)][0]
             else:
-                self.error(f"attribute {var.attr} not found in {var_info.type.outside}", var.attr.location)
+                self.error(f"attribute '{var.attr}' not found in {var_info.type.outside}", var.attr.location)
             var_info.name += "." + str(var.attr)
         if var.index is not None:
             if var_info.type.inside is not None:
