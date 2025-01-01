@@ -7,7 +7,7 @@ class c0 {
         attr0: int;
         attr1: c1;
     }
-    constructor c0 new(arg0: int) {
+    constructor c0 new(int arg0) {
         var int l0 = arg0;
         let g0 = arg0;
         let l0 = l0 * l0;
@@ -15,9 +15,9 @@ class c0 {
         let self.attr1 = c1.new(l0);
     }
     method bool m0(pass) {
-        var l1;
-        let l1 = self.attr1.m1();
-        let self.attr0 = c1.f1();
+        var int l1;
+        let l1 = self.attr1.m1(pass);
+        let self.attr0 = c1.f1(pass);
         if(l1 == self.attr0) {
             return true;
         }
@@ -27,7 +27,7 @@ class c0 {
     }
 }
 class c1 {
-    constructor c1 new(arg0: int) {
+    constructor c1 new(int arg0) {
         let g0 = arg0;
     }
     method int m1(pass) {

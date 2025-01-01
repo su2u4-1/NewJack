@@ -39,6 +39,7 @@ AtoZ = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 atoZ = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 Keyword = {
     "class",
+    "global",
     "var",
     "describe",
     "constructor",

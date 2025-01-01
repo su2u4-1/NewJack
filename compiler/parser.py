@@ -61,7 +61,7 @@ class Parser:
                     if self.now != Token("symbol", ":"):
                         self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
                     self.get()
-                    if self.now != built_in_type or self.now.type == "identifier":
+                    if self.now != built_in_type and self.now.type != "identifier":
                         self.error("must be built-in type or identifier")
                     global_list.append(DeclareVar(Identifier(global_name), "global", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
@@ -70,7 +70,7 @@ class Parser:
             elif self.now == Token("keyword", "EOF"):
                 break
             else:
-                self.error("missing keyword 'class'")
+                self.error("missing keyword 'class' or 'global'")
         return Root(class_list, global_list)
 
     def parse_Class(self) -> Class:
@@ -101,7 +101,7 @@ class Parser:
                     if self.now != Token("symbol", ":"):
                         self.error(f"must be symbol ':', not {self.now.type} '{self.now.content}'")
                     self.get()
-                    if self.now != built_in_type or self.now.type == "identifier":
+                    if self.now != built_in_type and self.now.type != "identifier":
                         self.error("must be built-in type or identifier")
                     attr_list.append(DeclareVar(Identifier(attr_name), "attribute", self.parse_Type(), location))
                     if self.now != Token("symbol", ";"):
@@ -285,8 +285,7 @@ class Parser:
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
             elif_s.append(self.parse_Statements())
-        if self.next() == Token("keyword", "else"):
-            self.get()
+        if self.now == Token("keyword", "else"):
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")

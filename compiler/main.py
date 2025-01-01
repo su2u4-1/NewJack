@@ -1,5 +1,7 @@
 from os.path import isfile, abspath, isdir
-from sys import argv
+from sys import argv, path
+
+path.append(abspath("\\".join(__file__.split("\\")[:-2])))
 
 from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
 from compiler.lexer import lexer
