@@ -13,6 +13,7 @@ class c0 {
         let l0 = l0 * l0;
         let self.attr0 = arg0;
         let self.attr1 = c1.new(l0);
+        return self;
     }
     method bool m0(pass) {
         var int l1;
@@ -29,6 +30,7 @@ class c0 {
 class c1 {
     constructor c1 new(int arg0) {
         let g0 = arg0;
+        return self;
     }
     method int m1(pass) {
         return g0;

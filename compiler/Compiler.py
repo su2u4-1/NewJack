@@ -179,7 +179,7 @@ class Compiler:
 
     def compileLet_S(self, let: Let_S) -> list[str]:
         code: list[str] = []
-        code.extend(self.GetVarInfo(let.var).code)
+        code.extend(self.GetVarInfo(let.var, True).code)
         code.extend(self.compileExpression(let.expression))
         code.append("pop $D")
         code.append("pop $T")
@@ -367,53 +367,65 @@ class Compiler:
         var_info = self.GetVarInfo(call.var)
         if var_info.kind == "method":
             code.append("\n".join(var_info.code))
-        elif var_info.kind != "function" and var_info.kind != "constructor":
+        elif var_info.kind == "constructor":
+            code.append("push 0")
+        elif var_info.kind != "function":
             self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
         for i in call.expression_list:
             code.extend(self.compileExpression(i))
-        code.append(f"call {var_info.name} {len(call.expression_list)}")
-        # code.append(f"call {var_info.type}.{var_info.name} {len(call.expression_list)}")
+        if var_info.kind != "function":
+            code.append(f"call {var_info.name} {len(call.expression_list) + 1}")
+        else:
+            code.append(f"call {var_info.name} {len(call.expression_list)}")
         return code
 
-    def GetVarInfo(self, var: Variable) -> Info:
+    def GetVarInfo(self, var: Variable, addr: bool = False) -> Info:
+        t = ""
         if isinstance(var.var, Identifier):
             var_info = Info()
             var_info.name = str(var.var)
             if str(var.var) == "self" and self.now_subroutine.kind != "function":
                 var_info.type = self.argument[str(self.now_subroutine.name)]["self"][0]
                 var_info.kind = "argument"
-                var_info.code.append("push @L 0")
+                t = "L 0"
             elif str(var.var) in self.local[str(self.now_subroutine.name)]:
                 var_info.type = self.local[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "local"
-                var_info.code.append(f"push @L {self.count["argument"] + self.local[str(self.now_subroutine.name)][str(var.var)][1]}")
+                t = f"L {self.count["argument"] + self.local[str(self.now_subroutine.name)][str(var.var)][1]}"
             elif str(var.var) in self.argument[str(self.now_subroutine.name)]:
                 var_info.type = self.argument[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "argument"
-                var_info.code.append(f"push @L {self.argument[str(self.now_subroutine.name)][str(var.var)][1]}")
+                t = f"L {self.argument[str(self.now_subroutine.name)][str(var.var)][1]}"
             elif str(var.var) in self.global_:
                 var_info.type = self.global_[str(var.var)][0]
                 var_info.kind = "global"
                 var_info.code.append("inpv [The address of the pointer to the global]")
-                var_info.code.append(f"push @V {self.global_[str(var.var)][1]}")
+                t = f"V {self.global_[str(var.var)][1]}"
             elif str(var.var) in self.subroutine:
                 var_info.type = Type(Identifier(self.subroutine[str(var.var)][1]))
             else:
                 self.error(f"variable {var} not found", var.location)
         else:
-            var_info = self.GetVarInfo(var.var)
+            var_info = self.GetVarInfo(var.var, addr)
         if var.attr is not None:
             assert var_info.type.outside.content not in ("constructor", "function", "method")
             if var_info.type.outside == "class":
                 if f"{var_info.name}.{var.attr}" in self.subroutine:
-                    var_info.type = Type(Identifier(var_info.name))
+                    var_info.type = self.subroutine[f"{var_info.name}.{var.attr}"][0]
                     var_info.kind = self.subroutine[f"{var_info.name}.{var.attr}"][1]
                     var_info.code = []
                 else:
                     self.error(f"attribute '{var.attr}' not found in {var_info.name}", var.attr.location)
             elif str(var.attr) in self.attribute[str(var_info.type.outside)]:
+                # $L -> @L      ->    heap obj
+                # 255   m[255] = 1023 m[1023] = attr0
+                if t != "":
+                    var_info.code.append("push @" + t)
                 var_info.code.append("pop $D")
-                var_info.code.append(f"push $D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
+                if addr:
+                    var_info.code.append(f"push $D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
+                else:
+                    var_info.code.append(f"push @D {self.attribute[str(var_info.type.outside)][str(var.attr)][1]}")
                 var_info.kind = "attribute"
                 var_info.type = self.attribute[str(var_info.type.outside)][str(var.attr)][0]
             elif str(var_info.type.outside) + "." + str(var.attr) in self.subroutine:
@@ -423,12 +435,23 @@ class Compiler:
             else:
                 self.error(f"attribute '{var.attr}' not found in {var_info.type.outside}", var.attr.location)
             var_info.name += "." + str(var.attr)
-        if var.index is not None:
+        elif var.index is not None:
+            if t != "":
+                var_info.code.append("push $" + t)
             if var_info.type.inside is not None:
                 var_info.type = var_info.type.inside
                 var_info.code.extend(self.compileExpression(var.index))
                 var_info.code.append("call built_in.add 2")
+                if not addr:
+                    var_info.code.append("pop $D")
+                    var_info.code.append("push @D")
             else:
                 self.error(f"variable {var} is not a container", var.index.location)
             var_info.name += f"[{var.index}]"
+        else:
+            if t != "":
+                if addr:
+                    var_info.code.append("push $" + t)
+                else:
+                    var_info.code.append("push @" + t)
         return var_info
