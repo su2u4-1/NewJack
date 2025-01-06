@@ -4,7 +4,7 @@
 <global> ::= "global" "{" [{<identifier'var_name'> ":" <type> ";"}] "}"
 <describe> ::= "describe" "{" [{<identifier'var_name'> ":" <type> ";"}] "}"
 <subroutine> ::= ("function" | "method" | "constructor") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
-<type> ::= <identifier'type'> | <built-in_type> ["[" <type> "}"]
+<type> ::= <identifier'type'> | <built-in_type> ["[" <type> "]"]
 <argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
 <statements> ::= ({<statement>} | "pass")
 <statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
@@ -13,7 +13,7 @@
 <do_S> ::= "do" <call> ";"
 <if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"elif" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
 <while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
-<for_S> ::= "for" "("<identifier'name'> "," <expression> [";" <conditional> ";" <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
+<for_S> ::= "for" "(" <identifier'name'> "," <expression> [";" <conditional> ";" <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
 <return_S> ::= "return" [<expression>] ";"
 <break_S> ::= "break" [<Integer>] ";"
 <continue_S> ::= "continue" ";"
@@ -33,7 +33,7 @@
 <0-9> ::= "0" | <1-9>
 <1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
-<keyword> ::= "class" | "var" | "discribe" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
+<keyword> ::= "class" | "var" | "describe" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "!"

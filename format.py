@@ -11,6 +11,7 @@ def format_nj(code: list[str]) -> list[str]:
     indent = 0
     line = ""
     f = True
+    sf = False
     for i in tokens:
         if i.type == "symbol":
             if i.content == "{":
@@ -33,7 +34,7 @@ def format_nj(code: list[str]) -> list[str]:
                 f = True
             elif i.content in ")]:,":
                 line += i.content
-            elif i.content in ".([":
+            elif i.content in ".([" and not sf:
                 line += i.content
                 f = True
             else:
@@ -42,7 +43,9 @@ def format_nj(code: list[str]) -> list[str]:
                     f = False
                 else:
                     line += " " + i.content
+            sf = True
         elif i.type in ("string", "integer", "symbol", "keyword", "float", "char", "identifier"):
+            sf = False
             if f:
                 line += i.content
                 f = False

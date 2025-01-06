@@ -1,0 +1,62 @@
+global {
+    g0: int;
+    g1: list[int];
+    g2: arr[int];
+}
+class c0 {
+    describe {
+        attr0: int;
+        attr1: c1;
+    }
+    constructor c0 new(pass) {
+        let g0 = 5;
+        let self.attr0 = g0 * ( 13 + 2);
+        let self.attr1 = c1.new(g0);
+        return self;
+    }
+    method int m0(int arg0) {
+        return self.attr1.m1(g0) + self.attr0;
+    }
+    function arr[int] f0(int arg1) {
+        var arr[int] l0;
+        for(i, arg1) {
+            let arr[i] = g1[i] + g2[i];
+        }
+        if(g0 == self.attr0) {
+            return g2;
+        }
+        else {
+            return l0;
+        }
+    }
+}
+class c1 {
+    describe {
+        attr2: int;
+    }
+    constructor c1 new(int arg2) {
+        var int l1;
+        while(l1 < arg2) {
+            do g1.append(l1);
+            let l1 = l1 + 1;
+        }
+        self.attr2 = g0;
+        return self;
+    }
+    function void f1(pass) {
+        do g1.append(g0);
+        let g2[g0] = g0;
+        return;
+    }
+    method int m1(int arg3) {
+        if(self.attr2 > 0) {
+            return self.attr2;
+        }
+        elif(self.attr2 == 0) {
+            return arg3;
+        }
+        else {
+            return 0;
+        }
+    }
+}
