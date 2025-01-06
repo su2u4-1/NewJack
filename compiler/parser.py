@@ -209,7 +209,7 @@ class Parser:
         # Parse variable declarations and init.
         location = self.now.location
         self.get()
-        if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "float")) or self.now.type == "identifier":
+        if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "arr", "float")) or self.now.type == "identifier":
             var_type = self.parse_Type()
         else:
             self.error("missing variable type")

@@ -65,6 +65,7 @@ Keyword = {
     "char",
     "str",
     "list",
+    "arr",
     "float",
 }
 Precedence = {
