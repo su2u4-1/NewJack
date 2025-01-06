@@ -57,18 +57,29 @@ def format_nj(code: list[str]) -> list[str]:
 
 
 def format_vm(code: list[str]) -> list[str]:
+    def check_label(i: str) -> bool:
+        if (
+            i.startswith("label if")
+            or i.startswith("label elif")
+            or i.startswith("label for")
+            or i.startswith("label while")
+            or i.startswith("label loop")
+        ):
+            return True
+        return False
+
     new_code: list[str] = []
     indent = 0
     f = False
     for i in code:
         i = i.strip()
-        if f and i.startswith("label") and not (i.startswith("label if") or i.startswith("label loop")):
+        if f and i.startswith("label") and not (check_label(i)):
             indent -= 1
         f = False
         if i.startswith("debug-label end"):
             indent -= 2
         new_code.append("    " * indent + i)
-        if i.startswith("label") and not (i.startswith("label if") or i.startswith("label loop")) or i.startswith("debug-label start"):
+        if i.startswith("label") and not (check_label(i)) or i.startswith("debug-label start"):
             indent += 1
         elif not i.startswith("debug-label start"):
             f = True
