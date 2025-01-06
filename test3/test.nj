@@ -22,7 +22,7 @@ class c0 {
         for(i, arg1) {
             let l0[i] = g1[i] + g2[i];
         }
-        if(g0 == self.attr0) {
+        if(g0 == l0[0]) {
             return g2;
         }
         else {

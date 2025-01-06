@@ -8,8 +8,10 @@ from compiler.lib import CompileError, CompileErrorGroup, Info, type_int, type_v
 class Compiler:
     def __init__(self, global_: Global, errout: list[str], debug_flag: bool = False) -> None:
         self.global_: dict[str, tuple[Type, int]] = {}
-        self.subroutine: dict[str, tuple[Type, Literal["class", "constructor", "function", "method"]]] = {}
-        self.attribute: dict[str, dict[str, tuple[Type, int]]] = {}
+        self.subroutine: dict[str, tuple[Type, Literal["class", "constructor", "function", "method"]]] = {
+            "list.append": (type_void, "method")
+        }
+        self.attribute: dict[str, dict[str, tuple[Type, int]]] = {"list": {}}
         self.argument: dict[str, dict[str, tuple[Type, int]]] = {}
         self.local: dict[str, dict[str, tuple[Type, int]]] = {}
         self.err_list: list[CompileError] = []
@@ -145,9 +147,11 @@ class Compiler:
             return self.compileIf_S(statement)
         elif isinstance(statement, While_S):
             return self.compileWhile_S(statement)
+        elif isinstance(statement, For_S):
+            return self.compileFor_S(statement)
         elif isinstance(statement, Return_S):
             return self.compileReturn_S(statement)
-        elif isinstance(statement, Break_S):
+        elif isinstance(statement, Break_S):  # type: ignore
             return self.compileBreak_S(statement)
         else:
             self.error(f"unknown statement", statement.location)
@@ -417,8 +421,8 @@ class Compiler:
                 else:
                     self.error(f"attribute '{var.attr}' not found in {var_info.name}", var.attr.location)
             elif str(var.attr) in self.attribute[str(var_info.type.outside)]:
-                # $L -> @L      ->    heap obj
-                # 255   m[255] = 1023 m[1023] = attr0
+                # $L ->       @L    ->    heap obj
+                # 255  m[255] = 1023  m[1023] = attr0
                 if t != "":
                     var_info.code.append("push @" + t)
                 var_info.code.append("pop $D")
