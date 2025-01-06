@@ -50,7 +50,7 @@ Keyword = {
     "let",
     "do",
     "if",
-    "if else",
+    "elif",
     "else",
     "while",
     "return",
@@ -160,7 +160,7 @@ class CompileError(Exception):
         if source.endswith("\n"):
             source = source[:-1]
         info = [
-            f'File "{self.file}", line {self.line}, in {self.index}',
+            f'File "{self.file}", line {self.line + 1}, in {self.index}',
             f"{self.kind} Error: {self.text}",
             source,
             " " * (self.index - 1) + "^",
@@ -250,7 +250,7 @@ def format_traceback(e: BaseException) -> str:
 
 
 Operator = Tokens("symbol", ("+", "-", "*", "/", "==", "!=", ">=", "<=", ">", "<", "|", "&"))
-built_in_type = Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void"))
+built_in_type = Tokens("keyword", ("int", "bool", "char", "str", "list", "float", "void", "arr"))
 type_class = Type(Identifier("class"))
 type_subroutine = {
     "constructor": Type(Identifier("constructor")),

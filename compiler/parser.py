@@ -199,6 +199,7 @@ class Parser:
         var_type = Type(Identifier(self.now.content, self.now.location), None, self.now.location)
         self.get()
         if self.now == Token("symbol", "["):
+            self.get()
             var_type.inside = self.parse_Type()
             if self.now != Token("symbol", "]"):
                 self.error("[ not closed")
@@ -209,7 +210,7 @@ class Parser:
         # Parse variable declarations and init.
         location = self.now.location
         self.get()
-        if self.now == Tokens("keyword", ("int", "bool", "char", "str", "list", "arr", "float")) or self.now.type == "identifier":
+        if (self.now == built_in_type and self.now != Token("keyword", "void")) or self.now.type == "identifier":
             var_type = self.parse_Type()
         else:
             self.error("missing variable type")
@@ -324,6 +325,9 @@ class Parser:
         if self.now.type != "identifier":
             self.error("must be identifier")
         for_count_integer = Identifier(self.now.content, self.now.location)
+        self.get()
+        if self.now != Token("symbol", ","):
+            self.error("missing symbol ','")
         i_0 = self.parse_Expression()
         if self.now == Token("symbol", ")"):
             i_1 = Expression([Term(Integer("0", self.now.location), location=self.now.location)], self.now.location)
@@ -431,6 +435,7 @@ class Parser:
                 output = Term(self.parse_Expression(), None, self.now.location)
                 if self.now != Token("symbol", ")"):
                     self.error("missing symbol ')'")
+                self.get()
             elif self.now == Token("symbol", "-"):
                 output = Term(self.parse_Term(), "-", self.now.location)
             else:  # self.now == Token("symbol", "!")

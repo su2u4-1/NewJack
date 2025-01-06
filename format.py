@@ -43,6 +43,8 @@ def format_nj(code: list[str]) -> list[str]:
                     f = False
                 else:
                     line += " " + i.content
+                if i.content in ".([":
+                    f = True
             sf = True
         elif i.type in ("string", "integer", "symbol", "keyword", "float", "char", "identifier"):
             sf = False

@@ -10,7 +10,7 @@ class c0 {
     }
     constructor c0 new(pass) {
         let g0 = 5;
-        let self.attr0 = g0 * ( 13 + 2);
+        let self.attr0 = g0 * (13 + 2);
         let self.attr1 = c1.new(g0);
         return self;
     }
@@ -20,7 +20,7 @@ class c0 {
     function arr[int] f0(int arg1) {
         var arr[int] l0;
         for(i, arg1) {
-            let arr[i] = g1[i] + g2[i];
+            let l0[i] = g1[i] + g2[i];
         }
         if(g0 == self.attr0) {
             return g2;
@@ -40,7 +40,7 @@ class c1 {
             do g1.append(l1);
             let l1 = l1 + 1;
         }
-        self.attr2 = g0;
+        let self.attr2 = g0;
         return self;
     }
     function void f1(pass) {
