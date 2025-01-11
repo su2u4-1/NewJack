@@ -1,11 +1,11 @@
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, List, Tuple, Union
 
 from compiler.lib import Token, Tokens, CompileError, built_in_type, Operator, Precedence
 from compiler.AST import *
 
 
 class Parser:
-    def __init__(self, tokens: list[Token], file_path: str) -> None:
+    def __init__(self, tokens: List[Token], file_path: str) -> None:
         tokens.append(Token("keyword", "EOF"))
         self.tokens = tokens
         self.index = 0
@@ -13,7 +13,7 @@ class Parser:
         self.file_path = file_path
         self.now = tokens[0]
 
-    def error(self, text: str, location: tuple[int, int] = (-1, -1)) -> NoReturn:
+    def error(self, text: str, location: Tuple[int, int] = (-1, -1)) -> NoReturn:
         if location == (-1, -1):
             location = self.now.location
         raise CompileError(text, self.file_path, location, "parser")
@@ -165,7 +165,7 @@ class Parser:
             self.error("missing symbol '{'")
         return Subroutine(name, kind, type, self.parse_Statements(), arg_list, location)  # type: ignore
 
-    def parse_Statements(self) -> list[Statement]:
+    def parse_Statements(self) -> List[Statement]:
         output: list[Statement] = []
         while True:
             self.get()
@@ -378,7 +378,7 @@ class Parser:
             self.error("missing symbol ';'")
         return Break_S(n, location)
 
-    def parse_ExpressionList(self) -> list[Expression]:
+    def parse_ExpressionList(self) -> List[Expression]:
         output: list[Expression] = []
         output.append(self.parse_Expression())
         if self.now == Token("symbol", ","):
@@ -391,7 +391,7 @@ class Parser:
     def parse_Expression(self) -> Expression:
         location = self.next().location
         symbol: list[Op] = []
-        output: list[Term | Op] = []
+        output: list[Union[Term, Op]] = []
         output.append(self.parse_Term())
         while self.now == Operator:
             while True:

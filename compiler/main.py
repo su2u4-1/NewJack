@@ -1,5 +1,6 @@
 from os.path import isfile, abspath, isdir
 from sys import argv, path
+from typing import List, Dict, Tuple
 
 path.append(abspath("\\".join(__file__.split("\\")[:-2])))
 
@@ -10,7 +11,7 @@ from compiler.AST import Class, Global, Root, DeclareVar
 from compiler.Compiler import Compiler
 
 
-def analyze_file(source: list[str], arg: Args, file_path: str, errout: list[str]) -> Root:
+def analyze_file(source: List[str], arg: Args, file_path: str, errout: List[str]) -> Root:
     # Tokenize the source code.
     try:
         tokens = lexer(source, file_path)
@@ -45,8 +46,8 @@ def analyze_file(source: list[str], arg: Args, file_path: str, errout: list[str]
 
 
 def compile_all_file(
-    class_list: list[Class], global_: Global, arg: Args, source_dict: dict[str, list[str]], errout: list[str]
-) -> list[str]:
+    class_list: List[Class], global_: Global, arg: Args, source_dict: Dict[str, List[str]], errout: List[str]
+) -> List[str]:
     failed = False
     compiler = Compiler(global_, errout, arg.debug)
     for c in class_list:
@@ -67,7 +68,7 @@ def compile_all_file(
     return compiler.returncode()
 
 
-def parse_arguments(args: str) -> tuple[list[str], Args]:
+def parse_arguments(args: str) -> Tuple[List[str], Args]:
     if "exit" in args.lower():
         exit()
     arg = Args()
@@ -81,22 +82,21 @@ def parse_arguments(args: str) -> tuple[list[str], Args]:
         elif i.startswith("-"):
             outpath = False
             errout = False
-            match i:
-                case "-d" | "--debug":
-                    arg.debug = True
-                case "-c" | "--compile":
-                    arg.compile = True
-                case "-s" | "--showast":
-                    arg.showast = True
-                case "-o" | "--outpath":
-                    outpath = True
-                case "-e" | "--errout":
-                    errout = True
-                case "-h" | "--help":
-                    help = True
-                    arg.help.append("--help")
-                case _:
-                    print(f"Unrecognized flag: {i}. Please refer to the help section for valid options.")
+            if i == "-d" or i == "--debug":
+                arg.debug = True
+            elif i == "-c" or i == "--compile":
+                arg.compile = True
+            elif i == "-s" or i == "--showast":
+                arg.showast = True
+            elif i == "-o" or i == "--outpath":
+                outpath = True
+            elif i == "-e" or i == "--errout":
+                errout = True
+            elif i == "-h" or i == "--help":
+                help = True
+                arg.help.append("--help")
+            else:
+                print(f"Unrecognized flag: {i}. Please refer to the help section for valid options.")
         elif isfile(abspath(i)):
             if outpath:
                 arg.outpath += abspath(i)
@@ -112,7 +112,7 @@ def parse_arguments(args: str) -> tuple[list[str], Args]:
     return paths, arg
 
 
-def main() -> tuple[list[str], str]:
+def main() -> Tuple[List[str], str]:
     errout: list[str] = []
     # parse arguments
     if len(argv) == 1:

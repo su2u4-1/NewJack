@@ -1,11 +1,12 @@
 from os import listdir
 from os.path import isfile, isdir, join
 from sys import argv
+from typing import List
 
 from compiler.lexer import lexer
 
 
-def format_nj(code: list[str]) -> list[str]:
+def format_nj(code: List[str]) -> List[str]:
     new_code: list[str] = []
     tokens = lexer(code, "format.nj")
     indent = 0
@@ -56,7 +57,7 @@ def format_nj(code: list[str]) -> list[str]:
     return new_code
 
 
-def format_vm(code: list[str]) -> list[str]:
+def format_vm(code: List[str]) -> List[str]:
     def check_label(i: str) -> bool:
         if (
             i.startswith("label if")

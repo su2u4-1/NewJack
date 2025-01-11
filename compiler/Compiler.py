@@ -1,20 +1,20 @@
 from traceback import format_stack
-from typing import Literal
+from typing import Literal, List, Tuple, Union
 
 from compiler.AST import *
 from compiler.lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
 
 
 class Compiler:
-    def __init__(self, global_: Global, errout: list[str], debug_flag: bool = False) -> None:
-        self.global_: dict[str, tuple[Type, int]] = {}
-        self.subroutine: dict[str, tuple[Type, Literal["class", "constructor", "function", "method"]]] = {
+    def __init__(self, global_: Global, errout: List[str], debug_flag: bool = False) -> None:
+        self.global_: dict[str, Tuple[Type, int]] = {}
+        self.subroutine: dict[str, Tuple[Type, Literal["class", "constructor", "function", "method"]]] = {
             "list.append": (type_void, "method")
         }
-        self.attribute: dict[str, dict[str, tuple[Type, int]]] = {"list": {}}
-        self.argument: dict[str, dict[str, tuple[Type, int]]] = {}
-        self.local: dict[str, dict[str, tuple[Type, int]]] = {}
-        self.err_list: list[CompileError] = []
+        self.attribute: dict[str, dict[str, Tuple[Type, int]]] = {"list": {}}
+        self.argument: dict[str, dict[str, Tuple[Type, int]]] = {}
+        self.local: dict[str, dict[str, Tuple[Type, int]]] = {}
+        self.err_list: List[CompileError] = []
         self.count: dict[str, int] = {
             "subroutine": 0,
             "global": 0,
@@ -26,22 +26,22 @@ class Compiler:
         }
         self.now_class: Class = Class(none, [], [], "")
         self.now_subroutine: Subroutine = Subroutine(none, "method", Type(none), [], [])
-        self.loop: list[int] = []
+        self.loop: List[int] = []
         self.debug_flag = debug_flag
-        self.code: list[str] = ["debug-label start"]
+        self.code: List[str] = ["debug-label start"]
         self.errout = errout
         self.declare(global_.global_variable)
         if self.debug_flag:
             self.showCompilerInfo()
 
-    def error(self, text: str, location: tuple[int, int]) -> None:
+    def error(self, text: str, location: Tuple[int, int]) -> None:
         i = CompileError(text, self.now_class.file_path, location, "compiler")
         i.traceback = "Traceback (most recent call last):\n" + "".join(format_stack())
         self.err_list.append(i)
 
     def addclass(self, c: Class) -> None:
         self.now_class = c
-        code: list[str] = []
+        code: List[str] = []
         self.err_list = []
         try:
             # compile class
@@ -70,7 +70,7 @@ class Compiler:
                 continue
             self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
 
-    def declare(self, vars: list[DeclareVar] | DeclareVar) -> None:
+    def declare(self, vars: Union[List[DeclareVar], DeclareVar]) -> None:
         if isinstance(vars, DeclareVar):
             vars = [vars]
         for var in vars:
@@ -97,22 +97,22 @@ class Compiler:
             t[str(var.name)] = (var.type, self.count[var.kind])
             self.count[var.kind] += 1
 
-    def returncode(self) -> list[str]:
-        self.code.insert(1, f"alloc {self.count["global"]}")
+    def returncode(self) -> List[str]:
+        self.code.insert(1, f"alloc {self.count['global']}")
         self.code.insert(2, "inpv [The address of the pointer to the global]")
         self.code.insert(3, "pop @V")
         self.code.append("debug-label end")
         return self.code
 
-    def compileClass(self, class_: Class) -> list[str]:
-        code: list[str] = []
+    def compileClass(self, class_: Class) -> List[str]:
+        code: List[str] = []
         self.now_class = class_
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
         return code
 
-    def compileSubroutine(self, subroutine: Subroutine) -> list[str]:
-        code: list[str] = []
+    def compileSubroutine(self, subroutine: Subroutine) -> List[str]:
+        code: List[str] = []
         if str(subroutine.name).startswith(str(self.now_class.name) + "."):
             code.append(f"label {subroutine.name}")
         else:
@@ -136,7 +136,7 @@ class Compiler:
         del self.local[str(subroutine.name)]
         return code
 
-    def compileStatement(self, statement: Statement) -> list[str]:
+    def compileStatement(self, statement: Statement) -> List[str]:
         if isinstance(statement, Var_S):
             return self.compileVar_S(statement)
         elif isinstance(statement, Do_S):
@@ -157,8 +157,8 @@ class Compiler:
             self.error(f"unknown statement", statement.location)
             return []
 
-    def compileVar_S(self, var: Var_S) -> list[str]:
-        code: list[str] = []
+    def compileVar_S(self, var: Var_S) -> List[str]:
+        code: List[str] = []
         for i in var.var_list:
             assert i.kind == "local"
         if len(var.var_list) < len(var.expression_list):
@@ -176,13 +176,13 @@ class Compiler:
                 code.append(f"pop @L {t}")
         return code
 
-    def compileDo_S(self, do: Do_S) -> list[str]:
+    def compileDo_S(self, do: Do_S) -> List[str]:
         result = self.compileCall(do.call)
         result.append("pop $T")
         return result
 
-    def compileLet_S(self, let: Let_S) -> list[str]:
-        code: list[str] = []
+    def compileLet_S(self, let: Let_S) -> List[str]:
+        code: List[str] = []
         code.extend(self.GetVarInfo(let.var, True).code)
         code.extend(self.compileExpression(let.expression))
         code.append("pop $D")
@@ -190,8 +190,8 @@ class Compiler:
         code.append("stor @T $D")
         return code
 
-    def compileIf_S(self, if_: If_S) -> list[str]:
-        code: list[str] = []
+    def compileIf_S(self, if_: If_S) -> List[str]:
+        code: List[str] = []
         n = self.count["if"]
         self.count["if"] += 1
         code.extend(self.compileExpression(if_.if_conditional))
@@ -213,8 +213,8 @@ class Compiler:
         code.append(f"label if_end_{n}")
         return code
 
-    def compileWhile_S(self, while_: While_S) -> list[str]:
-        code: list[str] = []
+    def compileWhile_S(self, while_: While_S) -> List[str]:
+        code: List[str] = []
         n = self.count["loop"]
         self.count["loop"] += 1
         self.loop.append(n)
@@ -236,8 +236,8 @@ class Compiler:
             self.error("loop level error", while_.location)
         return code
 
-    def compileFor_S(self, for_: For_S) -> list[str]:
-        code: list[str] = []
+    def compileFor_S(self, for_: For_S) -> List[str]:
+        code: List[str] = []
         n = self.count["loop"]
         self.count["loop"] += 1
         self.loop.append(n)
@@ -245,14 +245,14 @@ class Compiler:
         self.count["local"] += 1
         self.local[str(self.now_subroutine.name)][str(for_.for_count_integer)] = (type_int, cn)
         code.extend(self.compileExpression(for_.for_range[0]))
-        code.append(f"pop @L {self.count["argument"]+cn}")
+        code.append(f"pop @L {self.count['argument']+cn}")
         code.append(f"label for_start_{n}")
         for s in for_.statement_list:
             code.extend(self.compileStatement(s))
         code.extend(self.compileExpression(for_.for_range[2]))
-        code.append(f"push @L {self.count["argument"]+cn}")
+        code.append(f"push @L {self.count['argument']+cn}")
         code.append("call built_in.add 2")
-        code.append(f"pop @L {self.count["argument"]+cn}")
+        code.append(f"pop @L {self.count['argument']+cn}")
         code.extend(self.compileExpression(for_.for_range[1]))
         code.append(f"goto for_start_{n} true")
         if for_.else_:
@@ -263,8 +263,8 @@ class Compiler:
             self.error("loop level error", for_.location)
         return code
 
-    def compileReturn_S(self, return_: Return_S) -> list[str]:
-        code: list[str] = []
+    def compileReturn_S(self, return_: Return_S) -> List[str]:
+        code: List[str] = []
         if return_.expression is None:
             if self.now_subroutine.return_type == type_void:
                 code.append("push 0")
@@ -275,15 +275,15 @@ class Compiler:
         code.append("return")
         return code
 
-    def compileBreak_S(self, break_: Break_S) -> list[str]:
+    def compileBreak_S(self, break_: Break_S) -> List[str]:
         if len(self.loop) < int(break_.n):
             self.error("The break statement must be inside a loop", break_.location)
             return []
         else:
             return [f"goto loop_end_{self.loop[-int(break_.n)]} all"]
 
-    def compileExpression(self, expression: Expression) -> list[str]:
-        code: list[str] = []
+    def compileExpression(self, expression: Expression) -> List[str]:
+        code: List[str] = []
         for i in expression.content:
             if isinstance(i, Term):
                 code.extend(self.compileTerm(i))
@@ -291,8 +291,8 @@ class Compiler:
                 code.extend(self.compileOp(i))
         return code
 
-    def compileTerm(self, term: Term) -> list[str]:
-        code: list[str] = []
+    def compileTerm(self, term: Term) -> List[str]:
+        code: List[str] = []
         if isinstance(term.content, Integer):
             code.append(f"push {term.content}")
         elif isinstance(term.content, Float):
@@ -333,7 +333,7 @@ class Compiler:
                 code.append("call built_in.invert 1")
         return code
 
-    def compileOp(self, op: Op) -> list[str]:
+    def compileOp(self, op: Op) -> List[str]:
         if op == "+":
             return ["call built_in.add 2"]
         elif op == "-":
@@ -366,8 +366,8 @@ class Compiler:
             self.error(f"unknown op {op}", op.location)
             return []
 
-    def compileCall(self, call: Call) -> list[str]:
-        code: list[str] = []
+    def compileCall(self, call: Call) -> List[str]:
+        code: List[str] = []
         var_info = self.GetVarInfo(call.var)
         if var_info.kind == "method":
             code.append("\n".join(var_info.code))
@@ -395,7 +395,7 @@ class Compiler:
             elif str(var.var) in self.local[str(self.now_subroutine.name)]:
                 var_info.type = self.local[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "local"
-                t = f"L {self.count["argument"] + self.local[str(self.now_subroutine.name)][str(var.var)][1]}"
+                t = f"L {self.count['argument'] + self.local[str(self.now_subroutine.name)][str(var.var)][1]}"
             elif str(var.var) in self.argument[str(self.now_subroutine.name)]:
                 var_info.type = self.argument[str(self.now_subroutine.name)][str(var.var)][0]
                 var_info.kind = "argument"

@@ -1,7 +1,9 @@
+from typing import List
+
 from compiler.lib import Token, CompileError, Number, Symbol, atoZ, Keyword
 
 
-def lexer(source: list[str], file: str) -> list[Token]:
+def lexer(source: List[str], file: str) -> List[Token]:
     """
     Tokenizes the source code into a list of tokens.
 

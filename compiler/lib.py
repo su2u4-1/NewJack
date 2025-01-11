@@ -1,5 +1,5 @@
 import os.path
-from typing import Sequence, Literal
+from typing import Sequence, Literal, List, Tuple
 from traceback import format_list, extract_tb
 
 from compiler.AST import Type, Identifier
@@ -98,7 +98,7 @@ match_arg = {"-d": "--debug", "-s": "--showast", "-c": "--compile", "-h": "--hel
 
 
 class Token:
-    def __init__(self, type: TokenType, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, type: TokenType, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.content = content
         self.type = type
         self.line, self.index = location
@@ -140,14 +140,14 @@ class Tokens:
 
 
 class CompileError(Exception):
-    def __init__(self, text: str, file: str, location: tuple[int, int], kind: str) -> None:
+    def __init__(self, text: str, file: str, location: Tuple[int, int], kind: str) -> None:
         self.file = file
         self.line, self.index = location
         self.text = text
         self.kind = kind
         self.traceback = ""
 
-    def show(self, source: str) -> tuple[str, int]:
+    def show(self, source: str) -> Tuple[str, int]:
         """
         Formats the error message with detailed context.
 
@@ -213,7 +213,7 @@ class Args:
                     print(f"{match_arg[i]:10}", docs[match_arg[i]])
 
 
-def get_path(paths: list[str]) -> list[str]:
+def get_path(paths: List[str]) -> List[str]:
     files: list[str] = []
     for path in paths:
         path = os.path.abspath(path)
@@ -228,7 +228,7 @@ def get_path(paths: list[str]) -> list[str]:
     return files
 
 
-def read_source(path: str) -> list[str]:
+def read_source(path: str) -> List[str]:
     source = []
     if path.endswith(".nj"):
         with open(path, "r") as f:

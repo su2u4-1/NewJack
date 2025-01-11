@@ -5,7 +5,7 @@ This module defines classes and structures used to represent the abstract syntax
 Each class corresponds to a syntactic construct in the language, such as expressions, statements, and subroutines.
 """
 
-from typing import Literal, Optional, Sequence, Union, Iterable
+from typing import Literal, Optional, Sequence, Union, Iterable, List, Tuple
 import os.path
 
 __all__ = [
@@ -38,11 +38,11 @@ __all__ = [
 
 
 class Identifier:
-    def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.content = content
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -56,11 +56,11 @@ class Identifier:
 
 
 class Integer:
-    def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.content = int(content)
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -74,11 +74,11 @@ class Integer:
 
 
 class Float:
-    def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.a, self.b = content.split(".")
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -89,11 +89,11 @@ class Float:
 
 
 class String:
-    def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.content = content
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -104,11 +104,11 @@ class String:
 
 
 class Char:
-    def __init__(self, content: str, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: str, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.content = content[0]
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -122,12 +122,12 @@ class Op:
     def __init__(
         self,
         content: Literal["+", "-", "*", "/", "|", "&", "<<", ">>", "==", "!=", ">=", "<=", ">", "<"],
-        location: tuple[int, int] = (-1, -1),
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.content = content
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -141,12 +141,12 @@ class Op:
 
 
 class Type:
-    def __init__(self, outside: Identifier, inside: Optional["Type"] = None, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, outside: Identifier, inside: Optional["Type"] = None, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.outside = outside
         self.inside = inside
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -170,13 +170,13 @@ class Term:
         self,
         content: Union[Integer, Float, Char, String, "Call", "Variable", "Expression", "Term", Literal["false", "true", "self"]],
         neg: Optional[Literal["-", "!"]] = None,
-        location: tuple[int, int] = (-1, -1),
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.content = content
         self.neg = neg
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -190,12 +190,12 @@ class Term:
 
 
 class Expression:
-    def __init__(self, content: Sequence[Term | Op], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, content: Sequence[Union[Term, Op]], location: Tuple[int, int] = (-1, -1)) -> None:
         """content: Stores Op and Term sequences converted to Reverse Polish Notation (RPN)"""
         self.location = location
         self.content = content
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -211,7 +211,7 @@ class Variable:
         var: "Variable | Identifier",
         index: Optional[Expression] = None,
         attr: Optional[Identifier] = None,
-        location: tuple[int, int] = (-1, -1),
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.var = var
@@ -223,7 +223,7 @@ class Variable:
             elif attr is not None:
                 self.attr = attr
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -239,19 +239,19 @@ class Variable:
 
 
 class Call:
-    def __init__(self, var: Variable, expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var: Variable, expression_list: List[Expression] = [], location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var = var
         self.expression_list = expression_list
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
-        return f"{self.var}({", ".join(str(i) for i in self.expression_list)})"
+        return f"{self.var}({', '.join(str(i) for i in self.expression_list)})"
 
 
 class DeclareVar:
@@ -260,14 +260,14 @@ class DeclareVar:
         name: Identifier,
         kind: Literal["class", "constructor", "function", "method", "global", "argument", "attribute", "local"],
         type: Type,
-        location: tuple[int, int] = (-1, -1),
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.name = name
         self.kind = kind
         self.type = type
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __repr__(self) -> str:
@@ -278,12 +278,12 @@ class DeclareVar:
 
 
 class Var_S:
-    def __init__(self, var_list: list[DeclareVar], expression_list: list[Expression] = [], location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var_list: List[DeclareVar], expression_list: List[Expression] = [], location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var_list = var_list
         self.expression_list = expression_list
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = ["var_s:"]
         for v, e in zip(self.var_list, self.expression_list):
             t.append(f"    {v} = {e}")
@@ -294,11 +294,11 @@ class Var_S:
 
 
 class Do_S:
-    def __init__(self, call: Call, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, call: Call, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.call = call
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return ["do " + self.call.show()[0]]
 
     def __str__(self) -> str:
@@ -309,12 +309,12 @@ class Do_S:
 
 
 class Let_S:
-    def __init__(self, var: Variable, expression: Expression, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var: Variable, expression: Expression, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var = var
         self.expression = expression
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return ["let_s:", f"    {self.var} = {self.expression}"]
 
     def __str__(self) -> str:
@@ -322,11 +322,11 @@ class Let_S:
 
 
 class Return_S:
-    def __init__(self, expression: Optional[Expression] = None, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, expression: Optional[Expression] = None, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.expression = expression
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __str__(self) -> str:
@@ -340,11 +340,11 @@ class Return_S:
 
 
 class Break_S:
-    def __init__(self, n: Integer, location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, n: Integer, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.n = n
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         return [str(self)]
 
     def __str__(self) -> str:
@@ -358,11 +358,11 @@ class For_S:
     def __init__(
         self,
         for_count_integer: Identifier,
-        for_range: tuple[Expression, Expression, Expression],
-        statement_list: list["Statement"],
+        for_range: Tuple[Expression, Expression, Expression],
+        statement_list: List["Statement"],
         else_: bool = False,
-        else_statement_list: list["Statement"] = [],
-        location: tuple[int, int] = (-1, -1),
+        else_statement_list: List["Statement"] = [],
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.for_count_integer = for_count_integer
@@ -371,7 +371,7 @@ class For_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = [f"for({self.for_count_integer}, {self.for_range[0]}; {self.for_range[1]}; {self.for_range[2]})"]
         for s in self.statement_list:
             t.extend(ident(s.show()))
@@ -389,13 +389,13 @@ class If_S:
     def __init__(
         self,
         if_conditional: Expression,
-        if_statement_list: list["Statement"],
+        if_statement_list: List["Statement"],
         elif_n: int = 0,
-        elif_statement_list: list[list["Statement"]] = [],
-        elif_conditional_list: list[Expression] = [],
+        elif_statement_list: List[List["Statement"]] = [],
+        elif_conditional_list: List[Expression] = [],
         else_: bool = False,
-        else_statement_list: list["Statement"] = [],
-        location: tuple[int, int] = (-1, -1),
+        else_statement_list: List["Statement"] = [],
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.if_conditional = if_conditional
@@ -406,7 +406,7 @@ class If_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = [f"if({self.if_conditional})"]
         for s in self.if_statement_list:
             t.extend(ident(s.show()))
@@ -428,10 +428,10 @@ class While_S:
     def __init__(
         self,
         conditional: Expression,
-        statement_list: list["Statement"],
+        statement_list: List["Statement"],
         else_: bool = False,
-        else_statement_list: list["Statement"] = [],
-        location: tuple[int, int] = (-1, -1),
+        else_statement_list: List["Statement"] = [],
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.conditional = conditional
@@ -439,7 +439,7 @@ class While_S:
         self.else_ = else_
         self.else_statement_list = else_statement_list
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = [f"while({self.conditional})"]
         for s in self.statement_list:
             t.extend(ident(s.show()))
@@ -453,7 +453,7 @@ class While_S:
         return "\n".join(self.show())
 
 
-Statement = Var_S | Do_S | Let_S | Return_S | Break_S | For_S | If_S | While_S
+Statement = Union[Var_S, Do_S, Let_S, Return_S, Break_S, For_S, If_S, While_S]
 
 
 class Subroutine:
@@ -462,9 +462,9 @@ class Subroutine:
         name: Identifier,
         kind: Literal["constructor", "method", "function"],
         return_type: Type,
-        statement_list: list[Statement],
-        argument_list: list[DeclareVar] = [],
-        location: tuple[int, int] = (-1, -1),
+        statement_list: List[Statement],
+        argument_list: List[DeclareVar] = [],
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.name = name
@@ -473,8 +473,8 @@ class Subroutine:
         self.statement_list = statement_list
         self.argument_list = argument_list
 
-    def show(self) -> list[str]:
-        t = [f"{self.kind} {self.name}({", ".join(str(i) for i in self.argument_list)}) -> {self.return_type}"]
+    def show(self) -> List[str]:
+        t = [f"{self.kind} {self.name}({', '.join(str(i) for i in self.argument_list)}) -> {self.return_type}"]
         for s in self.statement_list:
             t.extend(ident(s.show()))
         return t
@@ -487,10 +487,10 @@ class Class:
     def __init__(
         self,
         name: Identifier,
-        attr_list: list[DeclareVar],
-        subroutine_list: list[Subroutine],
+        attr_list: List[DeclareVar],
+        subroutine_list: List[Subroutine],
         file_path: str,
-        location: tuple[int, int] = (-1, -1),
+        location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.name = name
@@ -499,7 +499,7 @@ class Class:
         self.file_path = file_path
         self.file_name = os.path.split(os.path.abspath(file_path))[1].split(".")[0]
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = [f"class({self.name}), file: {self.file_path}"]
         t.append("    attr:")
         for a in self.attr_list:
@@ -515,9 +515,9 @@ class Class:
 
 class Global:
     def __init__(self) -> None:
-        self.global_variable: list[DeclareVar] = []
+        self.global_variable: List[DeclareVar] = []
 
-    def show(self) -> list[str]:
+    def show(self) -> List[str]:
         t = ["global:"]
         for g in self.global_variable:
             t.append(f"    {g}")
@@ -528,7 +528,7 @@ class Global:
 
 
 class Root:
-    def __init__(self, class_list: list[Class], global_list: list[DeclareVar]) -> None:
+    def __init__(self, class_list: List[Class], global_list: List[DeclareVar]) -> None:
         self.class_list = class_list
         self.global_list = global_list
 
