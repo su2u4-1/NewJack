@@ -32,7 +32,7 @@
         | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <0-9> ::= "0" | <1-9>
 <1-9> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-<built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "float"
+<built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "arr" | "float"
 <keyword> ::= "class" | "var" | "describe" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
 <keyword_content> ::= "false" | "true" | "self"

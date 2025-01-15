@@ -239,10 +239,13 @@ class Variable:
 
 
 class Call:
-    def __init__(self, var: Variable, expression_list: List[Expression] = [], location: Tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, var: Variable, expression_list: Optional[List[Expression]] = None, location: Tuple[int, int] = (-1, -1)) -> None:
         self.location = location
         self.var = var
-        self.expression_list = expression_list
+        if expression_list is None:
+            self.expression_list = []
+        else:
+            self.expression_list = expression_list
 
     def show(self) -> List[str]:
         return [str(self)]
@@ -278,10 +281,15 @@ class DeclareVar:
 
 
 class Var_S:
-    def __init__(self, var_list: List[DeclareVar], expression_list: List[Expression] = [], location: Tuple[int, int] = (-1, -1)) -> None:
+    def __init__(
+        self, var_list: List[DeclareVar], expression_list: Optional[List[Expression]] = None, location: Tuple[int, int] = (-1, -1)
+    ) -> None:
         self.location = location
         self.var_list = var_list
-        self.expression_list = expression_list
+        if expression_list is None:
+            self.expression_list = []
+        else:
+            self.expression_list = expression_list
 
     def show(self) -> List[str]:
         t = ["var_s:"]
@@ -361,7 +369,7 @@ class For_S:
         for_range: Tuple[Expression, Expression, Expression],
         statement_list: List["Statement"],
         else_: bool = False,
-        else_statement_list: List["Statement"] = [],
+        else_statement_list: Optional[List["Statement"]] = None,
         location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
@@ -369,7 +377,10 @@ class For_S:
         self.for_range = for_range
         self.statement_list = statement_list
         self.else_ = else_
-        self.else_statement_list = else_statement_list
+        if else_statement_list is None:
+            self.else_statement_list = []
+        else:
+            self.else_statement_list = else_statement_list
 
     def show(self) -> List[str]:
         t = [f"for({self.for_count_integer}, {self.for_range[0]}; {self.for_range[1]}; {self.for_range[2]})"]
@@ -391,20 +402,29 @@ class If_S:
         if_conditional: Expression,
         if_statement_list: List["Statement"],
         elif_n: int = 0,
-        elif_statement_list: List[List["Statement"]] = [],
-        elif_conditional_list: List[Expression] = [],
+        elif_statement_list: Optional[List[List["Statement"]]] = None,
+        elif_conditional_list: Optional[List[Expression]] = None,
         else_: bool = False,
-        else_statement_list: List["Statement"] = [],
+        else_statement_list: Optional[List["Statement"]] = None,
         location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.if_conditional = if_conditional
         self.if_statement_list = if_statement_list
         self.elif_n = elif_n
-        self.elif_statement_list = elif_statement_list
-        self.elif_conditional_list = elif_conditional_list
         self.else_ = else_
-        self.else_statement_list = else_statement_list
+        if elif_statement_list is None:
+            self.elif_statement_list = []
+        else:
+            self.elif_statement_list = elif_statement_list
+        if elif_conditional_list is None:
+            self.elif_conditional_list = []
+        else:
+            self.elif_conditional_list = elif_conditional_list
+        if else_statement_list is None:
+            self.else_statement_list = []
+        else:
+            self.else_statement_list = else_statement_list
 
     def show(self) -> List[str]:
         t = [f"if({self.if_conditional})"]
@@ -430,14 +450,17 @@ class While_S:
         conditional: Expression,
         statement_list: List["Statement"],
         else_: bool = False,
-        else_statement_list: List["Statement"] = [],
+        else_statement_list: Optional[List["Statement"]] = None,
         location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
         self.conditional = conditional
         self.statement_list = statement_list
         self.else_ = else_
-        self.else_statement_list = else_statement_list
+        if else_statement_list is None:
+            self.else_statement_list = []
+        else:
+            self.else_statement_list = else_statement_list
 
     def show(self) -> List[str]:
         t = [f"while({self.conditional})"]
@@ -463,7 +486,7 @@ class Subroutine:
         kind: Literal["constructor", "method", "function"],
         return_type: Type,
         statement_list: List[Statement],
-        argument_list: List[DeclareVar] = [],
+        argument_list: Optional[List[DeclareVar]] = None,
         location: Tuple[int, int] = (-1, -1),
     ) -> None:
         self.location = location
@@ -471,7 +494,10 @@ class Subroutine:
         self.kind = kind
         self.return_type = return_type
         self.statement_list = statement_list
-        self.argument_list = argument_list
+        if argument_list is None:
+            self.argument_list = []
+        else:
+            self.argument_list = argument_list
 
     def show(self) -> List[str]:
         t = [f"{self.kind} {self.name}({', '.join(str(i) for i in self.argument_list)}) -> {self.return_type}"]
