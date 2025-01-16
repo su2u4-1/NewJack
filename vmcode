@@ -165,8 +165,8 @@ non-standard syntactic sugar:
         load @P $D
         copy $[a] $D
 
-    jump "[label]" [true | false | all]
-        getl $D "[label]"
+    goto "[label]" [true | false | all]
+        getl $T "[label]"
         if true:
             pop $C
         if false:

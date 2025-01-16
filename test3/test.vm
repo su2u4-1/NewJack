@@ -1,12 +1,12 @@
 debug-label start
     alloc 3
-    inpv [The address of the pointer to the global]
+    inpv [global address]
     pop @V
     debug-label start test.c0
         label c0.new
             alloc 2
             pop @L 0
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push $V 0
             push 5
             pop $D
@@ -15,7 +15,7 @@ debug-label start
             push @L 0
             pop $D
             push $D 0
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             push 13
             push 2
@@ -28,7 +28,7 @@ debug-label start
             pop $D
             push $D 1
             push 0
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             call c1.new 2
             pop $D
@@ -40,7 +40,7 @@ debug-label start
             push @L 0
             pop $D
             push @D 1
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             call c1.m1 2
             push @L 0
@@ -57,13 +57,13 @@ debug-label start
             push $L 1
             push @L 2
             call built_in.add 2
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push $V 1
             push @L 2
             call built_in.add 2
             pop $D
             push @D
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push $V 2
             push @L 2
             call built_in.add 2
@@ -77,10 +77,12 @@ debug-label start
             push @L 2
             call built_in.add 2
             pop @L 2
+            push @L 2
             push @L 0
+            call built_in.lt 2
             goto for_start_0 true
             label loop_end_0
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             push $L 1
             push 0
@@ -89,7 +91,7 @@ debug-label start
             push @D
             call built_in.eq 2
             goto if_false_0 false
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 2
             return
             goto if_end_0 all
@@ -109,7 +111,8 @@ debug-label start
             push @L 1
             call built_in.lt 2
             goto loop_end_1 false
-            inpv [The address of the pointer to the global]
+            inpv [global address]
+            push @V 1
             push @L 2
             call list.append 2
             pop $T
@@ -125,7 +128,7 @@ debug-label start
             push @L 0
             pop $D
             push $D 0
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             pop $D
             pop $T
@@ -133,17 +136,18 @@ debug-label start
             push @L 0
             return
         label c1.f1
-            inpv [The address of the pointer to the global]
-            inpv [The address of the pointer to the global]
+            inpv [global address]
+            push @V 1
+            inpv [global address]
             push @V 0
             call list.append 2
             pop $T
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push $V 2
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             call built_in.add 2
-            inpv [The address of the pointer to the global]
+            inpv [global address]
             push @V 0
             pop $D
             pop $T

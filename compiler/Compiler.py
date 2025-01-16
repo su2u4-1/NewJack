@@ -99,7 +99,7 @@ class Compiler:
 
     def returncode(self) -> List[str]:
         self.code.insert(1, f"alloc {self.count['global']}")
-        self.code.insert(2, "inpv [The address of the pointer to the global]")
+        self.code.insert(2, "inpv [global address]")
         self.code.insert(3, "pop @V")
         self.code.append("debug-label end")
         return self.code
@@ -253,7 +253,9 @@ class Compiler:
         code.append(f"push @L {self.count['argument']+cn}")
         code.append("call built_in.add 2")
         code.append(f"pop @L {self.count['argument']+cn}")
+        code.append(f"push @L {self.count['argument']+cn}")
         code.extend(self.compileExpression(for_.for_range[1]))
+        code.append(f"call built_in.lt 2")
         code.append(f"goto for_start_{n} true")
         if for_.else_:
             for s in for_.else_statement_list:
@@ -403,7 +405,7 @@ class Compiler:
             elif str(var.var) in self.global_:
                 var_info.type = self.global_[str(var.var)][0]
                 var_info.kind = "global"
-                var_info.code.append("inpv [The address of the pointer to the global]")
+                var_info.code.append("inpv [global address]")
                 t = f"V {self.global_[str(var.var)][1]}"
             elif str(var.var) in self.subroutine:
                 var_info.type = Type(Identifier(self.subroutine[str(var.var)][1]))
