@@ -177,6 +177,9 @@ non-standard syntactic sugar:
             setv $C 1
         jump $T $C
 
+    label [label]
+        setl "[label]"
+
     alloc [value]
         - Allocate memory of size [value] from the heap and return the base address
         - Return the base address: Push the address onto the stack pointed to by $P
