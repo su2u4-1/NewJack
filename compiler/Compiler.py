@@ -438,6 +438,8 @@ class Compiler:
                 var_info.kind = "method"
                 var_info.name = str(var_info.type.outside)
                 var_info.type = self.subroutine[str(var_info.type.outside) + "." + str(var.attr)][0]
+                if t:
+                    var_info.code.append("push @" + t)
             else:
                 self.error(f"attribute '{var.attr}' not found in {var_info.type.outside}", var.attr.location)
             var_info.name += "." + str(var.attr)
