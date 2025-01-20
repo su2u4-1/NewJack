@@ -19,7 +19,6 @@
 <continue_S> ::= "continue" ";"
 <var> ::= <identifier'var'> | <var> "." <identifier'attr'> | <var> "[" <integer> "]"
 <expression> ::= <term> [{<operator> <term>}]
-<expression> ::= (<term> | <expression>) [<operator> (<term> | <expression>)]
 <term> ::= <string> | <integer> | <float> | <keyword_content> | ("-" | "!") <term> | <call> | <var> | "(" <expression> ")" | <conditional>
 <call> ::= <var> "(" (<expression> [{"," <expression>}] | "pass") ")"
 <conditional> ::= <expression> <logical_operator> <expression>
@@ -46,7 +45,7 @@
 <commant> ::= "#" <string> | "`" <string> "`"
 
 # 優先級 運算符  描述
-# 1      ! ~    邏輯not與取負數
+# 1      ! -    邏輯not與取負數
 # 2      * /    乘除法
 # 3      + -    加减法
 # 4      << >>  左右移

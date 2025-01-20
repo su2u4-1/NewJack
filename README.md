@@ -120,20 +120,20 @@ class class_name {
 第一個參數會是self，類型為目前class，應回傳此self
 建構子的呼叫方式:
 ```
- = class_name.new(arg, ...);
+class_name.new(arg, ...);
 ```
 ### 函式(function)
 函式裡無法使用self，函式無法取得目前class的屬性(attr)，因為沒有目前物件  
 函式的呼叫方式:
 ```
- = class_name.fun_name(arg, ...);
+class_name.fun_name(arg, ...);
 ```
 ### 方法(method)
 method的第一個參數會是self，類型為目前class  
 可以使用self來取得目前物件的屬性(attr)  
 方法的呼叫方式:
 ```
- = obj_name.method_name(arg, ...);
+obj_name.method_name(arg, ...);
 ```
 ## 語句(statement)
 nj有var, do, let, if, while, for, return, break這幾個語句  
@@ -215,13 +215,26 @@ break [int];
 表達式由數個term與操作符(operator)組成
 語法:
 ```
-term [{operator term}]
+<expression> ::= <term> [{<operator> <term>}]
 ```
 ### term
-term可以是: int, float, char, str, call, var, (expression), -term, ~term, false, true, self  
+term可以是: int, float, char, str, call, var, (expression), -term, !term, false, true, self  
 語法:
 ```
-(int|float|char|str|call|var|(expression)|-term|~term|false|true|self)
+<term> ::= <str> | <int> | <float> | false | true | self | (- | !)<term> | <call> | <var> | (<expression>)
 ```
 ### 操作符(operator)
 operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <
+<<與>>是算術移位
+==, !=, >=, <=, >, <是邏輯操作符(logical operator)，他們的回傳值一定是true或false
+## 其他/other
+### self的總結
+self只能在建構子(constructor)與方法(method)中使用  
+self是關鍵字，所以不能把變數命名成self  
+在聲明時與呼叫時皆不用寫出self  
+self的類型(type)為當前class
+在method中self是呼叫時的物件(obj)  
+在constructor中self是一個屬性皆為0的空物件
+### 一些細節
+操作符(operator)在預設條件下會直接拿變數實際值去計算
+所以如果變數是自定義的類型可能會變成拿obj的第一個attr或obj的attr數量去計算
