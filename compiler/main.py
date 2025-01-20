@@ -146,6 +146,11 @@ def main() -> Tuple[List[str], str]:
             root = analyze_file(source_dict[i], arg, i, errout)
             class_list.extend(root.class_list)
             global_.global_variable.extend(root.global_list)
+            if root.enter is not None:
+                if global_.enter is not None:
+                    errout.append(f'File "{i}"\nparser Error: Only one enter is allowed')
+                    raise Continue()
+                global_.enter = root.enter
         except Continue:
             print(f"File {i} processing failed")
             failed = True

@@ -33,6 +33,10 @@ class Compiler:
         self.declare(global_.global_variable)
         if self.debug_flag:
             self.showCompilerInfo()
+        if global_.enter is not None:
+            self.code.append("label enter")
+            for i in global_.enter:
+                self.code.extend(self.compileStatement(i))
 
     def error(self, text: str, location: Tuple[int, int]) -> None:
         i = CompileError(text, self.now_class.file_path, location, "compiler")

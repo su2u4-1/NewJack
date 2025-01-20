@@ -42,7 +42,7 @@
 <char> ::= "'" unicode_characters "'"
 <integer> ::= ["-"] <1-9> {<0-9>} | "0"
 <float> ::= ["-"] {<0-9>} "." {<0-9>}
-<commant> ::= "#" <string> | "`" <string> "`"
+<comment> ::= "#" <string> | "`" <string> "`"
 
 # 優先級 運算符  描述
 # 1      ! -    邏輯not與取負數

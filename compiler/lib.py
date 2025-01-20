@@ -41,6 +41,7 @@ Keyword = {
     "class",
     "global",
     "var",
+    "enter",
     "describe",
     "constructor",
     "function",

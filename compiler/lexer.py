@@ -29,7 +29,7 @@ def lexer(source: List[str], file: str) -> List[Token]:
         for j, char in enumerate(line):
             p = pp
             pp = char
-            if state == "commant":
+            if state == "comment":
                 if char == "`":
                     state = ""
                 continue
@@ -111,7 +111,7 @@ def lexer(source: List[str], file: str) -> List[Token]:
             elif char == "#":
                 break
             elif char == "`":
-                state = "commant"
+                state = "comment"
             elif char == "-":
                 if p in ("[", "(", "=", ",", "!", "+", "-", "*", "/", "|", "&", "==", "!=", ">=", "<=", ">", "<", "<<", ">>"):
                     state = "neg"

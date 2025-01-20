@@ -43,6 +43,7 @@ class Parser:
         """
         class_list: list[Class] = []
         global_list: list[DeclareVar] = []
+        enter = None
         while True:
             self.get()
             if self.now == Token("keyword", "class"):
@@ -67,11 +68,16 @@ class Parser:
                     if self.now != Token("symbol", ";"):
                         self.error("missing symbol ';'")
                     self.get()
+            elif self.now == Token("keyword", "enter"):
+                self.get()
+                if self.now != Token("symbol", "{"):
+                    self.error("must be symbol '{'")
+                enter = self.parse_Statements()
             elif self.now == Token("keyword", "EOF"):
                 break
             else:
                 self.error("missing keyword 'class' or 'global'")
-        return Root(class_list, global_list)
+        return Root(class_list, global_list, enter)
 
     def parse_Class(self) -> Class:
         location = self.now.location
@@ -375,6 +381,9 @@ class Parser:
         elif self.now == Token("symbol", ";"):
             n = Integer("1", self.now.location)
         else:
+            self.error("missing symbol ';'")
+        self.get()
+        if self.now != Token("symbol", ";"):
             self.error("missing symbol ';'")
         return Break_S(n, location)
 
