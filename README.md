@@ -20,19 +20,25 @@
 python ./compiler/main.py ./test.nj -c
 ```
 ## 各項參數說明:  
---debug: Activates debug mode, providing detailed stack traces and error information when exceptions occur.  
---debug：啟動偵錯模式，在發生異常時提供詳細的堆疊追蹤和錯誤資訊。  
---showast: Displays the Abstract Syntax Tree (AST) generated during the parsing phase.  
---showast：顯示解析階段產生的抽象語法樹（AST）。  
---compile: Compiles the program after parsing, producing a .vm file as output.  
---compile：解析後編譯程序，產生.vm 檔案作為輸出。  
---help: Displays help information. If additional arguments follow this flag, detailed descriptions of those specific options are shown. If no arguments are provided, all available options are displayed.  
---help：顯示幫助資訊。如果此標誌後面有附加參數，則會顯示這些特定選項的詳細描述。如果沒有提供參數，則顯示所有可用選項。  
---outpath: Specifies the output directory for the compiled result. If not provided, the output defaults to the source file's directory.  
---outpath：指定編譯結果的輸出目錄。如果未提供，則輸出預設為來源檔案的目錄。  
---errout: Specifies a file to output error and debug messages. If not provided, these messages are printed to the standard output (stdout).  
---errout：指定輸出錯誤和偵錯資訊的檔案。如果未提供，這些訊息將列印到標準輸出（stdout）。  
-以上flag可以使用一個-與第一個字母組成簡短寫法(ex: -c)  
+這些flag可以使用一個-與第一個字母組成簡短寫法(ex: -c)  
+### --debug
+Activates debug mode, providing detailed stack traces and error information when exceptions occur.  
+啟動偵錯模式，在發生異常時提供詳細的堆疊追蹤和錯誤資訊。  
+### --showast
+Displays the Abstract Syntax Tree (AST) generated during the parsing phase.  
+顯示解析階段產生的抽象語法樹（AST）。  
+### --compile
+Compiles the program after parsing, producing a .vm file as output.  
+解析後編譯程序，產生.vm 檔案作為輸出。  
+### --help
+Displays help information. If additional arguments follow this flag, detailed descriptions of those specific options are shown. If no arguments are provided, all available options are displayed.  
+顯示幫助資訊。如果此標誌後面有附加參數，則會顯示這些特定選項的詳細描述。如果沒有提供參數，則顯示所有可用選項。  
+### --outpath
+Specifies the output directory for the compiled result. If not provided, the output defaults to the source file's directory.  
+指定編譯結果的輸出目錄。如果未提供，則輸出預設為來源檔案的目錄。  
+### --errout
+Specifies a file to output error and debug messages. If not provided, these messages are printed to the standard output (stdout).  
+指定輸出錯誤和偵錯資訊的檔案。如果未提供，這些訊息將列印到標準輸出（stdout）。  
 
 ## 指令語法:
 ```
