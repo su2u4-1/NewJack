@@ -22,8 +22,8 @@ def lexer(source: List[str], file: str) -> List[Token]:
     state = ""
     pp, p = "", ""
     location = (-1, -1)
+    tokens.append(Token("file_name", file, (-1, -1)))
     for i, line in enumerate(source):
-        tokens.append(Token("file_name", file, (-1, -1)))
         if state == "string":
             raise CompileError("string not closed", file, location, "lexer")
         for j, char in enumerate(line):

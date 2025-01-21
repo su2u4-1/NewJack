@@ -279,9 +279,9 @@ class Parser:
         elif_c: list[Expression] = []
         elif_s: list[list[Statement]] = []
         while True:
-            self.get()
-            if self.now != Token("keyword", "elif"):
+            if self.next() != Token("keyword", "elif"):
                 break
+            self.get()
             self.get()
             if self.now != Token("symbol", "("):
                 self.error("missing symbol '('")
@@ -292,7 +292,8 @@ class Parser:
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")
             elif_s.append(self.parse_Statements())
-        if self.now == Token("keyword", "else"):
+        if self.next() == Token("keyword", "else"):
+            self.get()
             self.get()
             if self.now != Token("symbol", "{"):
                 self.error("missing symbol '{'")

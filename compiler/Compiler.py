@@ -35,6 +35,9 @@ class Compiler:
             self.showCompilerInfo()
         if global_.enter is not None:
             self.code.append("label enter")
+            self.now_subroutine.name = Identifier("enter")
+            self.local["enter"] = {}
+            self.argument["enter"] = {}
             for i in global_.enter:
                 self.code.extend(self.compileStatement(i))
 
