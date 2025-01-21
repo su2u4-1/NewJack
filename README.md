@@ -249,4 +249,7 @@ self的類型(type)為當前class
 在constructor中self是一個屬性皆為0的空物件
 ### 一些細節
 操作符(operator)在預設條件下會直接拿變數實際值去計算
-所以如果變數是自定義的類型可能會變成拿obj的第一個attr或obj的attr數量去計算
+所以如果變數是自定義的類型可能會變成拿obj的第一個attr或obj的attr數量去計算  
+
+compiler裡有個built_in.py，裡面放著應為內建的東西  
+這只是暫時的，因為目前這些內建的都還沒寫出實現，所以用built_in.py來避免編譯時出錯
