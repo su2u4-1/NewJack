@@ -3,15 +3,17 @@ from typing import Literal, List, Tuple, Union
 
 from compiler.AST import *
 from compiler.lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
+from compiler.built_in import built_in_function, built_in_class
 
 
 class Compiler:
     def __init__(self, global_: Global, errout: List[str], debug_flag: bool = False) -> None:
         self.global_: dict[str, Tuple[Type, int]] = {}
-        self.subroutine: dict[str, Tuple[Type, Literal["class", "constructor", "function", "method"]]] = {
-            "list.append": (type_void, "method")
-        }
-        self.attribute: dict[str, dict[str, Tuple[Type, int]]] = {"list": {}}
+        self.subroutine: dict[str, Tuple[Type, Literal["class", "constructor", "function", "method"]]] = {}
+        self.subroutine.update(built_in_function)
+        self.attribute: dict[str, dict[str, Tuple[Type, int]]] = {}
+        for i in built_in_class:
+            self.attribute[i] = {}
         self.argument: dict[str, dict[str, Tuple[Type, int]]] = {}
         self.local: dict[str, dict[str, Tuple[Type, int]]] = {}
         self.err_list: List[CompileError] = []

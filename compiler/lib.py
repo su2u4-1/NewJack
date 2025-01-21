@@ -259,6 +259,7 @@ type_subroutine = {
     "method": Type(Identifier("method")),
 }
 type_int = Type(Identifier("int"))
+type_str = Type(Identifier("str"))
 type_argument = Type(Identifier("argument"))
 type_void = Type(Identifier("void"))
 none = Identifier("None")
