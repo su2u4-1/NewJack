@@ -228,6 +228,18 @@ operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <
 <<與>>是算術移位
 ==, !=, >=, <=, >, <是邏輯操作符(logical operator)，他們的回傳值一定是true或false
 ## 其他/other
+### 程式入口(enter)
+在一個檔案的最外層使用enter關鍵字聲明一段程式碼  
+可以視為無class無arg的function  
+同時編譯的所有檔案裡只能有一個enter  
+在enter裡return會視為關閉程式  
+回傳值視為exit code  
+語法:
+```
+enter {
+    <statements>
+}
+```
 ### self的總結
 self只能在建構子(constructor)與方法(method)中使用  
 self是關鍵字，所以不能把變數命名成self  
