@@ -27,6 +27,8 @@ label enter
     pop $T
     inpv [global address]
     push $V 1
+    inpv [global address]
+    push @V 0
     push @L 1
     call built_in.add 2
     call built_in.add 2
@@ -48,6 +50,8 @@ label enter
     stor @T $D
     inpv [global address]
     push $V 1
+    inpv [global address]
+    push @V 0
     push @L 1
     call built_in.add 2
     call built_in.add 2
