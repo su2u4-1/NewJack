@@ -77,7 +77,7 @@ class Parser:
                 break
             else:
                 self.error("missing keyword 'class' or 'global'")
-        return Root(class_list, global_list, enter)
+        return Root(class_list, global_list, enter, self.file_path)
 
     def parse_Class(self) -> Class:
         location = self.now.location

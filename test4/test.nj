@@ -10,8 +10,8 @@ enter {
         for(i, 1; 10; 2) {
             do c0.f0(i);
             do c1.f1(pass);
-            let g1[go+i] = l0.attr1.m1(g2[g0+i]);
-            if (g1[go+i] == 0) {
+            let g1[g0+i] = l0.attr1.m1(g2[g0+i]);
+            if (g1[g0+i] == 0) {
                 break 2;
             }
         }

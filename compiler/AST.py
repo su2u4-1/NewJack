@@ -543,6 +543,7 @@ class Global:
     def __init__(self) -> None:
         self.global_variable: List[DeclareVar] = []
         self.enter: Optional[List[Statement]] = None
+        self.enter_file: str = ""
 
     def show(self) -> List[str]:
         t = ["global:"]
@@ -555,10 +556,11 @@ class Global:
 
 
 class Root:
-    def __init__(self, class_list: List[Class], global_list: List[DeclareVar], enter: Optional[List[Statement]]) -> None:
+    def __init__(self, class_list: List[Class], global_list: List[DeclareVar], enter: Optional[List[Statement]], enter_file: str) -> None:
         self.class_list = class_list
         self.global_list = global_list
         self.enter = enter
+        self.enter_file = enter_file
 
 
 def ident(content: Iterable[str]) -> Iterable[str]:

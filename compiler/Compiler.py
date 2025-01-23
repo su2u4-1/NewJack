@@ -26,13 +26,14 @@ class Compiler:
             "loop": 0,
             "if": 0,
         }
-        self.now_class: Class = Class(none, [], [], "")
         self.now_subroutine: Subroutine = Subroutine(none, "method", Type(none), [], [])
         self.loop: List[int] = []
         self.debug_flag = debug_flag
         self.code: List[str] = ["debug-label start"]
         self.errout = errout
+        self.now_class: Class = Class(none, [], [], "")
         self.declare(global_.global_variable)
+        self.now_class: Class = Class(none, [], [], global_.enter_file)
         if global_.enter is not None:
             self.code.append("label enter")
             self.now_subroutine.name = Identifier("enter")
@@ -40,6 +41,8 @@ class Compiler:
             self.argument["enter"] = {}
             for i in global_.enter:
                 self.code.extend(self.compileStatement(i))
+        if len(self.err_list) > 0:
+            raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
             self.showCompilerInfo()
             self.errout.append("code:-------------------------")

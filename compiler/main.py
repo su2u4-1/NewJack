@@ -49,23 +49,34 @@ def compile_all_file(
     class_list: List[Class], global_: Global, arg: Args, source_dict: Dict[str, List[str]], errout: List[str]
 ) -> List[str]:
     failed = False
-    compiler = Compiler(global_, errout, arg.debug)
-    for c in class_list:
-        try:
-            # Add the AST to the compiler for further processing.
-            compiler.addclass(c)
-        except CompileErrorGroup as e:
-            for i in e.exceptions:
-                s = i.show(source_dict[c.file_path][i.line])
-                errout.append(s[0])
-                if arg.debug:
-                    errout.append("-" * s[1])
-                    errout.append(i.traceback)
-                    errout.append("-" * s[1])
-            failed = True
+    try:
+        compiler = Compiler(global_, errout, arg.debug)
+    except CompileErrorGroup as e:
+        for i in e.exceptions:
+            s = i.show(source_dict[i.file][i.line])
+            errout.append(s[0])
+            if arg.debug:
+                errout.append("-" * s[1])
+                errout.append(i.traceback)
+                errout.append("-" * s[1])
+        failed = True
+    else:
+        for c in class_list:
+            try:
+                # Add the AST to the compiler for further processing.
+                compiler.addclass(c)
+            except CompileErrorGroup as e:
+                for i in e.exceptions:
+                    s = i.show(source_dict[c.file_path][i.line])
+                    errout.append(s[0])
+                    if arg.debug:
+                        errout.append("-" * s[1])
+                        errout.append(i.traceback)
+                        errout.append("-" * s[1])
+                failed = True
     if failed:
         return []
-    return compiler.returncode()
+    return compiler.returncode()  # type: ignore
 
 
 def parse_arguments(args: str) -> Tuple[List[str], Args]:
@@ -151,6 +162,7 @@ def main() -> Tuple[List[str], str]:
                     errout.append(f'File "{i}"\nparser Error: Only one enter is allowed')
                     raise Continue()
                 global_.enter = root.enter
+                global_.enter_file = root.enter_file
         except Continue:
             print(f"File {i} processing failed")
             failed = True
