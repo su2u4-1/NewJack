@@ -105,7 +105,7 @@ syntactic sugar:
 
     [operation]v $[a] [value] $[c]
         inpv [value]
-        [operation] $[a] $V $[c]
+        [operation]r $[a] $V $[c]
 
     setl "[label]"
         - Define a label
@@ -120,7 +120,7 @@ non-standard syntactic sugar:
     - Uses general-purpose registers and is therefore marked as "non-standard"
 
     push @[a] [value]
-        - Push the value at $[a] offset by [value] onto the stack
+        - Push the value at @[a] offset by [value] onto the stack
         sett 7
         addv $[a] [value] $T
         load @T $D
@@ -137,6 +137,12 @@ non-standard syntactic sugar:
     push $[a]
         - Push the value of $[a] onto the stack
         stor @P $[a]
+        addv $P 1 $P
+
+    push $[a] [value]
+        - Push the value of $[a] + [value] onto the stack
+        addv $[a] [value] $D
+        stor @P $D
         addv $P 1 $P
 
     push [value]
