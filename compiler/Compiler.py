@@ -33,8 +33,6 @@ class Compiler:
         self.code: List[str] = ["debug-label start"]
         self.errout = errout
         self.declare(global_.global_variable)
-        if self.debug_flag:
-            self.showCompilerInfo()
         if global_.enter is not None:
             self.code.append("label enter")
             self.now_subroutine.name = Identifier("enter")
@@ -42,6 +40,11 @@ class Compiler:
             self.argument["enter"] = {}
             for i in global_.enter:
                 self.code.extend(self.compileStatement(i))
+        if self.debug_flag:
+            self.showCompilerInfo()
+            self.errout.append("code:-------------------------")
+            self.errout.append("\n".join(self.code))
+            self.errout.append("------------------------------")
 
     def error(self, text: str, location: Tuple[int, int]) -> None:
         i = CompileError(text, self.now_class.file_path, location, "compiler")
@@ -59,23 +62,22 @@ class Compiler:
             code.append(f"debug-label end {c.file_name}.{c.name}")
         # show error info
         except Exception as e:
-            self.errout.append("\n------------------------------\n")
+            self.errout.append("------------------------------")
             self.errout.append(format_traceback(e))
             self.errout.append(f"{type(e).__name__}: {e}")
-        self.errout.append("\n------------------------------\n")
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
             self.showCompilerInfo()
-            self.errout.append("\ncode:-------------------------\n")
+            self.errout.append("code:-------------------------")
             self.errout.append("\n".join(code))
-            self.errout.append("\n------------------------------\n")
+            self.errout.append("------------------------------")
         else:
             self.code.extend(code)
 
     def showCompilerInfo(self) -> None:
         for k, v in self.__dict__.items():
-            if k == "errout":
+            if k == "errout" or k == "code" or k == "err_list":
                 continue
             self.errout.append(f"{k}:" + "-" * (29 - len(k)) + f"\n    {v}")
 

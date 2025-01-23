@@ -97,17 +97,17 @@ def parse_arguments(args: str) -> Tuple[List[str], Args]:
                 arg.help.append("--help")
             else:
                 print(f"Unrecognized flag: {i}. Please refer to the help section for valid options.")
-        elif isfile(abspath(i)):
+        elif isdir(abspath(i)):
+            paths.append(abspath(i))
+        else:
             if outpath:
                 arg.outpath += abspath(i)
                 outpath = False
             elif errout:
                 arg.errout += abspath(i)
                 errout = False
-            else:
+            elif isfile(abspath(i)):
                 paths.append(abspath(i))
-        elif isdir(abspath(i)):
-            paths.append(abspath(i))
     arg.print_help()
     return paths, arg
 
