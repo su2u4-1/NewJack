@@ -10,13 +10,11 @@ code:
     2 byte
     001 + [register a](3 bit) + [register b](3 bit) + 0_or_1(7 bit)
         - Copy the value of register $[a] to register $[b]
-        - Not extendable
 
     jump $[a] $[b]
-    1 byte
-    010 + [register a](3 bit) + 0_or_1(2 bit)
+    2 byte
+    010 + [register a](3 bit) + [register b](3 bit) + 0_or_1(7 bit)
         - If register $[b] contains True, jump to the address in $[a]
-        - Not extendable
 
     comp $[a] [C-code] $[b]
     2 byte
@@ -45,13 +43,13 @@ code:
             101 lmv  # left shift
             110 and
             111 or_
-        - Not extendable
 
     exte [value]
     2 byte
     101 + [value](15 bit) + extend_or_not(1 bit)
         - If extend_or_not == 1, add the given value to the current extendable value
         - The value can be extended
+        - for the value of inpv and the value of exte
 
     sett [0~7]
     1 byte
@@ -107,10 +105,10 @@ syntactic sugar:
         inpv [value]
         [operation]r $[a] $V $[c]
 
-    setl "[label]"
+    setl [label]
         - Define a label
 
-    getl $[a] "[label]"
+    getl $[a] [label]
         - Assign the address of the label to the specified register
         setv $[a] [value]
 
@@ -147,7 +145,7 @@ non-standard syntactic sugar:
 
     push [value]
         - Push the value onto the stack
-        intv [value]
+        inpv [value]
         push $V
 
     pop @[a] [value]
@@ -171,8 +169,8 @@ non-standard syntactic sugar:
         load @P $D
         copy $[a] $D
 
-    goto "[label]" [true | false | all]
-        getl $T "[label]"
+    goto [label] [true | false | all]
+        getl $T [label]
         if true:
             pop $C
         if false:
@@ -184,7 +182,7 @@ non-standard syntactic sugar:
         jump $T $C
 
     label [label]
-        setl "[label]"
+        setl [label]
 
     alloc [value]
         - Allocate memory of size [value] from the heap and return the base address
