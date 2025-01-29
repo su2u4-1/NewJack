@@ -11,9 +11,6 @@ def error(text: str, file: str, line: int) -> None:
     raise CompileError(text, file, (line, 0), "compiler")
 
 
-from typing import Optional
-
-
 def my_bin(n: int, l: Optional[int] = None) -> str:
     neg = n < 0
     n = abs(n)
@@ -37,7 +34,12 @@ def my_bin(n: int, l: Optional[int] = None) -> str:
 
 
 def assembler2(source: List[str], file: str) -> str:
+    # register to binary
     rtob = {"A": "000", "C": "001", "D": "010", "L": "011", "M": "100", "P": "101", "T": "110", "V": "111"}
+    # C-code to binary
+    ctob = {"nv": "000", ">": "001", "==": "010", ">=": "011", "<": "100", "!=": "101", "<=": "110", "aw": "111"}
+    # operator to binary
+    otob = {"add": "000", "sub": "001", "mul": "010", "div": "011", "rmv": "100", "lmv": "101", "and": "110", "or": "111"}
     code = ""
     for line, i in enumerate(source):
         i = i.strip()
@@ -54,14 +56,71 @@ def assembler2(source: List[str], file: str) -> str:
                     for j in range(1, len(binary) // 12):
                         code += f"1101{binary[j*12:j*12+12]}"
                     code += "0"
+            else:
+                error("Unknown format", file, line)
         elif i.startswith("copy"):
             i = i.split()
-            if len(i) == 3:
+            if len(i) == 3 and i[1][0] == "$" and i[2][0] == "$":
                 code += f"001{rtob[i[1][1]]}{rtob[i[2][1]]}" + "0" * 7
+            else:
+                error("Unknown format", file, line)
         elif i.startswith("jump"):
             i = i.split()
-            if len(i) == 3:
+            if len(i) == 3 and i[1][0] == "$" and i[2][0] == "$":
                 code += f"010{rtob[i[1][1]]}{rtob[i[2][1]]}" + "0" * 7
+            else:
+                error("Unknown format", file, line)
+        elif i.startswith("comp"):
+            i = i.split()
+            if len(i) == 4 and i[1][0] == "$" and i[3][0] == "$":
+                if i[2] in ("nv", ">", "==", ">=", "<", "!=", "<=", "aw"):
+                    code += f"011{rtob[i[1][1]]}{ctob[i[2]]}{rtob[i[3][1]]}0000"
+                else:
+                    error("Unknown C-code", file, line)
+            else:
+                error("Unknown format", file, line)
+        elif i[:3] in ("add", "sub", "mul", "div", "rmv", "lmv", "and", "or"):
+            i = i.split()
+            if len(i) == 4 and i[0][3] == "r" and i[1][0] == "$" and i[2][0] == "$" and i[3][0] == "$":
+                code += f"100{otob[i[0][:3]]}{rtob[i[1][1]]}{rtob[i[2][1]]}{rtob[i[3][1]]}0"
+            else:
+                error("Unknown format", file, line)
+        elif i.startswith("sett"):
+            i = i.split()
+            if len(i) == 2:
+                if 0 <= int(i[1]) <= 7:
+                    pass
+                else:
+                    error("$T can only be switched in the range of 0~7", file, line)
+            else:
+                error("Unknown format", file, line)
+        elif i.startswith("//setl"):
+            i = i.split()
+            if len(i) == 2:
+                label[i[1]] = len(code) // 8
+            else:
+                error("Unknown format", file, line)
+        elif i.startswith("//getl"):
+            i = i.split()
+            if len(i) == 2:
+                code += f"/{i[1]}/"
+            else:
+                error("Unknown format", file, line)
+    while "/" in code:
+        t = code.split("/", maxsplit=3)
+        i = label[t[1]]
+        r = ""
+        if -2048 <= i < 2047:
+            r += f"000{my_bin(i, 12)}0"
+        else:
+            n = abs(i).bit_length() + 1
+            n += 12 - (n % 12)
+            binary = my_bin(i, n)
+            r += f"000{binary[:12]}"
+            for j in range(1, len(binary) // 12):
+                r += f"1101{binary[j*12:j*12+12]}"
+            r += "0"
+        code = t[0] + r + t[2]
     return code
 
 
@@ -93,7 +152,7 @@ def assembler1(source: List[str], file: str) -> List[str]:
                 code.append(f"copy ${i[1][1]} $A\ncopy ${i[2][1]} $M")
             else:
                 error("Unknown format", file, line)
-        elif i[:3] in ("add", "sub", "mul", "div", "rmv", "lmv", "and", "or_") and i[3] == "v":
+        elif i[:3] in ("add", "sub", "mul", "div", "rmv", "lmv", "and", "or") and i[3] == "v":
             i = i.split()
             if len(i) == 4 and i[1][0] == "$" and i[3][0] == "$":
                 code.append(f"inpv {i[2]}\n{i[0][:3]}r ${i[1][1]} $V ${i[3][1]}")
@@ -212,7 +271,7 @@ if len(argv) > 1:
         path = argv[1]
         main(path)
     elif len(argv) > 2:
-        print(f"path error (only one path): {" ".join(argv[1:])}")
+        print(f"path error (only one path): {' '.join(argv[1:])}")
     else:
         print(f"path error: no path")
 else:

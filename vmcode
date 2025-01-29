@@ -42,7 +42,7 @@ code:
             100 rmv  # right shift
             101 lmv  # left shift
             110 and
-            111 or_
+            111 or 
 
     exte [value]
     2 byte

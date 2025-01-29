@@ -123,7 +123,5 @@ if len(argv) > 1:
         if len(argv) >= 3:
             type_ = argv[2]
         main(path, type_)
-    else:
-        print("file path is required")
 else:
     main(*input("file path: ").split(maxsplit=1))
