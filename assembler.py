@@ -270,9 +270,7 @@ if len(argv) > 1:
     if len(argv) == 2:
         path = argv[1]
         main(path)
-    elif len(argv) > 2:
-        print(f"path error (only one path): {' '.join(argv[1:])}")
     else:
-        print(f"path error: no path")
+        print(f"path error (only one path): {' '.join(argv[1:])}")
 else:
     main(input("file path: "))
