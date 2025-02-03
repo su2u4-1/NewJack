@@ -7,8 +7,15 @@ from compiler.lib import CompileError
 label: dict[str, int] = {}
 
 
+def split_newlines(source: List[str]) -> List[str]:
+    result: List[str] = []
+    for line in source:
+        result.extend(line.split("\n"))
+    return result
+
+
 def error(text: str, file: str, line: int) -> None:
-    raise CompileError(text, file, (line, 0), "compiler")
+    raise CompileError(text, file, (line, 0), "assembler")
 
 
 def my_bin(n: int, l: Optional[int] = None) -> str:
@@ -131,7 +138,7 @@ def assembler1(source: List[str], file: str) -> List[str]:
         if i.startswith("setv"):
             i = i.split()
             if len(i) == 3 and i[1][0] == "$":
-                code.append(f"inpv {i[2]}\ncopy $V ${i[1]}")
+                code.append(f"inpv {i[2]}\ncopy $V ${i[1][1]}")
             else:
                 error("Unknown format", file, line)
         elif i.startswith("j-if"):
@@ -170,7 +177,7 @@ def assembler1(source: List[str], file: str) -> List[str]:
                 code.append(f"//getl {i[2]}\ncopy $V ${i[1][1]}")
             else:
                 error("Unknown format", file, line)
-    return code
+    return split_newlines(code)
 
 
 def assembler0(source: List[str], file: str) -> List[str]:
@@ -181,7 +188,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
             continue
         elif i.startswith("label"):
             code.append(f"setl {i.split()[1]}")
-        elif i == "inpv [global abbress]":
+        elif i == "inpv [global address]":
             code.append("inpv 0")
         elif i.startswith("push"):
             i = i.split()
@@ -191,7 +198,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
                 elif i[1][0] == "$":
                     code.append(f"stor @P ${i[1][1]}\naddv $P 1 $P")
                 else:
-                    code.append(f"intv {i[1]}\npush $V")
+                    code.append(f"inpv {i[1]}\npush $V")
             elif len(i) == 3:
                 if i[1][0] == "@":
                     code.append(f"sett 7\naddv ${i[1][1]} {i[2]} $T\nload @T $D\nsett 0\nstor @P $D\naddv $P 1 $P")
@@ -244,7 +251,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
             code.append("return")
         else:
             code.append(i)
-    return code
+    return split_newlines(code)
 
 
 def main(path: str) -> None:
@@ -255,15 +262,30 @@ def main(path: str) -> None:
         print(f"path error: {path}")
     with open(path, "r") as f:
         code = f.readlines()
-    code = assembler0(code, path)
-    with open("o0.vm", "w") as f:
-        f.write("\n".join(code))
-    code = assembler1(code, abspath("o0.vm"))
-    with open("o1.vm", "w") as f:
-        f.write("\n".join(code))
-    asm = assembler2(code, abspath("o1.vm"))
-    with open("o2.vm", "wb") as f:
-        f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
+    file_name = ".".join(path.split(".")[:-1])
+    try:
+        code = assembler0(code, path)
+        with open(file_name + "_o0.vm", "w") as f:
+            f.write("\n".join(code))
+    except CompileError as e:
+        print("in assembler0:")
+        print(e.show(code[e.line])[0])
+        return
+    try:
+        code = assembler1(code, abspath(file_name + "_o0.vm"))
+        with open(file_name + "_o1.vm", "w") as f:
+            f.write("\n".join(code))
+    except CompileError as e:
+        print("in assembler1:")
+        print(e.show(code[e.line])[0])
+        return
+    try:
+        asm = assembler2(code, abspath(file_name + "_o1.vm"))
+        with open(file_name + "_o2.vm", "wb") as f:
+            f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
+    except CompileError as e:
+        print("in assembler2:")
+        print(e.show(code[e.line])[0])
 
 
 if len(argv) > 1:
