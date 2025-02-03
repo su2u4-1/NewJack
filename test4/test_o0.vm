@@ -5,7 +5,8 @@ load @P $D
 stor @V $D
 setl enter
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 call c0.new 1
 subv $P 1 $P
 load @P $D
@@ -24,25 +25,30 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 5
-push $V
+stor @P $V
+addv $P 1 $P
 call c0.m0 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 setl while_start_0
 inpv 1
-push $V
+stor @P $V
+addv $P 1 $P
 getl $T loop_end_0
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
 inpv 1
-push $V
+stor @P $V
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 sett 7
@@ -59,11 +65,11 @@ addv $P 1 $P
 call c0.f0 1
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 call c1.f1 0
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 inpv 0
 addv $V 1 $D
 stor @P $D
@@ -91,7 +97,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 1 $T
 load @T $D
@@ -119,17 +125,17 @@ call built_in.add 2
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 load @D $D
 stor @P $D
 addv $P 1 $P
 call c1.m1 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 inpv 0
 addv $V 1 $D
@@ -152,15 +158,18 @@ call built_in.add 2
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 load @D $D
 stor @P $D
 addv $P 1 $P
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.eq 2
 getl $T if_false_0
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
@@ -173,7 +182,8 @@ jump $T $C
 setl if_false_0
 setl if_end_0
 inpv 2
-push $V
+stor @P $V
+addv $P 1 $P
 sett 7
 addv $L 1 $T
 load @T $D
@@ -194,10 +204,13 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 10
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.lt 2
 getl $T for_start_1
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 jump $T $C
 setl loop_end_1
 getl $T while_start_0
@@ -217,13 +230,14 @@ addv $V 0 $D
 stor @P $D
 addv $P 1 $P
 inpv 5
-push $V
+stor @P $V
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 sett 7
 addv $L 0 $T
@@ -233,7 +247,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 addv $D 0 $D
 stor @P $D
 addv $P 1 $P
@@ -245,17 +259,19 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 13
-push $V
+stor @P $V
+addv $P 1 $P
 inpv 2
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.add 2
 call built_in.mul 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 sett 7
 addv $L 0 $T
@@ -265,12 +281,13 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 addv $D 1 $D
 stor @P $D
 addv $P 1 $P
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 inpv 0
 sett 7
 addv $V 0 $T
@@ -281,10 +298,10 @@ addv $P 1 $P
 call c1.new 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 sett 7
 addv $L 0 $T
@@ -302,7 +319,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 1 $T
 load @T $D
@@ -325,7 +342,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 0 $T
 load @T $D
@@ -336,7 +353,8 @@ call built_in.add 2
 return
 setl c0.f0
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 sett 7
@@ -344,7 +362,8 @@ addv $L 1 $T
 stor @T $D
 sett 0
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 sett 7
@@ -375,7 +394,7 @@ addv $P 1 $P
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 load @D $D
 stor @P $D
 addv $P 1 $P
@@ -392,20 +411,21 @@ addv $P 1 $P
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 load @D $D
 stor @P $D
 addv $P 1 $P
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 inpv 1
-push $V
+stor @P $V
+addv $P 1 $P
 sett 7
 addv $L 2 $T
 load @T $D
@@ -433,7 +453,9 @@ stor @P $D
 addv $P 1 $P
 call built_in.lt 2
 getl $T for_start_2
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 jump $T $C
 setl loop_end_2
 inpv 0
@@ -447,17 +469,20 @@ addv $L 1 $D
 stor @P $D
 addv $P 1 $P
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 load @D $D
 stor @P $D
 addv $P 1 $P
 call built_in.eq 2
 getl $T if_false_1
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
@@ -490,7 +515,8 @@ addv $L 0 $T
 stor @T $D
 sett 0
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 sett 7
@@ -512,7 +538,9 @@ stor @P $D
 addv $P 1 $P
 call built_in.lt 2
 getl $T loop_end_3
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
@@ -532,7 +560,7 @@ addv $P 1 $P
 call list.append 2
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 addv $L 2 $D
 stor @P $D
 addv $P 1 $P
@@ -543,14 +571,15 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 1
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.add 2
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 getl $T while_start_3
 setv $C 1
@@ -564,7 +593,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 addv $D 0 $D
 stor @P $D
 addv $P 1 $P
@@ -577,10 +606,10 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 sett 7
 addv $L 0 $T
@@ -607,7 +636,7 @@ addv $P 1 $P
 call list.append 2
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 inpv 0
 addv $V 2 $D
 stor @P $D
@@ -629,13 +658,14 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 subv $P 1 $P
 load @P $D
-copy @T $D
+copy $T $D
 stor @T $D
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 return
 setl c1.m1
 sett 7
@@ -646,7 +676,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 0 $T
 load @T $D
@@ -654,10 +684,13 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.gt 2
 getl $T if_false_2
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
@@ -669,7 +702,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 0 $T
 load @T $D
@@ -689,7 +722,7 @@ stor @P $D
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
-copy @D $D
+copy $D $D
 sett 7
 addv $D 0 $T
 load @T $D
@@ -697,10 +730,13 @@ sett 0
 stor @P $D
 addv $P 1 $P
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 call built_in.eq 2
 getl $T elif_0_2
-pop $C
+subv $P 1 $P
+load @P $D
+copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
@@ -716,6 +752,7 @@ setv $C 1
 jump $T $C
 setl elif_0_2
 inpv 0
-push $V
+stor @P $V
+addv $P 1 $P
 return
 setl if_end_2

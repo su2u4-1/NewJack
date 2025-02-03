@@ -1,10 +1,68 @@
 from os.path import isfile, abspath
 from sys import argv
-from typing import List, Optional
+from typing import Iterator, List, Optional, Tuple
 
 from compiler.lib import CompileError
 
 label: dict[str, int] = {}
+# register to binary
+rtob = {"A": "000", "C": "001", "D": "010", "L": "011", "M": "100", "P": "101", "T": "110", "V": "111"}
+btor = {"000": "A", "001": "C", "010": "D", "011": "L", "100": "M", "101": "P", "110": "T", "111": "V"}
+# C-code to binary
+ctob = {"nv": "000", ">": "001", "==": "010", ">=": "011", "<": "100", "!=": "101", "<=": "110", "aw": "111"}
+btoc = {"000": "nv", "001": "> ", "010": "==", "011": ">=", "100": "< ", "101": "!=", "110": "<=", "111": "aw"}
+# operator to binary
+otob = {"add": "000", "sub": "001", "mul": "010", "div": "011", "rmv": "100", "lmv": "101", "and": "110", "or": "111"}
+btoo = {"000": "add", "001": "sub", "010": "mul", "011": "div", "100": "rmv", "101": "lmv", "110": "and", "111": "or "}
+
+
+def asmtovm(asm: str, file: str) -> List[str]:
+    def getvalue(iterator: Iterator[str], length: int) -> str:
+        value = ""
+        for _ in range(length):
+            value += next(iterator)
+        return value
+
+    code: List[str] = []
+    a = iter(asm)
+    value = ""
+    try:
+        while True:
+            code_type = next(a) + next(a) + next(a)
+            if code_type == "000":
+                # inpv
+                value = getvalue(a, 12)
+                if next(a) == "0":
+                    code.append(f"inpv {int(value, 2)}")
+            elif code_type == "001":
+                # copy
+                code.append(f"copy ${btor[getvalue(a, 3)]} ${btor[getvalue(a, 3)]}")
+                assert "0000000" == getvalue(a, 7)
+            elif code_type == "010":
+                # jump
+                code.append(f"jump ${btor[getvalue(a, 3)]} ${btor[getvalue(a, 3)]}")
+                assert "0000000" == getvalue(a, 7)
+            elif code_type == "011":
+                # comp
+                code.append(f"comp ${btor[getvalue(a, 3)]} {btoc[getvalue(a, 3)]} ${btor[getvalue(a, 3)]}")
+                assert "0000" == getvalue(a, 4)
+            elif code_type == "100":
+                # operator
+                code.append(f"{btoo[getvalue(a, 3)]}r ${btor[getvalue(a, 3)]} ${btor[getvalue(a, 3)]} ${btor[getvalue(a, 3)]}")
+                assert "0" == next(a)
+            elif code_type == "101":
+                # exte
+                value += getvalue(a, 12)
+                if next(a) == "0":
+                    code.append(f"inpv {int(value, 2)}")
+            elif code_type == "110":
+                # sett
+                code.append(f"sett {str(int(getvalue(a, 3), 2))}")
+                assert "00" == getvalue(a, 2)
+            else:
+                error(f"error: unknown code type '{code_type}'", file, -1)
+    except StopIteration:
+        return code
 
 
 def split_newlines(source: List[str]) -> List[str]:
@@ -41,12 +99,6 @@ def my_bin(n: int, l: Optional[int] = None) -> str:
 
 
 def assembler2(source: List[str], file: str) -> str:
-    # register to binary
-    rtob = {"A": "000", "C": "001", "D": "010", "L": "011", "M": "100", "P": "101", "T": "110", "V": "111"}
-    # C-code to binary
-    ctob = {"nv": "000", ">": "001", "==": "010", ">=": "011", "<": "100", "!=": "101", "<=": "110", "aw": "111"}
-    # operator to binary
-    otob = {"add": "000", "sub": "001", "mul": "010", "div": "011", "rmv": "100", "lmv": "101", "and": "110", "or": "111"}
     code = ""
     for line, i in enumerate(source):
         i = i.strip()
@@ -96,7 +148,7 @@ def assembler2(source: List[str], file: str) -> str:
             i = i.split()
             if len(i) == 2:
                 if 0 <= int(i[1]) <= 7:
-                    pass
+                    code += f"110{my_bin(int(i[1]), 3)}00"
                 else:
                     error("$T can only be switched in the range of 0~7", file, line)
             else:
@@ -113,8 +165,10 @@ def assembler2(source: List[str], file: str) -> str:
                 code += f"/{i[1]}/"
             else:
                 error("Unknown format", file, line)
+        # else:
+        #     error("Unknown command", file, line)
     while "/" in code:
-        t = code.split("/", maxsplit=3)
+        t = code.split("/", maxsplit=2)
         i = label[t[1]]
         r = ""
         if -2048 <= i < 2047:
@@ -177,6 +231,8 @@ def assembler1(source: List[str], file: str) -> List[str]:
                 code.append(f"//getl {i[2]}\ncopy $V ${i[1][1]}")
             else:
                 error("Unknown format", file, line)
+        else:
+            code.append(i)
     return split_newlines(code)
 
 
@@ -198,7 +254,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
                 elif i[1][0] == "$":
                     code.append(f"stor @P ${i[1][1]}\naddv $P 1 $P")
                 else:
-                    code.append(f"inpv {i[1]}\npush $V")
+                    code.append(f"inpv {i[1]}\nstor @P $V\naddv $P 1 $P")
             elif len(i) == 3:
                 if i[1][0] == "@":
                     code.append(f"sett 7\naddv ${i[1][1]} {i[2]} $T\nload @T $D\nsett 0\nstor @P $D\naddv $P 1 $P")
@@ -214,7 +270,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
                 if i[1][0] == "@":
                     code.append(f"subv $P 1 $P\nload @P $D\nstor @{i[1][1]} $D")
                 elif i[1][0] == "$":
-                    code.append(f"subv $P 1 $P\nload @P $D\ncopy @{i[1][1]} $D")
+                    code.append(f"subv $P 1 $P\nload @P $D\ncopy ${i[1][1]} $D")
                 else:
                     error("Unknown format", file, line)
             elif len(i) == 3:
@@ -226,9 +282,9 @@ def assembler0(source: List[str], file: str) -> List[str]:
             i = i.split()
             if len(i) == 3:
                 if i[2] == "true":
-                    code.append(f"getl $T {i[1]}\npop $C\njump $T $C")
+                    code.append(f"getl $T {i[1]}\nsubv $P 1 $P\nload @P $D\ncopy $C $D\njump $T $C")
                 elif i[2] == "false":
-                    code.append(f"getl $T {i[1]}\npop $C\ninpv 0\ncomp $C == $V\njump $T $C")
+                    code.append(f"getl $T {i[1]}\nsubv $P 1 $P\nload @P $D\ncopy $C $D\ninpv 0\ncomp $C == $V\njump $T $C")
                 elif i[2] == "all":
                     code.append(f"getl $T {i[1]}\nsetv $C 1\njump $T $C")
                 else:
@@ -254,7 +310,7 @@ def assembler0(source: List[str], file: str) -> List[str]:
     return split_newlines(code)
 
 
-def main(path: str) -> None:
+def main(path: str, flags: List[bool]) -> None:
     code: List[str] = []
     if isfile(path):
         path = abspath(path)
@@ -265,34 +321,64 @@ def main(path: str) -> None:
     file_name = ".".join(path.split(".")[:-1])
     try:
         code = assembler0(code, path)
-        with open(file_name + "_o0.vm", "w") as f:
-            f.write("\n".join(code))
     except CompileError as e:
         print("in assembler0:")
         print(e.show(code[e.line])[0])
         return
+    if flags[0]:
+        with open(file_name + "_o0.vm", "w") as f:
+            f.write("\n".join(code))
     try:
         code = assembler1(code, abspath(file_name + "_o0.vm"))
-        with open(file_name + "_o1.vm", "w") as f:
-            f.write("\n".join(code))
     except CompileError as e:
         print("in assembler1:")
         print(e.show(code[e.line])[0])
         return
+    if flags[1]:
+        with open(file_name + "_o1.vm", "w") as f:
+            f.write("\n".join(code))
     try:
         asm = assembler2(code, abspath(file_name + "_o1.vm"))
-        with open(file_name + "_o2.vm", "wb") as f:
-            f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
     except CompileError as e:
         print("in assembler2:")
         print(e.show(code[e.line])[0])
+        return
+    if flags[2]:
+        with open(file_name + "_o2.vm", "w") as f:
+            f.write("\n".join(asmtovm(asm, file_name + "_asm.vm")))
+    with open(file_name + ".asm", "wb") as f:
+        f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
 
 
-if len(argv) > 1:
-    if len(argv) == 2:
-        path = argv[1]
-        main(path)
-    else:
-        print(f"path error (only one path): {' '.join(argv[1:])}")
+# if len(argv) > 1:
+#     if len(argv) == 2:
+#         path = argv[1]
+#         main(path)
+#     else:
+#         print(f"path error (only one path): {' '.join(argv[1:])}")
+# else:
+#     main(input("file path: "))
+
+
+def parser_args(args: List[str]) -> Tuple[str, List[bool]]:
+    path = ""
+    if len(args) >= 1:
+        for i in args:
+            if isfile(i):
+                path = i
+                break
+    flags = [False, False, False]
+    if "-o0" in args:
+        flags[0] = True
+    if "-o1" in args:
+        flags[1] = True
+    if "-o2" in args:
+        flags[2] = True
+    return path, flags
+
+
+if len(argv) <= 1:
+    path, flags = parser_args(input("path and flags (only one path):").split())
 else:
-    main(input("file path: "))
+    path, flags = parser_args(argv[1:])
+main(path, flags)

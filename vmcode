@@ -46,7 +46,7 @@ code:
 
     exte [value]
     2 byte
-    101 + [value](15 bit) + extend_or_not(1 bit)
+    101 + [value](12 bit) + extend_or_not(1 bit)
         - If extend_or_not == 1, add the given value to the current extendable value
         - The value can be extended
         - for the value of inpv and the value of exte
