@@ -350,16 +350,6 @@ def main(path: str, flags: List[bool]) -> None:
         f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
 
 
-# if len(argv) > 1:
-#     if len(argv) == 2:
-#         path = argv[1]
-#         main(path)
-#     else:
-#         print(f"path error (only one path): {' '.join(argv[1:])}")
-# else:
-#     main(input("file path: "))
-
-
 def parser_args(args: List[str]) -> Tuple[str, List[bool]]:
     path = ""
     if len(args) >= 1:
