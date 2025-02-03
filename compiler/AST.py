@@ -562,6 +562,22 @@ class Root:
         self.enter = enter
         self.enter_file = enter_file
 
+    def show(self) -> list[str]:
+        t = ["global:"]
+        for g in self.global_list:
+            t.append(f"    {g}")
+        if self.enter is not None:
+            t.append("enter:")
+            for e in self.enter:
+                t.extend(ident(e.show()))
+        t.append("class list:")
+        for c in self.class_list:
+            t.extend(ident(c.show()))
+        return t
+
+    def __str__(self) -> str:
+        return "\n".join(self.show())
+
 
 def ident(content: Iterable[str]) -> Iterable[str]:
     return ("    " + i for i in content)
