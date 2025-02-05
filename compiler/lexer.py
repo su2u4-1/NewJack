@@ -35,7 +35,7 @@ def lexer(source: List[str], file: str) -> List[Token]:
                 continue
             elif state == "string":
                 content += char
-                if char == '"':
+                if char == '"' or char == "'":
                     tokens.append(Token("string", content, location))
                     content = ""
                     state = ""
@@ -104,7 +104,7 @@ def lexer(source: List[str], file: str) -> List[Token]:
                     content = ""
                     state = ""
 
-            if char == '"':
+            if char == '"' or char == "'":
                 state = "string"
                 content = char
                 location = (i, j + 1)

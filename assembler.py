@@ -310,6 +310,50 @@ def assembler0(source: List[str], file: str) -> List[str]:
     return split_newlines(code)
 
 
+def preprocess(source: List[str]) -> List[str]:
+    code: List[str] = []
+    for i in source:
+        i = i.strip()
+        if i.startswith("call built_in."):
+            if i == "call built_in.neg 1":  # -
+                code.append("pop $D\ninpv 0\nsubr $V $D $D\npush $D")
+            elif i == "call built_in.invert 1":  # !
+                code.append("pop $D\ninpv 0\ncomp $V == $D\npush $C")
+            elif i == "call built_in.add 2":  # +
+                code.append("pop $D\npop $T\naddr $D $T $D\npush $D")
+            elif i == "call built_in.sub 2":  # -
+                code.append("pop $D\npop $T\nsubr $D $T $D\npush $D")
+            elif i == "call built_in.mul 2":  # *
+                code.append("pop $D\npop $T\nmulr $D $T $D\npush $D")
+            elif i == "call built_in.div 2":  # /
+                code.append("pop $D\npop $T\ndivr $D $T $D\npush $D")
+            elif i == "call built_in.or 2":  # |
+                code.append("pop $D\npop $T\norr $D $T $D\npush $D")
+            elif i == "call built_in.and 2":  # &
+                code.append("pop $D\npop $T\nandr $D $T $D\npush $D")
+            elif i == "call built_in.lm 2":  # <<
+                code.append("pop $D\npop $T\nlmvr $D $T $D\npush $D")
+            elif i == "call built_in.rm 2":  # >>
+                code.append("pop $D\npop $T\nrmvr $D $T $D\npush $D")
+            elif i == "call built_in.eq 2":  # ==
+                code.append("pop $D\npop $T\ncomp $D == $T\npush $C")
+            elif i == "call built_in.neq 2":  # !=
+                code.append("pop $D\npop $T\ncomp $D != $T\npush $C")
+            elif i == "call built_in.geq 2":  # >=
+                code.append("pop $D\npop $T\ncomp $D >= $T\npush $C")
+            elif i == "call built_in.leq 2":  # <=
+                code.append("pop $D\npop $T\ncomp $D <= $T\npush $C")
+            elif i == "call built_in.gt 2":  # >
+                code.append("pop $D\npop $T\ncomp $D > $T\npush $C")
+            elif i == "call built_in.lt 2":  # <
+                code.append("pop $D\npop $T\ncomp $D < $T\npush $C")
+            elif i == "call built_in.bool 1":  # bool
+                code.append("pop $D\ninpv 0\ncomp $D == $V\ncomp $C == $V\npush $C")
+        else:
+            code.append(i)
+    return split_newlines(code)
+
+
 def main(path: str, flags: List[bool]) -> None:
     code: List[str] = []
     if isfile(path):
@@ -319,6 +363,7 @@ def main(path: str, flags: List[bool]) -> None:
     with open(path, "r") as f:
         code = f.readlines()
     file_name = ".".join(path.split(".")[:-1])
+    code = preprocess(code)
     try:
         code = assembler0(code, path)
     except CompileError as e:
