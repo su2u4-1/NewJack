@@ -6,6 +6,8 @@ global {
 enter {
     var c0 l0 = c0.new(pass);
     let g0 = l0.m0(5);
+    let g1 = list.new();
+    let g2 = arr.new(10);
     while (true) {
         for(i, 1; 10; 2) {
             do c0.f0(i);
