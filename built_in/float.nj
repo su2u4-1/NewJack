@@ -1,0 +1,90 @@
+class float {
+    descript {
+        a: int;
+        b: int;
+    }
+    constructor float new(int a, int b) {
+        if(b == 0) {
+            print("Error: Division by zero");
+            return self;
+        }
+        var bool neg = false;
+        if((b < 0 & a > 0) | (b > 0 & a < 0)) {
+            neg = true;
+        }
+        var int t = math.gcd(a, b);
+        let self.a = a / t;
+        let self.b = b / t;
+        if(neg) {
+            let self.a = - self.a;
+        }
+        return self;
+    }
+    function float add_float(float a, float b) {
+        var int a, b = a.a * f.b + f.a * a.b, a.b * f.b;
+        return float.new(a, b);
+    }
+    function float sub_float(float a, float b) {
+        var int a, b = a.a * b.b - b.a * a.b, a.b * b.b;
+        return float.new(a, b);
+    }
+    function float mul_float(float a, float b) {
+        var int a, b = a.a * b.a, a.b * b.b;
+        return float.new(a, b);
+    }
+    function float div_float(float a, float b) {
+        var int a, b = a.a * b.b, a.b * b.a;
+        return float.new(a, b);
+    }
+    function bool eq_float(float a, float b) {
+        return a.a * b.b == b.a * a.b;
+    }
+    function bool neq_float(float a, float b) {
+        return a.a * b.b != b.a * a.b;
+    }
+    function bool geq_float(float a, float b) {
+        return a.a * b.b >= b.a * a.b;
+    }
+    function bool leq_float(float a, float b) {
+        return a.a * b.b <= b.a * a.b;
+    }
+    function bool gt_float(float a, float b) {
+        return a.a * b.b > b.a * a.b;
+    }
+    function bool lt_float(float a, float b) {
+        return a.a * b.b < b.a * a.b;
+    }
+    function float add_int(float a, int b) {
+        return float.new(a.a + b * a.b, a.b);
+    }
+    function float sub_int(float a, int b) {
+        return float.new(a.a - b * a.b, a.b);
+    }
+    function float mul_int(float a, int b) {
+        return float.new(a.a * b, a.b);
+    }
+    function float div_int(float a, int b) {
+        return float.new(a.a, a.b * b);
+    }
+    function bool eq_int(float a, int b) {
+        return a.a == a.b * b;
+    }
+    function bool neq_int(float a, int b) {
+        return a.a != a.b * b;
+    }
+    function bool geq_int(float a, int b) {
+        return a.a >= a.b * b;
+    }
+    function bool leq_int(float a, int b) {
+        return a.a <= a.b * b;
+    }
+    function bool gt_int(float a, int b) {
+        return a.a > a.b * b;
+    }
+    function bool lt_int(float a, int b) {
+        return a.a < a.b * b;
+    }
+    method float neg() {
+        return float.new(- self.a, self.b);
+    }
+}

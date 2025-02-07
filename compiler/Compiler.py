@@ -3,7 +3,7 @@ from typing import Literal, List, Tuple, Union
 
 from compiler.AST import *
 from compiler.lib import CompileError, CompileErrorGroup, Info, type_int, type_void, format_traceback, none
-from compiler.built_in import built_in_function, built_in_class
+from built_in.built_in import built_in_function, built_in_class
 
 
 class Compiler:

@@ -1,0 +1,49 @@
+class math {
+    function int gcd(int a, int b) {
+        var int t;
+        while(b != 0) {
+            let t = b;
+            let b = math.mod(a, b);
+            let a = t;
+        }
+        return a;
+    }
+    function int abs(int a) {
+        if(a < 0) {
+            return - a;
+        }
+        return a;
+    }
+    function int pow(int a, int b) {
+        var int res = 1;
+        while(b > 0) {
+            if(math.mod(b, 2) == 1) {
+                let res = res * a;
+            }
+            let a = a * a;
+            let b = b / 2;
+        }
+        return res;
+    }
+    function int max(int a, int b) {
+        if(a > b) {
+            return a;
+        }
+        return b;
+    }
+    function int min(int a, int b) {
+        if(a < b) {
+            return a;
+        }
+        return b;
+    }
+    function int mod(int a, int b) {
+        while(a >= b) {
+            let a = a - b;
+        }
+        return a;
+    }
+}
+
+
+

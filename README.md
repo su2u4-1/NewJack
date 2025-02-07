@@ -16,7 +16,7 @@
 由於nj編譯器是用python寫成，所以執行時需有python 3.8或以上版本  
 ## 範例
 此指令是將test.nj編譯成test.vm  
-```
+```sh
 python ./compiler/main.py ./test.nj -c
 ```
 ## 各項參數說明:  
@@ -43,6 +43,20 @@ Specifies a file to output error and debug messages. If not provided, these mess
 ## 指令語法:
 ```
 python <path>/compiler/main.py <path>/<name>.nj [(--debug|--showast|--compile|--help)] [(--outpath|--errout) <path>]
+```
+## 工具/tools
+我還寫了兩個工具方便使用，一是format.py，二是assembler.py  
+
+format.py可以把.nj文件或.vm文件格式化，可在路徑後方加上vm或nj來無視副檔名強制格式化  
+語法:
+```
+python <path>/format.py (<file path> | <dir path>) [vm | nj]
+```
+assembler.py可以把.vm轉換成binary file，目前無法執行，我打算之後用python寫出一個模擬器  
+assembler.py接受三個可選的flag(`-o0`、`-o1`和`-o2`)與一個路徑參數，`-o0`、`-o1`和`-o2`這三個flag是為了方便debug，它會輸出中間結果  
+語法:
+```
+python <path>/assembler.py <file path> [-o0][-o1][-o2]
 ```
 
 # 語法/grammar
@@ -251,5 +265,6 @@ self的類型(type)為當前class
 操作符(operator)在預設條件下會直接拿變數實際值去計算
 所以如果變數是自定義的類型可能會變成拿obj的第一個attr或obj的attr數量去計算  
 
-compiler裡有個built_in.py，裡面放著應為內建的東西  
-這只是暫時的，因為目前這些內建的都還沒寫出實現，所以用built_in.py來避免編譯時出錯
+~~compiler裡有個built_in.py，裡面放著應為內建的東西  
+這只是暫時的，因為目前這些內建的都還沒寫出實現，所以用built_in.py來避免編譯時出錯~~  
+目前把built_in提出來，裡面放著built_in.py與其他內建類型的nj實現  

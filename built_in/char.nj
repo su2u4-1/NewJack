@@ -1,0 +1,9 @@
+class char {
+    descript {
+        a: int;
+    }
+    constructor char new(int a) {
+        let self.a = a;
+        return self;
+    }
+}
