@@ -15,9 +15,19 @@
 # 使用/use
 由於nj編譯器是用python寫成，所以執行時需有python 3.8或以上版本  
 ## 範例
-此指令是將test.nj編譯成test.vm  
+這些指令是將./test4/test.nj編譯成./test4/test.asm，同時產生test.vm與_o0、_o1與_o2版本  
 ```sh
-python ./compiler/main.py ./test.nj -c
+> python ./format.py ./test4/test.nj
+> python ./compiler/main.py ./test4/test.nj -c
+Processing file: D:\NewJack\test4\test.nj
+File D:\NewJack\test4\test.nj processed successfully
+compile start
+compile end
+Compile successful: D:\NewJack\test4\test.vm
+
+> python ./format.py ./test4/test.vm
+> python ./assembler.py ./test4/test.vm -o0 -o1 -o2
+> 
 ```
 ## 各項參數說明:  
 這些flag可以使用一個-與第一個字母組成簡短寫法(ex: -c)  
@@ -268,3 +278,8 @@ self的類型(type)為當前class
 ~~compiler裡有個built_in.py，裡面放著應為內建的東西  
 這只是暫時的，因為目前這些內建的都還沒寫出實現，所以用built_in.py來避免編譯時出錯~~  
 目前把built_in提出來，裡面放著built_in.py與其他內建類型的nj實現  
+目前的built_in.py還只是暫時替代產物，之後會換成透過import或include之類的方式實現  
+
+# 待施工
+1. 完全無類型檢查，compiler內應該做一些類型檢查  
+2. 缺少泛型或重載運算子等手段  

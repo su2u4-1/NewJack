@@ -1,5 +1,6 @@
 from typing import NoReturn, Optional, List, Tuple, Union
 
+from built_in.built_in import built_in_class
 from compiler.lib import Token, Tokens, CompileError, built_in_type, Operator, Precedence
 from compiler.AST import *
 
@@ -450,7 +451,7 @@ class Parser:
                 output = Term(self.parse_Term(), "-", self.now.location)
             else:  # self.now == Token("symbol", "!")
                 output = Term(self.parse_Term(), "!", self.now.location)
-        elif self.now.type == "identifier" or self.now == Token("keyword", "self"):
+        elif self.now.type == "identifier" or self.now == Token("keyword", "self") or self.now == Tokens("keyword", built_in_class):
             var = self.parse_Variable()
             if self.now == Token("symbol", "("):
                 if self.next() == Token("keyword", "pass"):
@@ -471,7 +472,9 @@ class Parser:
         return output
 
     def parse_Variable(self, var: Optional[Variable] = None) -> Variable:
-        if var is None and (self.now.type == "identifier" or self.now == Token("keyword", "self")):
+        if var is None and (
+            self.now.type == "identifier" or self.now == Token("keyword", "self") or self.now == Tokens("keyword", built_in_class)
+        ):
             var = Variable(Identifier(self.now.content, self.now.location), location=self.now.location)
         elif self.now == Tokens("symbol", (".", "[")) and isinstance(var, Variable):
             if var.attr is not None or var.index is not None:

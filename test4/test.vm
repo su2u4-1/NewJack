@@ -14,6 +14,21 @@ label enter
     pop $D
     pop $T
     stor @T $D
+    inpv [global address]
+    push $V 1
+    push 0
+    call list.new 1
+    pop $D
+    pop $T
+    stor @T $D
+    inpv [global address]
+    push $V 2
+    push 0
+    push 10
+    call arr.new 2
+    pop $D
+    pop $T
+    stor @T $D
     label while_start_0
     push 1
     goto loop_end_0 false
