@@ -283,3 +283,4 @@ self的類型(type)為當前class
 # 待施工
 1. 完全無類型檢查，compiler內應該做一些類型檢查  
 2. 缺少泛型或重載運算子等手段  
+3. assembler o1 -> o2 缺少處理call, return, alloc的部分  
