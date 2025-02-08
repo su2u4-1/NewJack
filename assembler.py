@@ -195,12 +195,6 @@ def assembler1(source: List[str], file: str) -> List[str]:
                 code.append(f"inpv {i[2]}\ncopy $V ${i[1][1]}")
             else:
                 error("Unknown format", file, line)
-        elif i.startswith("j-if"):
-            i = i.split()
-            if len(i) == 5 and i[1][0] == "$" and i[2][0] == "$" and i[4][0] == "$":
-                code.append(f"comp ${i[2][1]} {i[3]} ${i[4][1]}\njump ${i[1][1]} $C")
-            else:
-                error("Unknown format", file, line)
         elif i.startswith("load"):
             i = i.split()
             if len(i) == 3 and i[1][0] == "@" and i[2][0] == "$":
