@@ -244,8 +244,6 @@ def assembler0(source: List[str], file: str) -> List[str]:
             continue
         elif i.startswith("label"):
             code.append(f"setl {i.split()[1]}")
-        elif i == "inpv [global address]":
-            code.append("inpv 0")
         elif i.startswith("push"):
             i = i.split()
             if len(i) == 2:

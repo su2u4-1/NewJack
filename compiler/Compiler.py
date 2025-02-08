@@ -113,7 +113,7 @@ class Compiler:
 
     def returncode(self) -> List[str]:
         self.code.insert(1, f"alloc {self.count['global']}")
-        self.code.insert(2, "inpv [global address]")
+        self.code.insert(2, "inpv 0")
         self.code.insert(3, "pop @V")
         self.code.append("debug-label end")
         return self.code
@@ -419,7 +419,7 @@ class Compiler:
             elif str(var.var) in self.global_:
                 var_info.type = self.global_[str(var.var)][0]
                 var_info.kind = "global"
-                var_info.code.append("inpv [global address]")
+                var_info.code.append("inpv 0")
                 t = f"V {self.global_[str(var.var)][1]}"
             elif str(var.var) in self.subroutine:
                 var_info.type = Type(Identifier(self.subroutine[str(var.var)][1]))

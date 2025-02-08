@@ -1,6 +1,6 @@
 debug-label start
     alloc 2
-    inpv [global address]
+    inpv 0
     pop @V
     debug-label start test.c0
         label c0.new
@@ -8,7 +8,7 @@ debug-label start
             pop @L 0
             push @L 1
             pop @L 2
-            inpv [global address]
+            inpv 0
             push $V 0
             push @L 1
             pop $D
@@ -75,7 +75,7 @@ debug-label start
         label c1.new
             alloc 0
             pop @L 0
-            inpv [global address]
+            inpv 0
             push $V 0
             push @L 1
             pop $D
@@ -84,11 +84,11 @@ debug-label start
             push @L 0
             return
         label c1.m1
-            inpv [global address]
+            inpv 0
             push @V 0
             return
         label c1.f1
-            inpv [global address]
+            inpv 0
             push @V 0
             return
     debug-label end test.c1
