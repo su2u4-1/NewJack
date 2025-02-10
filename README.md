@@ -13,9 +13,9 @@
 > https://marketplace.visualstudio.com/items?itemName=su2u4.newjackvm  
 
 # 使用/use
-由於nj編譯器是用python寫成，所以執行時需有python 3.8或以上版本  
+由於nj編譯器是用python寫成，所以執行時需有python 3.8或以上版本
 ## 範例
-這些指令是將./test4/test.nj編譯成./test4/test.asm，同時產生test.vm與_o0、_o1與_o2版本  
+這些指令是將./test4/test.nj編譯成./test4/test.asm，同時產生test.vm與_o0、_o1與_o2版本
 ```sh
 > python ./compiler/main.py ./test4/test.nj ./built_in/list.nj -c
 Processing file: D:\NewJack\test4\test.nj
@@ -30,7 +30,7 @@ Compile successful: D:\NewJack\test4\test.vm
 > python ./assembler.py ./test4/test.vm -o0 -o1 -o2
 > 
 ```
-## 各項參數說明:  
+## 各項參數說明:
 這些flag可以使用一個-與第一個字母組成簡短寫法(ex: -c)  
 ### --debug
 Activates debug mode, providing detailed stack traces and error information when exceptions occur.  
@@ -72,7 +72,7 @@ python <path>/assembler.py <file path> [-o0][-o1][-o2]
 
 # 語法/grammar
 ## 變數
-nj的變數類型分成四種，分別是全域變數(global)、屬性(attr)、參數(arg)與變數(local)
+nj的變數類型分成四種，分別是全域變數(global)、屬性(attr)、參數(arg)與變數(local)  
 其中global與attr使用global與describe來聲明  
 ### global與describe
 一個nj檔案由一個global區與許多class組成  
@@ -94,7 +94,7 @@ class class_name {
 }
 ```
 
-global與describe裡皆不能初始化，變數會被設為0，global應在程式入口處初始化
+global與describe裡皆不能初始化，變數會被設為0，global應在程式入口處初始化  
 
 class、global、describe、constructor、function、method等語句皆是可選的  
 ### attr與local
@@ -142,7 +142,7 @@ class class_name {
 ### 建構子(constructor)
 建構子(constructor)就像是特殊的method，建議取名為new、init等  
 回傳值的類型應為此建構子(constructor)所在的class  
-第一個參數會是self，類型為目前class，應回傳此self
+第一個參數會是self，類型為目前class，應回傳此self  
 建構子的呼叫方式:
 ```
 class_name.new(arg, ...);
@@ -209,7 +209,7 @@ else{
 ### for
 迴圈，可後接else，與python的else同義  
 會新增一個區域變數(local)，變數名由`var_name`聲明  
-如果`var_name`後接一個表達式(expression)，則此迴圈由0跑到`var_name`<expression0
+如果`var_name`後接一個表達式(expression)，則此迴圈由0跑到`var_name`<expression0  
 如果`var_name`後接一個表達式(expression)，則此迴圈由expression0開始，之後每次增加expression2，直到`var_name`>=expression1  
 語法:
 ```
@@ -237,7 +237,7 @@ break [int];
 ```
 ## 表達式(expression)
 ### 表達式(expression)
-表達式由數個term與操作符(operator)組成
+表達式由數個term與操作符(operator)組成  
 語法:
 ```
 <expression> ::= <term> [{<operator> <term>}]
@@ -249,8 +249,8 @@ term可以是: int, float, char, str, call, var, (expression), -term, !term, fal
 <term> ::= <str> | <int> | <float> | false | true | self | (- | !)<term> | <call> | <var> | (<expression>)
 ```
 ### 操作符(operator)
-operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <
-<<與>>是算術移位
+operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <  
+<<與>>是算術移位  
 ==, !=, >=, <=, >, <是邏輯操作符(logical operator)，他們的回傳值一定是true或false
 ## 其他/other
 ### 程式入口(enter)
@@ -272,6 +272,9 @@ self是關鍵字，所以不能把變數命名成self
 self的類型(type)為當前class
 在method中self是呼叫時的物件(obj)  
 在constructor中self是一個屬性皆為0的空物件
+### 關於pass與void關鍵字
+所有空的()內都需要加上pass關鍵字  
+如果subroutine回傳值類型為void，return時後方須直接接上;，不可有其他東西  
 ### 一些細節
 操作符(operator)在預設條件下會直接拿變數實際值去計算
 所以如果變數是自定義的類型可能會變成拿obj的第一個attr或obj的attr數量去計算  
@@ -284,4 +287,4 @@ self的類型(type)為當前class
 # 待施工
 1. 完全無類型檢查，compiler內應該做一些類型檢查  
 2. 缺少泛型或重載運算子等手段  
-~~3. assembler o1 -> o2 缺少處理call, return, alloc的部分~~  
+3. 缺少include或import等手段來導入其他nj file  
