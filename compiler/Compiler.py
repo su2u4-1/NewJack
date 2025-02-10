@@ -112,9 +112,10 @@ class Compiler:
             self.count[var.kind] += 1
 
     def returncode(self) -> List[str]:
-        self.code.insert(1, f"alloc {self.count['global']}")
-        self.code.insert(2, "inpv 0")
-        self.code.insert(3, "pop @V")
+        self.code.insert(1, f"push {self.count['global']}")
+        self.code.insert(2, f"call built_in.alloc 1")
+        self.code.insert(3, "inpv 0")
+        self.code.insert(4, "pop @V")
         self.code.append("debug-label end")
         return self.code
 
@@ -140,7 +141,8 @@ class Compiler:
             self.argument[str(subroutine.name)]["self"] = (Type(self.now_class.name), 0)
             self.count["argument"] += 1
         if subroutine.kind == "constructor":
-            code.append(f"alloc {len(self.attribute[str(self.now_class.name)])}")
+            code.append(f"push {len(self.attribute[str(self.now_class.name)])}")
+            code.append(f"call built_in.alloc 1")
             code.append("pop @L 0")
         for i in subroutine.argument_list:
             self.declare(i)
@@ -385,18 +387,23 @@ class Compiler:
     def compileCall(self, call: Call) -> List[str]:
         code: List[str] = []
         var_info = self.GetVarInfo(call.var)
-        if var_info.kind == "method":
-            code.append("\n".join(var_info.code))
-        elif var_info.kind == "constructor":
-            code.append("push 0")
-        elif var_info.kind != "function":
-            self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
-        for i in call.expression_list:
-            code.extend(self.compileExpression(i))
-        if var_info.kind != "function":
-            code.append(f"call {var_info.name} {len(call.expression_list) + 1}")
+        if var_info.name == "arr.new":
+            for i in call.expression_list:
+                code.extend(self.compileExpression(i))
+            code.append("call built_in.alloc 1")
         else:
-            code.append(f"call {var_info.name} {len(call.expression_list)}")
+            if var_info.kind == "method":
+                code.append("\n".join(var_info.code))
+            elif var_info.kind == "constructor":
+                code.append("push 0")
+            elif var_info.kind != "function":
+                self.error(f"variable {call.var} is not method, function or constructor", call.var.location)
+            for i in call.expression_list:
+                code.extend(self.compileExpression(i))
+            if var_info.kind != "function":
+                code.append(f"call {var_info.name} {len(call.expression_list) + 1}")
+            else:
+                code.append(f"call {var_info.name} {len(call.expression_list)}")
         return code
 
     def GetVarInfo(self, var: Variable, addr: bool = False) -> Info:

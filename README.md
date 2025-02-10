@@ -17,10 +17,11 @@
 ## 範例
 這些指令是將./test4/test.nj編譯成./test4/test.asm，同時產生test.vm與_o0、_o1與_o2版本  
 ```sh
-> python ./format.py ./test4/test.nj
-> python ./compiler/main.py ./test4/test.nj -c
+> python ./compiler/main.py ./test4/test.nj ./built_in/list.nj -c
 Processing file: D:\NewJack\test4\test.nj
 File D:\NewJack\test4\test.nj processed successfully
+Processing file: D:\NewJack\built_in\list.nj
+File D:\NewJack\built_in\list.nj processed successfully
 compile start
 compile end
 Compile successful: D:\NewJack\test4\test.vm
@@ -283,4 +284,4 @@ self的類型(type)為當前class
 # 待施工
 1. 完全無類型檢查，compiler內應該做一些類型檢查  
 2. 缺少泛型或重載運算子等手段  
-3. assembler o1 -> o2 缺少處理call, return, alloc的部分  
+~~3. assembler o1 -> o2 缺少處理call, return, alloc的部分~~  

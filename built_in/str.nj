@@ -1,5 +1,5 @@
 class str {
-    descript {
+    describe {
         a: list[char];
     }
     constructor str new(list[char] a) {
@@ -11,23 +11,23 @@ class str {
         return;
     }
     method void add_str(str s) {
-        for(i, s.a.size()) {
+        for(i, s.a.size(pass)) {
             do self.a.append(s.a[i]);
         }
         return;
     }
     method str format(list[str] s) {
         var int j = 0;
-        var list[char] result = list.new();
-        for(i, self.a.size()) {
+        var list[char] result = list.new(pass);
+        for(i, self.a.size(pass)) {
             if(self.a[i].a == '%') {
-                for(k, s[j].a.size()) {
-                    result.append(s[j].a[k]);
+                for(k, s[j].a.size(pass)) {
+                    do result.append(s[j].a[k]);
                 }
                 let j = j + 1;
             }
             else {
-                result.append(self.a[i]);
+                do result.append(self.a[i]);
             }
         }
     }

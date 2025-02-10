@@ -286,17 +286,28 @@ def assembler0(source: List[str], file: str) -> List[str]:
         elif i.startswith("call"):
             i = i.split()
             if len(i) == 3:
-                code.append(" ".join(i))
-            else:
-                error("Unknown format", file, line)
-        elif i.startswith("alloc"):
-            i = i.split()
-            if len(i) == 2:
-                code.append(" ".join(i))
+                code.append(f"copy $P $T\nsubv $T {i[2]} $T\ngetl $D {i[1]}\nstor @P $D\naddv $P 1 $P\nsubv $L 4 $D\nload @D $D")
+                code.append("stor @P $D\naddv $P 1 $P\nsubv $P 2 $D\nstor @P $D\naddv $P 1 $P\nstor @P $L\naddv $P 1 $P\nsett 1")
+                code.append("copy $P $T\nsett 0")
+                for j in range(int(i[2])):
+                    code.append(f"addv $T {j} $D\nload @D $D\nstor @P $D\naddv $P 1 $P")
+                code.append(f"sett 1\ncopy $T $L\nsett 0\ngetl $D {i[1]}\ninpv 1\njump $D $V")
             else:
                 error("Unknown format", file, line)
         elif i.startswith("return"):
-            code.append("return")
+            code.append("subv $P 1 $P")
+            code.append("load @P $D")
+            code.append("copy $T $D")
+            code.append("subv $L 3 $L")
+            code.append("load @L $D")
+            code.append("addv $L 1 $L")
+            code.append("load @L $P")
+            code.append("addv $L 1 $L")
+            code.append("load @L $L")
+            code.append("inpv 1")
+            code.append("jump $D $V")
+            code.append("stor @P $T")
+            code.append("addv $P 1 $P")
         else:
             code.append(i)
     return split_newlines(code)

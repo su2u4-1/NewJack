@@ -118,13 +118,11 @@ non-standard syntactic sugar:
 
     push @[a] [value]
         - Push the value at @[a] offset by [value] onto the stack
-        sett 7
         if value < 0:
-            subv $[a] [value] $T
+            subv $[a] [value] $D
         else:
-            addv $[a] [value] $T
-        load @T $D
-        sett 0
+            addv $[a] [value] $D
+        load @D $D
         stor @P $D
         addv $P 1 $P
 
@@ -192,10 +190,6 @@ non-standard syntactic sugar:
     label [label]
         setl [label]
 
-    alloc [value]
-        - Allocate memory of size [value] from the heap and return the base address
-        - Return the base address: Push the address onto the stack pointed to by $P
-
     call [function name] [number of argument]
         - Jump to the address of [function name]
         - Read arguments from $P and decrement $P by [number of argument]
@@ -206,11 +200,26 @@ non-standard syntactic sugar:
         push @L -4
         push $P -2
         push $L
+        # stor @P $D
+        # addv $P 1 $P
+        # subv $L 4 $D
+        # load @D $D
+        # stor @P $D
+        # addv $P 1 $P
+        # subv $P 2 $D
+        # stor @P $D
+        # addv $P 1 $P
+        # stor @P $L
+        # addv $P 1 $P
         sett 1
         copy $P $T
         sett 0
         for i in range([number of argument]):
             push @T i
+            # addv $T i $D
+            # load @D $D
+            # stor @P $D
+            # addv $P 1 $P
         sett 1
         copy $T $L
         sett 0
@@ -221,6 +230,21 @@ non-standard syntactic sugar:
     return
         - Jump back to the previous address
         - Push the return value onto the stack pointed to by $P
+        pop $T
+        # subv $P 1 $P
+        # load @P $D
+        # copy $T $D
+        subv $L 3 $L
+        load @L $D
+        addv $L 1 $L
+        load @L $P
+        addv $L 1 $L
+        load @L $L
+        inpv 1
+        jump $D $V
+        push $T
+        # stor @P $T
+        # addv $P 1 $P
 
     # Stack frame structure:
     # 0 -> now address

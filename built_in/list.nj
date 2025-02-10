@@ -1,10 +1,10 @@
 class list {
-    descript {
+    describe {
         data: arr[int];
         max_size: int;
         size: int;
     }
-    constructor list new() {
+    constructor list new(pass) {
         let self.data = arr.new(10);
         let self.max_size = 10;
         let self.size = 0;
@@ -12,13 +12,13 @@ class list {
     }
     method void append(int a) {
         if(self.size == self.max_size) {
-            self.get_memory();
+            do self.get_memory(pass);
         }
         let self.data[self.size] = a;
         let self.size = self.size + 1;
         return;
     }
-    method void get_memory() {
+    method void get_memory(pass) {
         let self.max_size = self.max_size * 2;
         var arr[int] new_data = arr.new(self.max_size);
         for(i, self.size) {
@@ -34,7 +34,7 @@ class list {
         let self.data[i] = a;
         return;
     }
-    method int size() {
+    method int size(pass) {
         return self.size;
     }
 }

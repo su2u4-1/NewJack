@@ -1,5 +1,6 @@
 debug-label start
-    alloc 3
+    push 3
+    call built_in.alloc 1
     inpv 0
     pop @V
 label enter
@@ -23,9 +24,8 @@ label enter
     stor @T $D
     inpv 0
     push $V 2
-    push 0
     push 10
-    call arr.new 2
+    call built_in.alloc 1
     pop $D
     pop $T
     stor @T $D
@@ -92,7 +92,8 @@ label enter
     label loop_end_0
     debug-label start test.c0
         label c0.new
-            alloc 2
+            push 2
+            call built_in.alloc 1
             pop @L 0
             inpv 0
             push $V 0
@@ -190,7 +191,8 @@ label enter
     debug-label end test.c0
     debug-label start test.c1
         label c1.new
-            alloc 1
+            push 1
+            call built_in.alloc 1
             pop @L 0
             push 0
             pop @L 2
@@ -269,4 +271,152 @@ label enter
             return
             label if_end_2
     debug-label end test.c1
+    debug-label start list.list
+        label list.new
+            push 3
+            call built_in.alloc 1
+            pop @L 0
+            push @L 0
+            pop $D
+            push $D 0
+            push 10
+            call built_in.alloc 1
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 1
+            push 10
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 2
+            push 0
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            return
+        label list.append
+            push @L 0
+            pop $D
+            push @D 2
+            push @L 0
+            pop $D
+            push @D 1
+            call built_in.eq 2
+            goto if_false_3 false
+            push @L 0
+            call list.get_memory 1
+            pop $T
+            goto if_end_3 all
+            label if_false_3
+            label if_end_3
+            push @L 0
+            pop $D
+            push $D 0
+            push @L 0
+            pop $D
+            push @D 2
+            call built_in.add 2
+            push @L 1
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push $D 2
+            push @L 0
+            pop $D
+            push @D 2
+            push 1
+            call built_in.add 2
+            pop $D
+            pop $T
+            stor @T $D
+            push 0
+            return
+        label list.get_memory
+            push @L 0
+            pop $D
+            push $D 1
+            push @L 0
+            pop $D
+            push @D 1
+            push 2
+            call built_in.mul 2
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 0
+            pop $D
+            push @D 1
+            call built_in.alloc 1
+            pop @L 1
+            push 0
+            pop @L 2
+            label for_start_4
+            push $L 1
+            push @L 2
+            call built_in.add 2
+            push @L 0
+            pop $D
+            push @D 0
+            push @L 2
+            call built_in.add 2
+            pop $D
+            push @D
+            pop $D
+            pop $T
+            stor @T $D
+            push 1
+            push @L 2
+            call built_in.add 2
+            pop @L 2
+            push @L 2
+            push @L 0
+            pop $D
+            push @D 2
+            call built_in.lt 2
+            goto for_start_4 true
+            label loop_end_4
+            push @L 0
+            pop $D
+            push $D 0
+            push @L 1
+            pop $D
+            pop $T
+            stor @T $D
+            push 0
+            return
+        label list.get
+            push @L 0
+            pop $D
+            push @D 0
+            push @L 1
+            call built_in.add 2
+            pop $D
+            push @D
+            return
+        label list.set
+            push @L 0
+            pop $D
+            push $D 0
+            push @L 1
+            call built_in.add 2
+            push @L 2
+            pop $D
+            pop $T
+            stor @T $D
+            push 0
+            return
+        label list.size
+            push @L 0
+            pop $D
+            push @D 2
+            return
+    debug-label end list.list
 debug-label end

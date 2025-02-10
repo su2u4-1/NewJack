@@ -1,16 +1,16 @@
 class float {
-    descript {
+    describe {
         a: int;
         b: int;
     }
     constructor float new(int a, int b) {
         if(b == 0) {
-            print("Error: Division by zero");
+            do print("Error: Division by zero");
             return self;
         }
         var bool neg = false;
         if((b < 0 & a > 0) | (b > 0 & a < 0)) {
-            neg = true;
+            let neg = true;
         }
         var int t = math.gcd(a, b);
         let self.a = a / t;
@@ -84,7 +84,7 @@ class float {
     function bool lt_int(float a, int b) {
         return a.a < a.b * b;
     }
-    method float neg() {
+    method float neg(pass) {
         return float.new(- self.a, self.b);
     }
 }

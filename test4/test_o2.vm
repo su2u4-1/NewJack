@@ -1,3 +1,8 @@
+inpv 3
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
 inpv 0
 inpv 1
 subr $P $V $P
@@ -10,6 +15,51 @@ copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 1
+subr $T $V $T
+inpv 1516
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 1516
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -42,6 +92,59 @@ copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 2014
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 2014
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -66,6 +169,51 @@ copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 1
+subr $T $V $T
+inpv 4380
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 4380
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -83,11 +231,6 @@ inpv 2
 addr $V $V $D
 copy $P $A
 copy $D $M
-inpv 1
-addr $P $V $P
-inpv 0
-copy $P $A
-copy $V $M
 inpv 1
 addr $P $V $P
 inpv 10
@@ -112,7 +255,7 @@ copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
-inpv 997
+inpv 1516
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -147,11 +290,93 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 1
+subr $T $V $T
+inpv 2302
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 2302
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
 copy $M $D
 copy $T $D
+copy $P $T
+inpv 0
+subr $T $V $T
+inpv 3623
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+sett 1
+copy $T $L
+sett 0
+inpv 3623
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -309,6 +534,59 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 3938
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 3938
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -410,7 +688,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 837
+inpv 1357
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -420,12 +698,12 @@ copy $C $D
 inpv 0
 comp $C == $V
 jump $T $C
-inpv 997
+inpv 1516
 copy $V $T
 inpv 1
 copy $V $C
 jump $T $C
-inpv 837
+inpv 1357
 copy $V $T
 inpv 1
 copy $V $C
@@ -500,7 +778,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 271
+inpv 539
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -508,11 +786,16 @@ copy $P $A
 copy $M $D
 copy $C $D
 jump $T $C
-inpv 214
+inpv 482
 copy $V $T
 inpv 1
 copy $V $C
 jump $T $C
+inpv 2
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -668,6 +951,59 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 3080
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 3080
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -688,6 +1024,29 @@ copy $M $D
 sett 0
 copy $P $A
 copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
 inpv 1
 addr $P $V $P
 sett 7
@@ -726,6 +1085,59 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 3938
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 3938
+copy $V $D
+inpv 1
+jump $D $V
 sett 7
 inpv 0
 addr $L $V $T
@@ -764,6 +1176,29 @@ copy $T $D
 addr $D $T $D
 copy $P $A
 copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
 inpv 1
 addr $P $V $P
 inpv 0
@@ -1015,7 +1450,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 1537
+inpv 2358
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -1086,7 +1521,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 2149
+inpv 3016
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -1107,7 +1542,30 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
-inpv 2167
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+inpv 3080
 copy $V $T
 inpv 1
 copy $V $C
@@ -1120,6 +1578,34 @@ copy $M $D
 sett 0
 copy $P $A
 copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+inpv 1
+copy $P $A
+copy $V $M
 inpv 1
 addr $P $V $P
 inpv 1
@@ -1182,7 +1668,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 2451
+inpv 3475
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -1213,6 +1699,59 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 4694
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 4694
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -1266,7 +1805,7 @@ copy $M $D
 copy $T $D
 copy $T $A
 copy $D $M
-inpv 2213
+inpv 3136
 copy $V $T
 inpv 1
 copy $V $C
@@ -1325,6 +1864,29 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
 inpv 0
 sett 7
 inpv 1
@@ -1347,6 +1909,59 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
+copy $P $T
+inpv 2
+subr $T $V $T
+inpv 4694
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 4694
+copy $V $D
+inpv 1
+jump $D $V
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -1413,6 +2028,29 @@ copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
 sett 7
 inpv 0
 addr $L $V $T
@@ -1458,7 +2096,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 2881
+inpv 4145
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -1493,7 +2131,30 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
-inpv 3024
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+inpv 4380
 copy $V $T
 inpv 1
 copy $V $C
@@ -1543,7 +2204,7 @@ copy $P $A
 copy $C $M
 inpv 1
 addr $P $V $P
-inpv 3014
+inpv 4324
 copy $V $T
 inpv 1
 subr $P $V $P
@@ -1563,7 +2224,30 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
-inpv 3024
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+inpv 4380
 copy $V $T
 inpv 1
 copy $V $C
@@ -1571,5 +2255,1148 @@ jump $T $C
 inpv 0
 copy $P $A
 copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+inpv 3
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $D $M
+sett 0
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 0
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 10
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 10
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 2
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 0
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 2
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 1
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+comp $D == $T
+copy $P $A
+copy $C $M
+inpv 1
+addr $P $V $P
+inpv 4959
+copy $V $T
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $C $D
+inpv 0
+comp $C == $V
+jump $T $C
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $T
+inpv 1
+subr $T $V $T
+inpv 5323
+copy $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 4
+subr $L $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+subr $P $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+copy $P $A
+copy $L $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $P $T
+sett 0
+inpv 0
+addr $T $V $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 1
+copy $T $L
+sett 0
+inpv 5323
+copy $V $D
+inpv 1
+jump $D $V
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 4959
+copy $V $T
+inpv 1
+copy $V $C
+jump $T $C
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 0
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 2
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 1
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 2
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 2
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+inpv 0
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 1
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 2
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+mulr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 1
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
+inpv 1
+addr $L $V $T
+copy $T $A
+copy $D $M
+sett 0
+inpv 0
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $D $M
+sett 0
+inpv 1
+addr $L $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 0
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+inpv 1
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $D $M
+sett 0
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 2
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+comp $D <  $T
+copy $P $A
+copy $C $M
+inpv 1
+addr $P $V $P
+inpv 5565
+copy $V $T
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $C $D
+jump $T $C
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 0
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 1
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+inpv 0
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 0
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 1
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+copy $D $A
+copy $M $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 0
+addr $D $V $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 1
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+addr $D $T $D
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 2
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+copy $T $A
+copy $D $M
+inpv 0
+copy $P $A
+copy $V $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+sett 7
+inpv 2
+addr $D $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $T $D
+inpv 3
+subr $L $V $L
+copy $L $A
+copy $M $D
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $P
+inpv 1
+addr $L $V $L
+copy $L $A
+copy $M $L
+inpv 1
+jump $D $V
+copy $P $A
+copy $T $M
 inpv 1
 addr $P $V $P

@@ -83,7 +83,7 @@ class Parser:
     def parse_Class(self) -> Class:
         location = self.now.location
         self.get()
-        if self.now.type == "identifier":
+        if self.now.type == "identifier" or self.now == Tokens("keyword", built_in_class):
             name = Identifier(self.now.content, self.now.location)
         else:
             self.error("missing class name")

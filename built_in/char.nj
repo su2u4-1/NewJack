@@ -1,5 +1,5 @@
 class char {
-    descript {
+    describe {
         a: int;
     }
     constructor char new(int a) {
