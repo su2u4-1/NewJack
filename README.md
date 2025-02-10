@@ -53,17 +53,17 @@ Specifies a file to output error and debug messages. If not provided, these mess
 
 ## 指令語法:
 ```
-python <path>/compiler/main.py <path>/<name>.nj [(--debug|--showast|--compile|--help)] [(--outpath|--errout) <path>]
+python <path>/compiler/main.py <path>/<name>.nj [--debug] [--showast] [--compile] [--help] [--outpath <path>] [--errout <path>]
 ```
 ## 工具/tools
-我還寫了兩個工具方便使用，一是format.py，二是assembler.py  
+還有兩個工具，一是format.py，二是assembler.py  
 
 format.py可以把.nj文件或.vm文件格式化，可在路徑後方加上vm或nj來無視副檔名強制格式化  
 語法:
 ```
 python <path>/format.py (<file path> | <dir path>) [vm | nj]
 ```
-assembler.py可以把.vm轉換成binary file，目前無法執行，我打算之後用python寫出一個模擬器  
+assembler.py可以把.vm轉換成binary file，目前無法拿來執行，預計之後會用python寫出一個模擬器來運行他  
 assembler.py接受三個可選的flag(`-o0`、`-o1`和`-o2`)與一個路徑參數，`-o0`、`-o1`和`-o2`這三個flag是為了方便debug，它會輸出中間結果  
 語法:
 ```
@@ -231,6 +231,7 @@ return [(var|self)];
 ### break
 跳出for-loop與while-loop，且會一併跳過else段  
 可後接數字跳出多層迴圈  
+跳出多層迴圈時不可跳出超過subroutine  
 語法:
 ```
 break [int];
@@ -255,7 +256,7 @@ operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <
 ## 其他/other
 ### 程式入口(enter)
 在一個檔案的最外層使用enter關鍵字聲明一段程式碼  
-可以視為無class無arg的function  
+可視為無class無arg的function  
 同時編譯的所有檔案裡只能有一個enter  
 在enter裡return會視為關閉程式  
 回傳值視為exit code  

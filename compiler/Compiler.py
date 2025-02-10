@@ -28,6 +28,7 @@ class Compiler:
         }
         self.now_subroutine: Subroutine = Subroutine(none, "method", Type(none), [], [])
         self.loop: List[int] = []
+        self.loop_n: List[int] = []
         self.debug_flag = debug_flag
         self.code: List[str] = ["debug-label start"]
         self.errout = errout
@@ -128,6 +129,7 @@ class Compiler:
 
     def compileSubroutine(self, subroutine: Subroutine) -> List[str]:
         code: List[str] = []
+        self.loop_n.append(0)
         if str(subroutine.name).startswith(str(self.now_class.name) + "."):
             code.append(f"label {subroutine.name}")
         else:
@@ -150,6 +152,7 @@ class Compiler:
             code.extend(self.compileStatement(i))
         del self.argument[str(subroutine.name)]
         del self.local[str(subroutine.name)]
+        self.loop_n.pop()
         return code
 
     def compileStatement(self, statement: Statement) -> List[str]:
@@ -234,6 +237,7 @@ class Compiler:
         n = self.count["loop"]
         self.count["loop"] += 1
         self.loop.append(n)
+        self.loop_n[-1] += 1
         code.append(f"label while_start_{n}")
         code.extend(self.compileExpression(while_.conditional))
         if while_.else_:
@@ -248,6 +252,7 @@ class Compiler:
             for s in while_.else_statement_list:
                 code.extend(self.compileStatement(s))
         code.append(f"label loop_end_{n}")
+        self.loop_n[-1] -= 1
         if self.loop.pop() != n:
             self.error("loop level error", while_.location)
         return code
@@ -257,6 +262,7 @@ class Compiler:
         n = self.count["loop"]
         self.count["loop"] += 1
         self.loop.append(n)
+        self.loop_n[-1] += 1
         cn = self.count["local"]
         self.count["local"] += 1
         self.local[str(self.now_subroutine.name)][str(for_.for_count_integer)] = (type_int, cn)
@@ -277,6 +283,7 @@ class Compiler:
             for s in for_.else_statement_list:
                 code.extend(self.compileStatement(s))
         code.append(f"label loop_end_{n}")
+        self.loop_n[-1] -= 1
         if self.loop.pop() != n:
             self.error("loop level error", for_.location)
         return code
@@ -294,7 +301,7 @@ class Compiler:
         return code
 
     def compileBreak_S(self, break_: Break_S) -> List[str]:
-        if len(self.loop) < int(break_.n):
+        if self.loop_n[-1] < int(break_.n):
             self.error("The break statement must be inside a loop", break_.location)
             return []
         else:
