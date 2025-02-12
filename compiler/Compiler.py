@@ -113,10 +113,11 @@ class Compiler:
             self.count[var.kind] += 1
 
     def returncode(self) -> List[str]:
-        self.code.insert(1, f"push {self.count['global']}")
-        self.code.insert(2, f"call built_in.alloc 1")
-        self.code.insert(3, "inpv 0")
-        self.code.insert(4, "pop @V")
+        if self.count["global"] != 0:
+            self.code.insert(1, f"push {self.count['global']}")
+            self.code.insert(2, f"call built_in.alloc 1")
+            self.code.insert(3, "inpv 0")
+            self.code.insert(4, "pop @V")
         self.code.append("debug-label end")
         return self.code
 

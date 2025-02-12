@@ -1,0 +1,30 @@
+class syatem{
+    describe{
+        start_pointer: int;
+        end_pointer: int;
+        now_pointer: int;
+        memory: arr[int];
+    }
+    method void init(pass){
+        let self.start_pointer = 2147483648;
+        let self.end_pointer = 4294967296;
+        let self.now_pointer = self.start_pointer;
+    }
+    method int alloc(int size){
+        var int ret = self.memory[self.now_pointer];
+    }
+}
+
+`
+start_pointer -> [length] = n
+[next] -> [len_2]
+[0]
+...
+[n-1]
+now_pointer -> [len_2] = m
+[next] = -1
+[0]
+...
+[m-1]
+end_pointer -> []
+`
