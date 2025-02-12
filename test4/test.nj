@@ -4,12 +4,12 @@ class main {
         global int g0 = l0.m0(5);
         global list[int] g1 = list.new(pass);
         global arr[int] g2 = arr.new(10);
-        while(true) {
-            for(i, 1, 10, 2) {
+        while (true) {
+            for (i, 1, 10, 2) {
                 do c0.f0(i);
                 do c1.f1(pass);
                 let g1[g0 + i] = l0.attr1.m1(g2[g0 + i]);
-                if(g1[g0 + i] == 0) {
+                if (g1[g0 + i] == 0) {
                     break 2;
                 }
             }
@@ -28,10 +28,10 @@ class c0 {
     }
     function arr[int] f0(int arg1) {
         var arr[int] l0;
-        for(i, arg1) {
+        for (i, arg1) {
             let l0[i] = g1[i] + g2[i];
         }
-        if(g0 == l0[0]) {
+        if (g0 == l0[0]) {
             return g2;
         }
         else {
@@ -43,7 +43,7 @@ class c1 {
     constructor c1 new(int arg2) {
         attr int attr2 = g0;
         var int l1;
-        while(l1 < arg2) {
+        while (l1 < arg2) {
             do g1.append(l1);
             let l1 = l1 + 1;
         }
@@ -55,10 +55,10 @@ class c1 {
         return;
     }
     method int m1(int arg3) {
-        if(self.attr2 > 0) {
+        if (self.attr2 > 0) {
             return self.attr2;
         }
-        elif(self.attr2 == 0) {
+        elif (self.attr2 == 0) {
             return arg3;
         }
         else {

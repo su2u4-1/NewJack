@@ -4,18 +4,18 @@ class float {
         b: int;
     }
     constructor float new(int a, int b) {
-        if(b == 0) {
+        if (b == 0) {
             do print("Error: Division by zero");
             return self;
         }
         var bool neg = false;
-        if((b < 0 & a > 0) | (b > 0 & a < 0)) {
+        if ((b < 0 & a > 0) | (b > 0 & a < 0)) {
             let neg = true;
         }
         var int t = math.gcd(a, b);
         let self.a = a / t;
         let self.b = b / t;
-        if(neg) {
+        if (neg) {
             let self.a = - self.a;
         }
         return self;

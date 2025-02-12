@@ -11,7 +11,7 @@ class str {
         return;
     }
     method void add_str(str s) {
-        for(i, s.a.size(pass)) {
+        for (i, s.a.size(pass)) {
             do self.a.append(s.a[i]);
         }
         return;
@@ -19,9 +19,9 @@ class str {
     method str format(list[str] s) {
         var int j = 0;
         var list[char] result = list.new(pass);
-        for(i, self.a.size(pass)) {
-            if(self.a[i].a == '%') {
-                for(k, s[j].a.size(pass)) {
+        for (i, self.a.size(pass)) {
+            if (self.a[i].a == '%') {
+                for (k, s[j].a.size(pass)) {
                     do result.append(s[j].a[k]);
                 }
                 let j = j + 1;

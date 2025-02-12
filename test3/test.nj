@@ -19,10 +19,10 @@ class c0 {
     }
     function arr[int] f0(int arg1) {
         var arr[int] l0;
-        for(i, arg1) {
+        for (i, arg1) {
             let l0[i] = g1[i] + g2[i];
         }
-        if(g0 == l0[0]) {
+        if (g0 == l0[0]) {
             return g2;
         }
         else {
@@ -36,7 +36,7 @@ class c1 {
     }
     constructor c1 new(int arg2) {
         var int l1;
-        while(l1 < arg2) {
+        while (l1 < arg2) {
             do g1.append(l1);
             let l1 = l1 + 1;
         }
@@ -49,10 +49,10 @@ class c1 {
         return;
     }
     method int m1(int arg3) {
-        if(self.attr2 > 0) {
+        if (self.attr2 > 0) {
             return self.attr2;
         }
-        elif(self.attr2 == 0) {
+        elif (self.attr2 == 0) {
             return arg3;
         }
         else {

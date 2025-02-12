@@ -7,8 +7,11 @@ class system {
         return;
     }
     function int alloc(int size) {
-        if(size > system_end_pointer) {
+        if (size > system_end_pointer) {
             do system.gc(pass);
+        }
+        if (size < 0 | size > system_end_pointer) {
+            return - 1;
         }
         var int t0 = system_memory[system_now_pointer];
         var int t1 = system_now_pointer + 1;

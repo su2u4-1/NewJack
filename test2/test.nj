@@ -19,7 +19,7 @@ class c0 {
         var int l1;
         let l1 = self.attr1.m1(pass);
         let self.attr0 = c1.f1(pass);
-        if(l1 == self.attr0) {
+        if (l1 == self.attr0) {
             return true;
         }
         else {

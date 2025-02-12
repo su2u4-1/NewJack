@@ -6,7 +6,7 @@ class list {
         return self;
     }
     method void append(int a) {
-        if(self.size == self.max_size) {
+        if (self.size == self.max_size) {
             do self.get_memory(pass);
         }
         let self.data[self.size] = a;
@@ -16,7 +16,7 @@ class list {
     method void get_memory(pass) {
         let self.max_size = self.max_size * 2;
         var arr[int] new_data = arr.new(self.max_size);
-        for(i, self.size) {
+        for (i, self.size) {
             let new_data[i] = self.data[i];
         }
         let self.data = new_data;

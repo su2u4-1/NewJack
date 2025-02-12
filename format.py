@@ -3,7 +3,7 @@ from os.path import isfile, isdir, join
 from sys import argv
 from typing import List
 
-from compiler.lexer import lexer
+from compiler.lexer import Token, lexer
 
 
 def format_nj(code: List[str]) -> List[str]:
@@ -11,8 +11,7 @@ def format_nj(code: List[str]) -> List[str]:
     tokens = lexer(code, "format.nj")
     indent = 0
     line = ""
-    f = True
-    sf = False
+    p = Token("symbol", "")
     for i in tokens:
         if i.type == "symbol":
             if i.content == "{":
@@ -20,42 +19,34 @@ def format_nj(code: List[str]) -> List[str]:
                 new_code.append("    " * indent + line)
                 indent += 1
                 line = ""
-                f = True
             elif i.content == "}":
                 if line != "":
                     new_code.append("    " * indent + line)
                 indent -= 1
                 new_code.append("    " * indent + "}")
                 line = ""
-                f = True
             elif i.content == ";":
                 line += ";"
                 new_code.append("    " * indent + line)
                 line = ""
-                f = True
-            elif i.content in ")]:,":
+            elif i.content in ")]:,.[":
                 line += i.content
-            elif i.content in ".([" and not sf:
-                line += i.content
-                f = True
-            else:
-                if f:
+            elif i.content in "(":
+                if p.content in ("if", "elif", "for", "while") or (p.type == "symbol" and p.content not in "()[]."):
+                    line += " " + i.content
+                else:
                     line += i.content
-                    f = False
+            else:
+                if p.content in "([":
+                    line += i.content
                 else:
                     line += " " + i.content
-                if i.content in ".([":
-                    f = True
-            sf = True
-            if i.content in ")]:,":
-                sf = False
         elif i.type in ("string", "integer", "symbol", "keyword", "float", "char", "identifier"):
-            sf = False
-            if f:
+            if line == "" or p.content in "([.":
                 line += i.content
-                f = False
             else:
                 line += " " + i.content
+        p = i
     return new_code
 
 
