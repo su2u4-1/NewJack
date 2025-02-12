@@ -169,7 +169,6 @@ class Parser:
         return var_type
 
     def parse_Var(self) -> Var_S:
-        # Parse variable declarations and init.
         location = self.now.location
         if self.now == Token("keyword", "global"):
             kind = "global"
@@ -404,7 +403,7 @@ class Parser:
             if self.now == Token("keyword", "true"):
                 output = Term("true", None, self.now.location)
                 self.get()
-            else:  # self.now == Token("keyword", "false"):
+            else:
                 output = Term("false", None, self.now.location)
                 self.get()
         elif self.now == Tokens("symbol", ("-", "!", "(")):
@@ -415,7 +414,7 @@ class Parser:
                 self.get()
             elif self.now == Token("symbol", "-"):
                 output = Term(self.parse_Term(), "-", self.now.location)
-            else:  # self.now == Token("symbol", "!")
+            else:
                 output = Term(self.parse_Term(), "!", self.now.location)
         elif self.now.type == "identifier" or self.now == Token("keyword", "self") or self.now == Tokens("keyword", built_in_class):
             var = self.parse_Variable()

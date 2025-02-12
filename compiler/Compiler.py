@@ -52,11 +52,9 @@ class Compiler:
         code: List[str] = []
         self.err_list = []
         try:
-            # compile class
             code.append(f"debug-label start {c.file_name}.{c.name}")
             code.extend(self.compileClass(c))
             code.append(f"debug-label end {c.file_name}.{c.name}")
-        # show error info
         except Exception as e:
             self.errout.append("------------------------------")
             self.errout.append(format_traceback(e))
@@ -90,10 +88,6 @@ class Compiler:
                 self.subroutine[str(var.name)] = (var.type, var.kind)
                 self.count["subroutine"] += 1
                 continue
-            # elif var.kind == "method":
-            #     t = self.attribute[str(self.now_class.name)]
-            #     self.subroutine[str(var.name)] = (var.type, var.kind)
-            #     var.kind = "subroutine"
             elif var.kind == "global":
                 t = self.global_
             elif var.kind == "attribute":

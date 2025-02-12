@@ -72,31 +72,7 @@ python <path>/assembler.py <file path> [-o0][-o1][-o2]
 
 # 語法/grammar
 ## 變數
-nj的變數類型分成四種，分別是全域變數(global)、屬性(attr)、參數(arg)與變數(local)  
-其中global與attr使用global與describe來聲明  
-### global與describe
-一個nj檔案由一個global區與許多class組成  
-global裡聲明全域變數，格式類似python
-```
-global {
-    global_var_name: global_var_type;
-    ...
-}
-```
-class則是由一個describe區、一個constructor與許多function和method組成  
-describe裡使用跟global裡一樣的聲明方式聲明class的屬性(attr)
-```
-class class_name {
-    describe {
-        attr_name: attr_type;
-        ...
-    }
-}
-```
-
-global與describe裡皆不能初始化，變數會被設為0，global應在程式入口處初始化  
-
-class、global、describe、constructor、function、method等語句皆是可選的  
+nj的變數類型分成四種，分別是全域變數(global)、屬性(attr)、參數(arg)與變數(local)
 ### attr與local
 arg在subroutine的定義處聲明，使用類似c的語法
 ```
@@ -106,23 +82,21 @@ class class_name {
     }
 }
 ```
-而local使用var語句來聲明
+其他的global、attr與local使用var語句來聲明，是否初始化是可選的
 ```
-var var_type var_name;
+var <type> <name> [= <expression> ];
 ```
-local是唯一可在聲明時初始化的變數類型
+也可以同時聲明與初始化多個變數
 ```
-var var_type var_name = expression;
+var <type> <name> [{, <name>}] [= <expression> [{, <expression>}]];
 ```
-local也可以同時聲明與初始化多個變數
-```
-var var_type var_name0, var_name1, var_name2 = expression0, expression1, expression2;
-```
-同一個var語句只能是同一個類型，表達式(expression)可以與變數(local)數量不一樣  
-如果表達式(expression)數量多於變數(local)，則多餘的表達式(expression)會被捨棄  
-如果表達式(expression)數量少於變數(local)，則多餘的變數(local)會被初始化為0  
+同一個var語句只能是同一個類型，表達式(expression)可以與變數數量不一樣  
+如果表達式(expression)數量多於變數，會產生錯誤  
+如果表達式(expression)數量少於變數，則多餘的變數會被初始化為0  
 
-attr應在constructor初始化，local可以在聲明時就初始化，也可在使用前再初始化就行  
+global應在main.main聲明並初始化  
+attr應在constructor聲明並初始化  
+local可以在聲明時就初始化，也可在使用前再初始化就行  
 ## subroutine
 nj的subroutine分成三種，分別是建構子(constructor)、函式(function)與方法(method)  
 三種subroutine的聲明方式
@@ -178,16 +152,16 @@ do (obj.method_name|class.fun_name|class.new)(arg [{, arg}]);
 用來對變數賦值  
 語法:
 ```
-let var = expression;
+let <var> = <expression>;
 ```
 ### if
 條件判斷式，可以後接elif與else  
 語法:
 ```
-if(expression) {
+if(<expression>) {
     <statements>
 }
-elif(expression) {
+elif(<expression>) {
     <statements>
 }
 ...
@@ -199,7 +173,7 @@ else {
 迴圈，可後接else，與python的else同義  
 語法:
 ```
-while(expression) {
+while(<expression>) {
     <statements>
 }
 else{
@@ -213,7 +187,7 @@ else{
 如果`var_name`後接一個表達式(expression)，則此迴圈由expression0開始，之後每次增加expression2，直到`var_name`>=expression1  
 語法:
 ```
-for(var_name, expression0[;expression1;expression2]) {
+for(var_name, <expression0>[, <expression1>, <expression2>]) {
     <statements>
 }
 else{
@@ -226,7 +200,7 @@ else{
 建構子(constructor)內的return應回傳self  
 語法:
 ```
-return [(var|self)];
+return [(<var>|self)];
 ```
 ### break
 跳出for-loop與while-loop，且會一併跳過else段  
@@ -255,15 +229,15 @@ operator列表: +, -, *, /, |, &, <<, >>, ==, !=, >=, <=, >, <
 ==, !=, >=, <=, >, <是邏輯操作符(logical operator)，他們的回傳值一定是true或false
 ## 其他/other
 ### 程式入口(enter)
-在一個檔案的最外層使用enter關鍵字聲明一段程式碼  
-可視為無class無arg的function  
-同時編譯的所有檔案裡只能有一個enter  
-在enter裡return會視為關閉程式  
-回傳值視為exit code  
+預設的入口函式是main.main，可用編譯時傳入的參數改變  
+同時編譯的所有檔案裡只能有一個入口函式  
+在入口函式裡return會視為關閉程式  
 語法:
 ```
-enter {
-    <statements>
+class main {
+    function void main(pass) {
+        <statements>
+    }
 }
 ```
 ### self的總結
