@@ -1,19 +1,17 @@
 # NewJack grammar
-<code> ::= {(<class> | <global>)}
-<class> ::= "class" <identifier'class_name'> "{" <describe> {<subroutine>} "}"
-<global> ::= "global" "{" [{<identifier'var_name'> ":" <type> ";"}] "}"
-<describe> ::= "describe" "{" [{<identifier'var_name'> ":" <type> ";"}] "}"
+<code> ::= {<class>}
+<class> ::= "class" <identifier'class_name'> "{" {<subroutine>} "}"
 <subroutine> ::= ("function" | "method" | "constructor") (<type> | "void") <identifier'name'> "(" (<argument_list> | "pass") ")" "{" <statements> "}"
 <type> ::= <identifier'type'> | <built-in_type> ["[" <type> "]"]
 <argument_list> ::= <type> <identifier'arg_name'> [{"," <type> <identifier'arg_name'>}]
 <statements> ::= ({<statement>} | "pass")
 <statement> ::= <var_S> | <let_S> | <do_S> | <if_S> | <while_S> | <for_S> | <return_S>
-<var_S> ::= "var" <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
+<var_S> ::= ("var" | "global" | "attr") <type> <identifier'name'> [{"," <identifier'name'>}] ["=" <expression> [{"," <expression>}]] ";"
 <let_S> ::= "let" <var> "=" <expression> ";"
 <do_S> ::= "do" <call> ";"
 <if_S> ::= "if" "(" <conditional> ")" "{" <statements> "}" [{"elif" "(" <conditional> ")" "{" <statements> "}"}] ["else" "{" <statements> "}"]
 <while_S> ::= "while" "(" <conditional> ")" "{" (<statements> | <break_S> | <continue_S>) "}"
-<for_S> ::= "for" "(" <identifier'name'> "," <expression> [";" <conditional> ";" <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
+<for_S> ::= "for" "(" <identifier'name'> "," <expression> ["," <conditional> "," <expression>] ")" "{" (<statements> | <break_S> | <continue_S>) "}" ["else" "{" <statements> "}"]
 <return_S> ::= "return" [<expression>] ";"
 <break_S> ::= "break" [<Integer>] ";"
 <continue_S> ::= "continue" ";"
@@ -34,6 +32,7 @@
 <built-in_type> ::= "int" | "bool" | "char" | "str" | "list" | "arr" | "float"
 <keyword> ::= "class" | "var" | "describe" | "constructor" | "function" | "method" | "void" | "pass" | <keyword_content>
             | "let" | "do" | "if" | "elif" | "else" | "while" | "return" | "for" | "break" | "continue" | <built-in_type>
+            | "global" | "attr"
 <keyword_content> ::= "false" | "true" | "self"
 <symbol> ::= "{" | "}" | "[" | "]" | "(" | ")" | "=" | ";" | "," | "." | <operator> | "!"
 <operator> ::= "+" | "-" | "*" | "/" | <logical_operator> | "|" | "&" | "<<" | ">>"

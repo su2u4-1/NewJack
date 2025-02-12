@@ -7,7 +7,7 @@ from built_in.built_in import built_in_function, built_in_class
 
 
 class Compiler:
-    def __init__(self, global_: Global, errout: List[str], debug_flag: bool = False) -> None:
+    def __init__(self, global_: List[DeclareVar], errout: List[str], debug_flag: bool = False) -> None:
         self.global_: dict[str, Tuple[Type, int]] = {}
         self.subroutine: dict[str, Tuple[Type, Literal["class", "constructor", "function", "method"]]] = {}
         self.subroutine.update(built_in_function)
@@ -33,15 +33,7 @@ class Compiler:
         self.code: List[str] = ["debug-label start"]
         self.errout = errout
         self.now_class: Class = Class(none, [], [], "")
-        self.declare(global_.global_variable)
-        self.now_class: Class = Class(none, [], [], global_.enter_file)
-        if global_.enter is not None:
-            self.code.append("label enter")
-            self.now_subroutine.name = Identifier("enter")
-            self.local["enter"] = {}
-            self.argument["enter"] = {}
-            for i in global_.enter:
-                self.code.extend(self.compileStatement(i))
+        self.declare(global_)
         if len(self.err_list) > 0:
             raise CompileErrorGroup(self.err_list)
         if self.debug_flag:
@@ -89,11 +81,7 @@ class Compiler:
         if isinstance(vars, DeclareVar):
             vars = [vars]
         for var in vars:
-            if var.kind in ("class", "constructor", "function", "method"):
-                if var.kind == "class":
-                    self.count["attribute"] = 0
-                    self.now_class = Class(var.name, [], [], "")
-                    self.attribute[str(var.name)] = {}
+            if var.kind in ("constructor", "function", "method"):
                 self.subroutine[str(var.name)] = (var.type, var.kind)
                 self.count["subroutine"] += 1
                 continue
@@ -123,6 +111,12 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> List[str]:
         code: List[str] = []
+        self.count["attribute"] = 0
+        self.now_class = class_
+        if str(class_.name) not in self.attribute:
+            self.attribute[str(class_.name)] = {}
+        for i in class_.attr_list:
+            self.declare(i)
         self.now_class = class_
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
@@ -179,21 +173,33 @@ class Compiler:
 
     def compileVar_S(self, var: Var_S) -> List[str]:
         code: List[str] = []
-        for i in var.var_list:
-            assert i.kind == "local"
         if len(var.var_list) < len(var.expression_list):
             self.error("'value' redundant 'variable'", var.location)
         for i, j in zip(var.var_list, var.expression_list):
-            self.declare(i)
-            t = self.count["local"] + self.count["argument"] - 1
             code.extend(self.compileExpression(j))
-            code.append(f"pop @L {t}")
+            if i.kind == "global":
+                code.append("inpv 0")
+                code.append(f"pop @V {self.global_[str(i.name)][1]}")
+            elif i.kind == "attribute":
+                code.append("push @L 0")
+                code.append("pop $D")
+                code.append(f"pop @D {self.attribute[str(self.now_class.name)][str(i.name)][1]}")
+            else:
+                self.declare(i)
+                code.append(f"pop @L {self.count["local"] + self.count["argument"] - 1}")
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
-                self.declare(i)
-                t = self.count["local"] + self.count["argument"] - 1
                 code.append("push 0")
-                code.append(f"pop @L {t}")
+                if i.kind == "global":
+                    code.append("inpv 0")
+                    code.append(f"pop @V {self.global_[str(i.name)][1]}")
+                elif i.kind == "attribute":
+                    code.append("push @L 0")
+                    code.append("pop $D")
+                    code.append(f"pop @D {self.attribute[str(self.now_class.name)][str(i.name)][1]}")
+                else:
+                    self.declare(i)
+                    code.append(f"pop @L {self.count["local"] + self.count["argument"] - 1}")
         return code
 
     def compileDo_S(self, do: Do_S) -> List[str]:

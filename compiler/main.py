@@ -4,10 +4,10 @@ from typing import List, Dict, Tuple
 
 path.append(abspath("\\".join(__file__.split("\\")[:-2])))
 
-from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
+from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue
 from compiler.lexer import lexer
 from compiler.parser import Parser
-from compiler.AST import Class, Global, Root, DeclareVar
+from compiler.AST import Class, DeclareVar, Root
 from compiler.Compiler import Compiler
 
 
@@ -46,7 +46,7 @@ def analyze_file(source: List[str], arg: Args, file_path: str, errout: List[str]
 
 
 def compile_all_file(
-    class_list: List[Class], global_: Global, arg: Args, source_dict: Dict[str, List[str]], errout: List[str]
+    class_list: List[Class], global_: List[DeclareVar], arg: Args, source_dict: Dict[str, List[str]], errout: List[str]
 ) -> List[str]:
     failed = False
     try:
@@ -150,19 +150,13 @@ def main() -> Tuple[List[str], str]:
     # process source
     failed = False
     class_list: list[Class] = []
-    global_ = Global()
+    global_: List[DeclareVar] = []
     for i in files:
         print(f"Processing file: {i}")
         try:
             root = analyze_file(source_dict[i], arg, i, errout)
             class_list.extend(root.class_list)
-            global_.global_variable.extend(root.global_list)
-            if root.enter is not None:
-                if global_.enter is not None:
-                    errout.append(f'File "{i}"\nparser Error: Only one enter is allowed')
-                    raise Continue()
-                global_.enter = root.enter
-                global_.enter_file = root.enter_file
+            global_.extend(root.global_)
         except Continue:
             print(f"File {i} processing failed")
             failed = True
@@ -173,10 +167,8 @@ def main() -> Tuple[List[str], str]:
 
     # add class and subroutine to the global
     for i in class_list:
-        global_.global_variable.append(DeclareVar(i.name, "class", type_class))
-        global_.global_variable.extend(i.attr_list)
         for j in i.subroutine_list:
-            global_.global_variable.append(DeclareVar(j.name, j.kind, j.return_type))  # type: ignore
+            global_.append(DeclareVar(j.name, j.kind, j.return_type))  # type: ignore
 
     # compile
     if arg.compile:

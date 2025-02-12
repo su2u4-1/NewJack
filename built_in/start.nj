@@ -2,4 +2,4 @@ global {
     built_in: system;
 }
 var system built_in = system.new(pass);
-call main.main();
+do main.main();

@@ -32,7 +32,6 @@ __all__ = [
     "Statement",
     "Subroutine",
     "Class",
-    "Global",
     "Root",
 ]
 
@@ -539,38 +538,13 @@ class Class:
         return "\n".join(self.show())
 
 
-class Global:
-    def __init__(self) -> None:
-        self.global_variable: List[DeclareVar] = []
-        self.enter: Optional[List[Statement]] = None
-        self.enter_file: str = ""
-
-    def show(self) -> List[str]:
-        t = ["global:"]
-        for g in self.global_variable:
-            t.append(f"    {g}")
-        return t
-
-    def __str__(self) -> str:
-        return "\n".join(self.show())
-
-
 class Root:
-    def __init__(self, class_list: List[Class], global_list: List[DeclareVar], enter: Optional[List[Statement]], enter_file: str) -> None:
+    def __init__(self, class_list: List[Class], global_: List[DeclareVar]) -> None:
         self.class_list = class_list
-        self.global_list = global_list
-        self.enter = enter
-        self.enter_file = enter_file
+        self.global_ = global_
 
     def show(self) -> list[str]:
-        t = ["global:"]
-        for g in self.global_list:
-            t.append(f"    {g}")
-        if self.enter is not None:
-            t.append("enter:")
-            for e in self.enter:
-                t.extend(ident(e.show()))
-        t.append("class list:")
+        t = ["class list:"]
         for c in self.class_list:
             t.extend(ident(c.show()))
         return t
