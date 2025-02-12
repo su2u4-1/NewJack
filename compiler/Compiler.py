@@ -81,7 +81,12 @@ class Compiler:
         if isinstance(vars, DeclareVar):
             vars = [vars]
         for var in vars:
-            if var.kind in ("constructor", "function", "method"):
+            if var.kind in ("class", "constructor", "function", "method"):
+                if var.kind == "class":
+                    if str(var.name) not in self.attribute:
+                        self.count["attribute"] = 0
+                        self.attribute[str(var.name)] = {}
+                    self.now_class = Class(var.name, [], [], "")
                 self.subroutine[str(var.name)] = (var.type, var.kind)
                 self.count["subroutine"] += 1
                 continue
@@ -111,12 +116,6 @@ class Compiler:
 
     def compileClass(self, class_: Class) -> List[str]:
         code: List[str] = []
-        self.count["attribute"] = 0
-        self.now_class = class_
-        if str(class_.name) not in self.attribute:
-            self.attribute[str(class_.name)] = {}
-        for i in class_.attr_list:
-            self.declare(i)
         self.now_class = class_
         for i in class_.subroutine_list:
             code.extend(self.compileSubroutine(i))
@@ -141,8 +140,7 @@ class Compiler:
             code.append(f"push {len(self.attribute[str(self.now_class.name)])}")
             code.append(f"call built_in.alloc 1")
             code.append("pop @L 0")
-        for i in subroutine.argument_list:
-            self.declare(i)
+        self.declare(subroutine.argument_list)
         for i in subroutine.statement_list:
             code.extend(self.compileStatement(i))
         del self.argument[str(subroutine.name)]

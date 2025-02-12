@@ -4,7 +4,7 @@ from typing import List, Dict, Tuple
 
 path.append(abspath("\\".join(__file__.split("\\")[:-2])))
 
-from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue
+from compiler.lib import get_path, read_source, get_one_path, format_traceback, CompileError, CompileErrorGroup, Args, Continue, type_class
 from compiler.lexer import lexer
 from compiler.parser import Parser
 from compiler.AST import Class, DeclareVar, Root
@@ -167,6 +167,8 @@ def main() -> Tuple[List[str], str]:
 
     # add class and subroutine to the global
     for i in class_list:
+        global_.append(DeclareVar(i.name, "class", type_class))
+        global_.extend(i.attr_list)
         for j in i.subroutine_list:
             global_.append(DeclareVar(j.name, j.kind, j.return_type))  # type: ignore
 
@@ -181,6 +183,8 @@ def main() -> Tuple[List[str], str]:
             return errout, arg.errout
         else:
             print("compile end")
+
+        code = ["call system.init 0", "pop $T", f"call {arg.enter} 0", "pop $T"] + code
 
         # output the compiled file
         if arg.outpath == "":

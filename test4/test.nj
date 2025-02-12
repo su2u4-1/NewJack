@@ -1,5 +1,5 @@
-class main{
-    function void main(pass){
+class main {
+    function void main(pass) {
         var c0 l0 = c0.new(pass);
         global int g0 = l0.m0(5);
         global list[int] g1 = list.new(pass);

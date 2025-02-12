@@ -1,45 +1,25 @@
-class system{
-    describe{
-        start_pointer: int;
-        end_pointer: int;
-        now_pointer: int;
-        memory: arr[int];
-    }
-    constructor system new(pass){
-        do self.init(pass);
-        return self;
-    }
-    method void init(pass){
-        let self.start_pointer = 2147483648;
-        let self.end_pointer = 4294967296;
-        let self.now_pointer = self.start_pointer;
+class system {
+    function void init(pass) {
+        global int system_start_pointer = 2147483648;
+        global int system_end_pointer = 4294967296;
+        global int system_now_pointer = system_start_pointer;
+        global arr[int] system_memory;
         return;
     }
-    method int alloc(int size){
-        if (size > self.end_pointer){
-            do self.gc(self);
+    function int alloc(int size) {
+        if(size > system_end_pointer) {
+            do system.gc(pass);
         }
-        var int t0 = self.memory[self.now_pointer];
-        var int t1 = self.now_pointer + 1;
-        let self.memory[self.now_pointer] = size;
-        let self.now_pointer = self.now_pointer + size + 2;
-        let self.memory[t1] = self.now_pointer;
-        let self.memory[self.now_pointer] = t0 - size - 2;
-        let self.memory[self.now_pointer] = -1;
+        var int t0 = system_memory[system_now_pointer];
+        var int t1 = system_now_pointer + 1;
+        let system_memory[system_now_pointer] = size;
+        let system_now_pointer = system_now_pointer + size + 2;
+        let system_memory[t1] = system_now_pointer;
+        let system_memory[system_now_pointer] = t0 - size - 2;
+        let system_memory[system_now_pointer] = - 1;
         return t1 - 1;
     }
+    function void gc(pass) {
+        return;
+    }
 }
-
-`
-start_pointer -> [length] = n
-[next] -> [len_2]
-[0]
-...
-[n-1]
-now_pointer -> [len_2] = m
-[next] = -1
-[0]
-...
-[m-1]
-end_pointer -> []
-`

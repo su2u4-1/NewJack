@@ -100,6 +100,10 @@ def main(path: str, type_: str) -> None:
         return
 
     for i in paths:
+        if not isfile(i):
+            continue
+        if not i.endswith(".vm") and not i.endswith(".nj"):
+            continue
         if type_ == "":
             if i.endswith(".vm"):
                 type_ = "vm"

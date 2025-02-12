@@ -1,13 +1,8 @@
 class list {
-    describe {
-        data: arr[int];
-        max_size: int;
-        size: int;
-    }
     constructor list new(pass) {
-        let self.data = arr.new(10);
-        let self.max_size = 10;
-        let self.size = 0;
+        attr arr[int] data = arr.new(10);
+        attr int max_size = 10;
+        attr int size = 0;
         return self;
     }
     method void append(int a) {

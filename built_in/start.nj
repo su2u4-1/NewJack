@@ -1,5 +1,0 @@
-global {
-    built_in: system;
-}
-var system built_in = system.new(pass);
-do main.main();

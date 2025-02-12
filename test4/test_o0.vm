@@ -5,7 +5,7 @@ inpv 0
 subv $P 1 $P
 load @P $D
 stor @V $D
-setl enter
+setl main.main
 inpv 0
 stor @P $V
 addv $P 1 $P
@@ -42,10 +42,6 @@ sett 7
 addv $L 0 $T
 stor @T $D
 sett 0
-inpv 0
-addv $V 0 $D
-stor @P $D
-addv $P 1 $P
 sett 7
 addv $L 0 $T
 load @T $D
@@ -86,17 +82,13 @@ sett 0
 getl $D c0.m0
 inpv 1
 jump $D $V
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 inpv 0
-addv $V 1 $D
-stor @P $D
-addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 0 $T
+stor @T $D
+sett 0
 inpv 0
 stor @P $V
 addv $P 1 $P
@@ -127,27 +119,23 @@ sett 0
 getl $D list.new
 inpv 1
 jump $D $V
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 inpv 0
-addv $V 2 $D
-stor @P $D
-addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 1 $T
+stor @T $D
+sett 0
 inpv 10
 stor @P $V
 addv $P 1 $P
+inpv 0
 subv $P 1 $P
 load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
+sett 7
+addv $V 2 $T
 stor @T $D
+sett 0
 setl while_start_0
 inpv 1
 stor @P $V
@@ -504,18 +492,6 @@ subv $P 1 $P
 load @P $D
 copy $T $D
 stor @T $D
-sett 7
-addv $L 0 $T
-load @T $D
-sett 0
-stor @P $D
-addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-addv $D 0 $D
-stor @P $D
-addv $P 1 $P
 inpv 0
 sett 7
 addv $V 0 $T
@@ -547,13 +523,6 @@ copy $T $D
 mulr $D $T $D
 stor @P $D
 addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 sett 7
 addv $L 0 $T
 load @T $D
@@ -563,9 +532,12 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 1 $D
-stor @P $D
-addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $D 0 $T
+stor @T $D
+sett 0
 inpv 0
 stor @P $V
 addv $P 1 $P
@@ -607,13 +579,21 @@ sett 0
 getl $D c1.new
 inpv 1
 jump $D $V
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
 subv $P 1 $P
 load @P $D
-copy $T $D
+sett 7
+addv $D 1 $T
 stor @T $D
+sett 0
 sett 7
 addv $L 0 $T
 load @T $D
@@ -978,6 +958,28 @@ addv $L 0 $T
 stor @T $D
 sett 0
 inpv 0
+sett 7
+addv $V 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+sett 7
+addv $D 0 $T
+stor @T $D
+sett 0
+inpv 0
 stor @P $V
 addv $P 1 $P
 subv $P 1 $P
@@ -1094,32 +1096,6 @@ getl $T while_start_3
 setv $C 1
 jump $T $C
 setl loop_end_3
-sett 7
-addv $L 0 $T
-load @T $D
-sett 0
-stor @P $D
-addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-addv $D 0 $D
-stor @P $D
-addv $P 1 $P
-inpv 0
-sett 7
-addv $V 0 $T
-load @T $D
-sett 0
-stor @P $D
-addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 sett 7
 addv $L 0 $T
 load @T $D
@@ -1389,28 +1365,9 @@ sett 7
 addv $L 0 $T
 stor @T $D
 sett 0
-sett 7
-addv $L 0 $T
-load @T $D
-sett 0
-stor @P $D
-addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-addv $D 0 $D
-stor @P $D
-addv $P 1 $P
 inpv 10
 stor @P $V
 addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 sett 7
 addv $L 0 $T
 load @T $D
@@ -1420,19 +1377,15 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 1 $D
-stor @P $D
-addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $D 1 $T
+stor @T $D
+sett 0
 inpv 10
 stor @P $V
 addv $P 1 $P
-subv $P 1 $P
-load @P $D
-copy $D $D
-subv $P 1 $P
-load @P $D
-copy $T $D
-stor @T $D
 sett 7
 addv $L 0 $T
 load @T $D
@@ -1442,19 +1395,30 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 2 $D
-stor @P $D
-addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $D 2 $T
+stor @T $D
+sett 0
 inpv 0
 stor @P $V
 addv $P 1 $P
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
 subv $P 1 $P
 load @P $D
-copy $T $D
+sett 7
+addv $D 3 $T
 stor @T $D
+sett 0
 sett 7
 addv $L 0 $T
 load @T $D
@@ -1485,7 +1449,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 2 $T
+addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1500,7 +1464,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 1 $T
+addv $D 2 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1571,7 +1535,7 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 0 $D
+addv $D 1 $D
 stor @P $D
 addv $P 1 $P
 sett 7
@@ -1584,7 +1548,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 2 $T
+addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1620,7 +1584,7 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 2 $D
+addv $D 3 $D
 stor @P $D
 addv $P 1 $P
 sett 7
@@ -1633,7 +1597,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 2 $T
+addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1683,7 +1647,7 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 1 $D
+addv $D 2 $D
 stor @P $D
 addv $P 1 $P
 sett 7
@@ -1696,7 +1660,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 1 $T
+addv $D 2 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1730,7 +1694,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 1 $T
+addv $D 2 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1779,7 +1743,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 0 $T
+addv $D 1 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1852,7 +1816,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 2 $T
+addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1881,7 +1845,7 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 0 $D
+addv $D 1 $D
 stor @P $D
 addv $P 1 $P
 sett 7
@@ -1924,7 +1888,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 0 $T
+addv $D 1 $T
 load @T $D
 sett 0
 stor @P $D
@@ -1973,7 +1937,7 @@ addv $P 1 $P
 subv $P 1 $P
 load @P $D
 copy $D $D
-addv $D 0 $D
+addv $D 1 $D
 stor @P $D
 addv $P 1 $P
 sett 7
@@ -2031,7 +1995,7 @@ subv $P 1 $P
 load @P $D
 copy $D $D
 sett 7
-addv $D 2 $T
+addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D

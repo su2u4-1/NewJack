@@ -10,7 +10,7 @@ copy $P $A
 copy $M $D
 copy $V $A
 copy $D $M
-//setl enter
+//setl main.main
 inpv 0
 copy $P $A
 copy $V $M
@@ -71,13 +71,6 @@ addr $L $V $T
 copy $T $A
 copy $D $M
 sett 0
-inpv 0
-inpv 0
-addr $V $V $D
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
 sett 7
 inpv 0
 addr $L $V $T
@@ -146,25 +139,17 @@ sett 0
 copy $V $D
 inpv 1
 jump $D $V
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
-copy $T $A
-copy $D $M
 inpv 0
 inpv 1
-addr $V $V $D
+subr $P $V $P
 copy $P $A
+copy $M $D
+sett 7
+inpv 0
+addr $V $V $T
+copy $T $A
 copy $D $M
-inpv 1
-addr $P $V $P
+sett 0
 inpv 0
 copy $P $A
 copy $V $M
@@ -215,42 +200,33 @@ sett 0
 copy $V $D
 inpv 1
 jump $D $V
+inpv 0
 inpv 1
 subr $P $V $P
 copy $P $A
 copy $M $D
-copy $D $D
+sett 7
 inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
+addr $V $V $T
 copy $T $A
 copy $D $M
-inpv 0
-inpv 2
-addr $V $V $D
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
+sett 0
 inpv 10
 copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
+inpv 0
 inpv 1
 subr $P $V $P
 copy $P $A
 copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
+sett 7
+inpv 2
+addr $V $V $T
 copy $T $A
 copy $D $M
+sett 0
 //setl while_start_0
 inpv 1
 copy $P $A
@@ -838,27 +814,6 @@ copy $M $D
 copy $T $D
 copy $T $A
 copy $D $M
-sett 7
-inpv 0
-addr $L $V $T
-copy $T $A
-copy $M $D
-sett 0
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 0
-addr $D $V $D
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
 inpv 0
 sett 7
 inpv 0
@@ -910,18 +865,6 @@ copy $P $A
 copy $D $M
 inpv 1
 addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
-copy $T $A
-copy $D $M
 sett 7
 inpv 0
 addr $L $V $T
@@ -938,11 +881,15 @@ copy $P $A
 copy $M $D
 copy $D $D
 inpv 1
-addr $D $V $D
+subr $P $V $P
 copy $P $A
+copy $M $D
+sett 7
+inpv 0
+addr $D $V $T
+copy $T $A
 copy $D $M
-inpv 1
-addr $P $V $P
+sett 0
 inpv 0
 copy $P $A
 copy $V $M
@@ -1012,6 +959,16 @@ sett 0
 copy $V $D
 inpv 1
 jump $D $V
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
 inpv 1
 subr $P $V $P
 copy $P $A
@@ -1021,9 +978,12 @@ inpv 1
 subr $P $V $P
 copy $P $A
 copy $M $D
-copy $T $D
+sett 7
+inpv 1
+addr $D $V $T
 copy $T $A
 copy $D $M
+sett 0
 sett 7
 inpv 0
 addr $L $V $T
@@ -1634,6 +1594,42 @@ copy $T $A
 copy $D $M
 sett 0
 inpv 0
+sett 7
+inpv 0
+addr $V $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
+inpv 1
+addr $P $V $P
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
+inpv 0
+addr $D $V $T
+copy $T $A
+copy $D $M
+sett 0
+inpv 0
 copy $P $A
 copy $V $M
 inpv 1
@@ -1827,50 +1823,6 @@ inpv 1
 copy $V $C
 jump $T $C
 //setl loop_end_3
-sett 7
-inpv 0
-addr $L $V $T
-copy $T $A
-copy $M $D
-sett 0
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 0
-addr $D $V $D
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
-inpv 0
-sett 7
-inpv 0
-addr $V $V $T
-copy $T $A
-copy $M $D
-sett 0
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
-copy $T $A
-copy $D $M
 sett 7
 inpv 0
 addr $L $V $T
@@ -2318,44 +2270,11 @@ addr $L $V $T
 copy $T $A
 copy $D $M
 sett 0
-sett 7
-inpv 0
-addr $L $V $T
-copy $T $A
-copy $M $D
-sett 0
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 0
-addr $D $V $D
-copy $P $A
-copy $D $M
-inpv 1
-addr $P $V $P
 inpv 10
 copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
-copy $T $A
-copy $D $M
 sett 7
 inpv 0
 addr $L $V $T
@@ -2372,28 +2291,20 @@ copy $P $A
 copy $M $D
 copy $D $D
 inpv 1
-addr $D $V $D
+subr $P $V $P
 copy $P $A
-copy $D $M
+copy $M $D
+sett 7
 inpv 1
-addr $P $V $P
+addr $D $V $T
+copy $T $A
+copy $D $M
+sett 0
 inpv 10
 copy $P $A
 copy $V $M
 inpv 1
 addr $P $V $P
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $D $D
-inpv 1
-subr $P $V $P
-copy $P $A
-copy $M $D
-copy $T $D
-copy $T $A
-copy $D $M
 sett 7
 inpv 0
 addr $L $V $T
@@ -2409,15 +2320,29 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
+inpv 1
+subr $P $V $P
+copy $P $A
+copy $M $D
+sett 7
 inpv 2
-addr $D $V $D
-copy $P $A
+addr $D $V $T
+copy $T $A
 copy $D $M
-inpv 1
-addr $P $V $P
+sett 0
 inpv 0
 copy $P $A
 copy $V $M
+inpv 1
+addr $P $V $P
+sett 7
+inpv 0
+addr $L $V $T
+copy $T $A
+copy $M $D
+sett 0
+copy $P $A
+copy $D $M
 inpv 1
 addr $P $V $P
 inpv 1
@@ -2429,9 +2354,12 @@ inpv 1
 subr $P $V $P
 copy $P $A
 copy $M $D
-copy $T $D
+sett 7
+inpv 3
+addr $D $V $T
 copy $T $A
 copy $D $M
+sett 0
 sett 7
 inpv 0
 addr $L $V $T
@@ -2482,7 +2410,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 2
+inpv 3
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2507,7 +2435,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 1
+inpv 2
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2623,7 +2551,7 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
-inpv 0
+inpv 1
 addr $D $V $D
 copy $P $A
 copy $D $M
@@ -2645,7 +2573,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 2
+inpv 3
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2706,7 +2634,7 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
-inpv 2
+inpv 3
 addr $D $V $D
 copy $P $A
 copy $D $M
@@ -2728,7 +2656,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 2
+inpv 3
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2813,7 +2741,7 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
-inpv 1
+inpv 2
 addr $D $V $D
 copy $P $A
 copy $D $M
@@ -2835,7 +2763,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 1
+inpv 2
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2892,7 +2820,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 1
+inpv 2
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -2974,7 +2902,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 0
+inpv 1
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -3097,7 +3025,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 2
+inpv 3
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -3145,7 +3073,7 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
-inpv 0
+inpv 1
 addr $D $V $D
 copy $P $A
 copy $D $M
@@ -3218,7 +3146,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 0
+inpv 1
 addr $D $V $T
 copy $T $A
 copy $M $D
@@ -3302,7 +3230,7 @@ subr $P $V $P
 copy $P $A
 copy $M $D
 copy $D $D
-inpv 0
+inpv 1
 addr $D $V $D
 copy $P $A
 copy $D $M
@@ -3400,7 +3328,7 @@ copy $P $A
 copy $M $D
 copy $D $D
 sett 7
-inpv 2
+inpv 3
 addr $D $V $T
 copy $T $A
 copy $M $D

@@ -197,6 +197,7 @@ class Args:
         self.outpath: str = ""
         self.errout: str = ""
         self.help: list[str] = []
+        self.enter: str = "main.main"
 
     def print_help(self) -> None:
         if self.help == ["--help"]:
