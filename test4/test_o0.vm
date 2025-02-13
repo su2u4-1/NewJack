@@ -1,4 +1,56 @@
-inpv 3
+copy $P $T
+subv $T 0 $T
+getl $D system.init
+stor @P $D
+addv $P 1 $P
+subv $L 4 $D
+load @D $D
+stor @P $D
+addv $P 1 $P
+subv $P 2 $D
+stor @P $D
+addv $P 1 $P
+stor @P $L
+addv $P 1 $P
+sett 1
+copy $P $T
+sett 0
+sett 1
+copy $T $L
+sett 0
+getl $D system.init
+inpv 1
+jump $D $V
+subv $P 1 $P
+load @P $D
+copy $T $D
+copy $P $T
+subv $T 0 $T
+getl $D main.main
+stor @P $D
+addv $P 1 $P
+subv $L 4 $D
+load @D $D
+stor @P $D
+addv $P 1 $P
+subv $P 2 $D
+stor @P $D
+addv $P 1 $P
+stor @P $L
+addv $P 1 $P
+sett 1
+copy $P $T
+sett 0
+sett 1
+copy $T $L
+sett 0
+getl $D main.main
+inpv 1
+jump $D $V
+subv $P 1 $P
+load @P $D
+copy $T $D
+inpv 7
 stor @P $V
 addv $P 1 $P
 inpv 0
@@ -1999,6 +2051,441 @@ addv $D 3 $T
 load @T $D
 sett 0
 stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $T $D
+subv $L 3 $L
+load @L $D
+addv $L 1 $L
+load @L $P
+addv $L 1 $L
+load @L $L
+inpv 1
+jump $D $V
+stor @P $T
+addv $P 1 $P
+setl system.init
+inpv 2147483648
+stor @P $V
+addv $P 1 $P
+inpv 0
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 3 $T
+stor @T $D
+sett 0
+inpv 4294967296
+stor @P $V
+addv $P 1 $P
+inpv 0
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 4 $T
+stor @T $D
+sett 0
+inpv 0
+sett 7
+addv $V 3 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+inpv 0
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 5 $T
+stor @T $D
+sett 0
+inpv 0
+stor @P $V
+addv $P 1 $P
+inpv 0
+subv $P 1 $P
+load @P $D
+sett 7
+addv $V 6 $T
+stor @T $D
+sett 0
+inpv 0
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $T $D
+subv $L 3 $L
+load @L $D
+addv $L 1 $L
+load @L $P
+addv $L 1 $L
+load @L $L
+inpv 1
+jump $D $V
+stor @P $T
+addv $P 1 $P
+setl system.alloc
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 4 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+comp $D > $T
+stor @P $C
+addv $P 1 $P
+getl $T if_false_4
+subv $P 1 $P
+load @P $D
+copy $C $D
+inpv 0
+comp $C == $V
+jump $T $C
+copy $P $T
+subv $T 0 $T
+getl $D system.gc
+stor @P $D
+addv $P 1 $P
+subv $L 4 $D
+load @D $D
+stor @P $D
+addv $P 1 $P
+subv $P 2 $D
+stor @P $D
+addv $P 1 $P
+stor @P $L
+addv $P 1 $P
+sett 1
+copy $P $T
+sett 0
+sett 1
+copy $T $L
+sett 0
+getl $D system.gc
+inpv 1
+jump $D $V
+subv $P 1 $P
+load @P $D
+copy $T $D
+getl $T if_end_4
+setv $C 1
+jump $T $C
+setl if_false_4
+setl if_end_4
+inpv 0
+addv $V 6 $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+load @D $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $L 1 $T
+stor @T $D
+sett 0
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+inpv 1
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+sett 7
+addv $L 2 $T
+stor @T $D
+sett 0
+inpv 0
+addv $V 6 $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+stor @T $D
+inpv 0
+addv $V 5 $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+inpv 2
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+stor @T $D
+inpv 0
+addv $V 6 $D
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 2 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+stor @T $D
+inpv 0
+addv $V 6 $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 1 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+sett 7
+addv $L 0 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+subr $D $T $D
+stor @P $D
+addv $P 1 $P
+inpv 2
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+subr $D $T $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+stor @T $D
+inpv 0
+addv $V 6 $D
+stor @P $D
+addv $P 1 $P
+inpv 0
+sett 7
+addv $V 5 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+addr $D $T $D
+stor @P $D
+addv $P 1 $P
+inpv 1
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+inpv 0
+subr $V $D $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+stor @T $D
+sett 7
+addv $L 2 $T
+load @T $D
+sett 0
+stor @P $D
+addv $P 1 $P
+inpv 1
+stor @P $V
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $D $D
+subv $P 1 $P
+load @P $D
+copy $T $D
+subr $D $T $D
+stor @P $D
+addv $P 1 $P
+subv $P 1 $P
+load @P $D
+copy $T $D
+subv $L 3 $L
+load @L $D
+addv $L 1 $L
+load @L $P
+addv $L 1 $L
+load @L $L
+inpv 1
+jump $D $V
+stor @P $T
+addv $P 1 $P
+setl system.gc
+inpv 0
+stor @P $V
 addv $P 1 $P
 subv $P 1 $P
 load @P $D
