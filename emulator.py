@@ -120,15 +120,49 @@ def parser_args(args: List[str]) -> Args:
     return Args(path)
 
 
+def get_command(data: bytes, pointer: int) -> str:
+    return bin(data[pointer])[2:].zfill(8)
+
+
 def main(args: Args) -> None:
     if args.path.endswith(".vm"):
         assembler.main(args.path, [False, False, False])
         args.path = args.path.split(".")[-2] + ".asm"
     with open(args.path, "rb") as f:
         data = f.read()
-    print(type(data))
-    for i in data:
-        print(bin(i)[2:].zfill(8), end=" ")
+    vm = VM(4294967296)
+    # print(bin(i)[2:].zfill(8), end=" ")
+    while vm.pointer < len(data):
+        c = get_command(data, vm.pointer)
+        if c[:3] == "000":
+            c += get_command(data, vm.pointer + 1)
+            vm.inpv(int(c[3:15], 2), bool(c[15]))
+            vm.pointer += 2
+        elif c[:3] == "001":
+            c += get_command(data, vm.pointer + 1)
+            vm.copy(int(c[3:6], 2), int(c[6:9], 2))
+            vm.pointer += 2
+        elif c[:3] == "010":
+            c += get_command(data, vm.pointer + 1)
+            vm.jump(int(c[3:6], 2), int(c[6:9], 2))
+            vm.pointer += 2
+        elif c[:3] == "011":
+            c += get_command(data, vm.pointer + 1)
+            vm.comp(int(c[3:6], 2), int(c[6:9], 2), int(c[9:12], 2))
+            vm.pointer += 2
+        elif c[:3] == "100":
+            c += get_command(data, vm.pointer + 1)
+            vm.operation(int(c[3:6], 2), int(c[6:9], 2), int(c[9:12], 2), int(c[12:15], 2))
+            vm.pointer += 2
+        elif c[:3] == "101":
+            c += get_command(data, vm.pointer + 1)
+            vm.exte(int(c[3:15], 2), bool(c[15]))
+            vm.pointer += 2
+        elif c[:3] == "110":
+            vm.sett(int(c[3:6], 2))
+            vm.pointer += 1
+        else:
+            raise Exception(f"Invalid command {c} in {args.path} {vm.pointer}")
 
 
 if __name__ == "__main__":
