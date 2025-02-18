@@ -363,7 +363,8 @@ def main(path: str, flags: List[bool]) -> None:
         path = abspath(path)
     else:
         print(f"path error: {path}")
-    with open(path, "r") as f:
+        return
+    with open(path, "r", encoding="utf-8") as f:
         code = f.readlines()
     file_name = ".".join(path.split(".")[:-1])
     code = preprocess(code)
@@ -374,7 +375,7 @@ def main(path: str, flags: List[bool]) -> None:
         print(e.show(code[e.line])[0])
         return
     if flags[0]:
-        with open(file_name + "_o0.vm", "w") as f:
+        with open(file_name + "_o0.vm", "w", encoding="utf-8") as f:
             f.write("\n".join(code))
     try:
         code = assembler1(code, abspath(file_name + "_o0.vm"))
@@ -383,7 +384,7 @@ def main(path: str, flags: List[bool]) -> None:
         print(e.show(code[e.line])[0])
         return
     if flags[1]:
-        with open(file_name + "_o1.vm", "w") as f:
+        with open(file_name + "_o1.vm", "w", encoding="utf-8") as f:
             f.write("\n".join(code))
     try:
         asm = assembler2(code, abspath(file_name + "_o1.vm"))
@@ -392,7 +393,7 @@ def main(path: str, flags: List[bool]) -> None:
         print(e.show(code[e.line])[0])
         return
     if flags[2]:
-        with open(file_name + "_o2.vm", "w") as f:
+        with open(file_name + "_o2.vm", "w", encoding="utf-8") as f:
             f.write("\n".join(asmtovm(asm, file_name + "_asm.vm")))
     with open(file_name + ".asm", "wb") as f:
         f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
@@ -415,8 +416,9 @@ def parser_args(args: List[str]) -> Tuple[str, List[bool]]:
     return path, flags
 
 
-if len(argv) <= 1:
-    path, flags = parser_args(input("path and flags (only one path):").split())
-else:
-    path, flags = parser_args(argv[1:])
-main(path, flags)
+if __name__ == "__main__":
+    if len(argv) <= 1:
+        path, flags = parser_args(input("path and flags (only one path):").split())
+    else:
+        path, flags = parser_args(argv[1:])
+    main(path, flags)
