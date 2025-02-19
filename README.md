@@ -56,25 +56,24 @@ Specifies a file to output error and debug messages. If not provided, these mess
 python <path>/compiler/main.py <path>/<name>.nj [--debug] [--showast] [--compile] [--help] [--outpath <path>] [--errout <path>]
 ```
 ## 工具/tools
-還有三個工具，位於tools資料夾裡  
-一是format.py，二是assembler.py，三是emulator.py  
+還有三個工具，一是format.py，二是assembler.py，三是emulator.py  
 
 format.py可以把.nj文件或.vm文件格式化，可在路徑後方加上vm或nj來無視副檔名強制格式化  
 語法:
 ```
-python <path>/tools/format.py (<file path> | <dir path>) [vm | nj]
+python <path>/format.py (<file path> | <dir path>) [vm | nj]
 ```
 assembler.py可以把.vm轉換成binary file，目前無法拿來執行，預計之後會用python寫出一個模擬器來運行他  
 assembler.py接受三個可選的flag(`-o0`、`-o1`和`-o2`)與一個路徑參數，`-o0`、`-o1`和`-o2`這三個flag是為了方便debug，它會輸出中間結果  
 語法:
 ```
-python <path>/tools/assembler.py <file path> [-o0][-o1][-o2]
+python <path>/assembler.py <file path> [-o0][-o1][-o2]
 ```
 emulator.py是一個模擬器，接受一個參數，此參數可以是.vm檔案或者是.asm檔案  
 如果是.vm檔案，emulator會把它轉換成.asm後再執行  
 語法:
 ```
-python <path>/tools/emulator.py <file path>/<file name>(.asm | .vm)
+python <path>/emulator.py <file path>/<file name>(.asm | .vm)
 ```
 > 註: 目前完全無法得知模擬結果，只能知道vm語法是否有錯誤
 
