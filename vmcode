@@ -52,8 +52,8 @@ code:
         - for the value of inpv and the value of exte
 
     sett [0~7]
-    1 byte
-    110 + [0~7](3 bit) + 00(2 bit)
+    2 byte
+    110 + [0~7](3 bit) + 0000000000(10 bit)
         - Specify which of the 8 sub-registers in $T to use
 
 register:
