@@ -169,17 +169,17 @@ def main(args: Args) -> None:
             print(vm.registers)
             print(vm.rT)
             raise Exception(f"Invalid command {c} in {args.path} {vm.pointer}")
-        # if vm.pointer in s:
-        #     break
+        if vm.pointer in s:  ##
+            break  ##
         s[vm.pointer] = c  ##
         print(i, vm.pointer, c, vm.registers)  ##
         i += 1  ##
         if vm.pointer == 6886:  ##
             break  ##
     print(vm.memory)
-    # print(len(s))
-    # for j, i in enumerate(s):
-    #     print(j + 1, i, s[i])
+    print(len(s))  ##
+    for j, i in enumerate(s):  ##
+        print(j + 1, i, s[i])  ##
     print(vm.registers)
     print(vm.rT)
     print(vm.pointer)
