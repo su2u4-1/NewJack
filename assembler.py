@@ -100,7 +100,7 @@ def my_bin(n: int, l: Optional[int] = None) -> str:
 
 def assembler2(source: List[str], file: str) -> str:
     code = ""
-    len_code = 0
+    code_len = 0
     for line, i in enumerate(source):
         i = i.strip()
         if i.startswith("inpv"):
@@ -108,16 +108,16 @@ def assembler2(source: List[str], file: str) -> str:
             if len(i) == 2:
                 if -2048 <= int(i[1]) < 2047:
                     code += f"000{my_bin(int(i[1]), 12)}0"
-                    len_code += 2
+                    code_len += 2
                 else:
                     n = abs(int(i[1])).bit_length() + 1
                     n += 12 - (n % 12)
                     binary = my_bin(int(i[1]), n)
                     code += f"000{binary[:12]}"
-                    len_code += 2
+                    code_len += 2
                     for j in range(1, len(binary) // 12):
                         code += f"1101{binary[j*12:j*12+12]}"
-                        len_code += 2
+                        code_len += 2
                     code += "0"
             else:
                 error("Unknown format", file, line)
@@ -125,14 +125,14 @@ def assembler2(source: List[str], file: str) -> str:
             i = i.split()
             if len(i) == 3 and i[1][0] == "$" and i[2][0] == "$":
                 code += f"001{rtob[i[1][1]]}{rtob[i[2][1]]}" + "0" * 7
-                len_code += 2
+                code_len += 2
             else:
                 error("Unknown format", file, line)
         elif i.startswith("jump"):
             i = i.split()
             if len(i) == 3 and i[1][0] == "$" and i[2][0] == "$":
                 code += f"010{rtob[i[1][1]]}{rtob[i[2][1]]}" + "0" * 7
-                len_code += 2
+                code_len += 2
             else:
                 error("Unknown format", file, line)
         elif i.startswith("comp"):
@@ -140,7 +140,7 @@ def assembler2(source: List[str], file: str) -> str:
             if len(i) == 4 and i[1][0] == "$" and i[3][0] == "$":
                 if i[2] in ("nv", ">", "==", ">=", "<", "!=", "<=", "aw"):
                     code += f"011{rtob[i[1][1]]}{ctob[i[2]]}{rtob[i[3][1]]}0000"
-                    len_code += 2
+                    code_len += 2
                 else:
                     error("Unknown C-code", file, line)
             else:
@@ -149,7 +149,7 @@ def assembler2(source: List[str], file: str) -> str:
             i = i.split()
             if len(i) == 4 and i[0][3] == "r" and i[1][0] == "$" and i[2][0] == "$" and i[3][0] == "$":
                 code += f"100{otob[i[0][:3]]}{rtob[i[1][1]]}{rtob[i[2][1]]}{rtob[i[3][1]]}0"
-                len_code += 2
+                code_len += 2
             else:
                 error("Unknown format", file, line)
         elif i.startswith("sett"):
@@ -157,7 +157,7 @@ def assembler2(source: List[str], file: str) -> str:
             if len(i) == 2:
                 if 0 <= int(i[1]) <= 7:
                     code += f"110{my_bin(int(i[1]), 3)}0000000000"
-                    len_code += 2
+                    code_len += 2
                 else:
                     error("$T can only be switched in the range of 0~7", file, line)
             else:
@@ -165,18 +165,18 @@ def assembler2(source: List[str], file: str) -> str:
         elif i.startswith("//setl"):
             i = i.split()
             if len(i) == 2:
-                label[i[1]] = len_code
+                label[i[1]] = code_len
             else:
                 error("Unknown format", file, line)
         elif i.startswith("//getl"):
             i = i.split()
             if len(i) == 2:
                 code += f"/{i[1]}/"
-                len_code += 2
+                code_len += 2
             else:
                 error("Unknown format", file, line)
-        # else:
-        #     error("Unknown command", file, line)
+        else:
+            error("Unknown command", file, line)
     while "/" in code:
         t = code.split("/", maxsplit=2)
         i = label[t[1]]
@@ -404,7 +404,7 @@ def main(path: str, flags: List[bool]) -> None:
         return
     if flags[2]:
         with open(file_name + "_o2.vm", "w", encoding="utf-8") as f:
-            f.write("\n".join(asmtovm(asm, file_name + "_asm.vm")))
+            f.write("\n".join(asmtovm(asm, file_name + ".asm")))
     with open(file_name + ".asm", "wb") as f:
         f.write(bytes(int(asm[i : i + 8], 2) for i in range(0, len(asm), 8)))
 
