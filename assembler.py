@@ -12,8 +12,8 @@ btor = {"000": "A", "001": "C", "010": "D", "011": "L", "100": "M", "101": "P", 
 ctob = {"nv": "000", ">": "001", "==": "010", ">=": "011", "<": "100", "!=": "101", "<=": "110", "aw": "111"}
 btoc = {"000": "nv", "001": "> ", "010": "==", "011": ">=", "100": "< ", "101": "!=", "110": "<=", "111": "aw"}
 # operator to binary
-otob = {"add": "000", "sub": "001", "mul": "010", "div": "011", "rmv": "100", "lmv": "101", "and": "110", "or": "111"}
-btoo = {"000": "add", "001": "sub", "010": "mul", "011": "div", "100": "rmv", "101": "lmv", "110": "and", "111": "or "}
+otob = {"add": "000", "sub": "001", "mul": "010", "div": "011", "rmv": "100", "lmv": "101", "and": "110", "or_": "111"}
+btoo = {"000": "add", "001": "sub", "010": "mul", "011": "div", "100": "rmv", "101": "lmv", "110": "and", "111": "or_"}
 
 
 def asmtovm(asm: str, file: str) -> List[str]:
@@ -34,6 +34,8 @@ def asmtovm(asm: str, file: str) -> List[str]:
                 value = getvalue(a, 12)
                 if next(a) == "0":
                     code.append(f"inpv {int(value, 2)}")
+                else:
+                    code.append(f"inpv {value} 1")
             elif code_type == "001":
                 # copy
                 code.append(f"copy ${btor[getvalue(a, 3)]} ${btor[getvalue(a, 3)]}")
@@ -53,8 +55,7 @@ def asmtovm(asm: str, file: str) -> List[str]:
             elif code_type == "101":
                 # exte
                 value += getvalue(a, 12)
-                if next(a) == "0":
-                    code.append(f"inpv {int(value, 2)}")
+                code.append(f"exte {value} {next(a)}")
             elif code_type == "110":
                 # sett
                 code.append(f"sett {str(int(getvalue(a, 3), 2))}")
@@ -145,7 +146,7 @@ def assembler2(source: List[str], file: str) -> str:
                     error("Unknown C-code", file, line)
             else:
                 error("Unknown format", file, line)
-        elif i[:3] in ("add", "sub", "mul", "div", "rmv", "lmv", "and", "or"):
+        elif i[:3] in ("add", "sub", "mul", "div", "rmv", "lmv", "and", "or_"):
             i = i.split()
             if len(i) == 4 and i[0][3] == "r" and i[1][0] == "$" and i[2][0] == "$" and i[3][0] == "$":
                 code += f"100{otob[i[0][:3]]}{rtob[i[1][1]]}{rtob[i[2][1]]}{rtob[i[3][1]]}0"
@@ -341,7 +342,7 @@ def preprocess(source: List[str]) -> List[str]:
             elif i == "call built_in.div 2":  # /
                 code.append("pop $D\npop $T\ndivr $D $T $D\npush $D")
             elif i == "call built_in.or 2":  # |
-                code.append("pop $D\npop $T\norr $D $T $D\npush $D")
+                code.append("pop $D\npop $T\nor_r $D $T $D\npush $D")
             elif i == "call built_in.and 2":  # &
                 code.append("pop $D\npop $T\nandr $D $T $D\npush $D")
             elif i == "call built_in.lm 2":  # <<

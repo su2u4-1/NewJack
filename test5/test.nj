@@ -1,0 +1,5 @@
+class main {
+    function void main(pass) {
+        do system.alloc(10);
+    }
+}

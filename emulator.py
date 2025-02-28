@@ -133,8 +133,8 @@ def get_command(data: bytes, pointer: int) -> str:
 
 
 def main(args: Args) -> None:
-    # s: dict[int, str] = {}  ##
-    # i = 1  ##
+    s: dict[int, str] = {}  ##
+    i = 1  ##
     if args.path.endswith(".vm"):
         assembler.main(args.path, [False, False, False])
         args.path = args.path.split(".")[-2] + ".asm"
@@ -160,7 +160,7 @@ def main(args: Args) -> None:
             vm.pointer += 2
         elif c[:3] == "101":
             vm.exte(c[3:15], True if c[15] == "1" else False)
-            # i -= 1  ##
+            i -= 1  ##
             vm.pointer += 2
         elif c[:3] == "110":
             vm.sett(int(c[3:6], 2))
@@ -169,17 +169,15 @@ def main(args: Args) -> None:
             print(vm.registers)
             print(vm.rT)
             raise Exception(f"Invalid command {c} in {args.path} {vm.pointer}")
-        # if vm.pointer in s:  ##
-        #     break  ##
-        # s[vm.pointer] = c  ##
-        # print(i, vm.pointer, c, vm.registers)  ##
-        # i += 1  ##
-        # if vm.pointer == 6886:  ##
-        #     break  ##
+        if vm.pointer in s:  ##
+            break  ##
+        s[vm.pointer] = c  ##
+        print(i, vm.pointer, c, vm.registers, vm.memory)  ##
+        i += 1  ##
     print(vm.memory)
     # print(len(s))  ##
     # for j, i in enumerate(s):  ##
-    #     print(j + 1, i, s[i])  ##
+    # print(j + 1, i, s[i])  ##
     print(vm.registers)
     print(vm.rT)
     print(vm.pointer)

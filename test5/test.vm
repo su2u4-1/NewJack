@@ -1,0 +1,132 @@
+call system.init 0
+pop $T
+call main.main 0
+pop $T
+debug-label start
+    push 4
+    call built_in.alloc 1
+    inpv 0
+    pop @V
+    debug-label start test.main
+        label main.main
+            push 10
+            call system.alloc 1
+            pop $T
+    debug-label end test.main
+    debug-label start system.system
+        label system.init
+            push 2147483648
+            inpv 0
+            pop @V 0
+            push 4294967296
+            inpv 0
+            pop @V 1
+            inpv 0
+            push @V 0
+            inpv 0
+            pop @V 2
+            push 0
+            inpv 0
+            pop @V 3
+            push 0
+            return
+        label system.alloc
+            push @L 0
+            inpv 0
+            push @V 1
+            call built_in.gt 2
+            goto if_false_0 false
+            call system.gc 0
+            pop $T
+            goto if_end_0 all
+            label if_false_0
+            label if_end_0
+            push @L 0
+            push 0
+            call built_in.lt 2
+            push @L 0
+            inpv 0
+            push @V 1
+            call built_in.gt 2
+            call built_in.or 2
+            goto if_false_1 false
+            push 1
+            call built_in.neg 1
+            return
+            goto if_end_1 all
+            label if_false_1
+            label if_end_1
+            inpv 0
+            push $V 3
+            inpv 0
+            push @V 2
+            call built_in.add 2
+            pop $D
+            push @D
+            pop @L 1
+            inpv 0
+            push @V 2
+            push 1
+            call built_in.add 2
+            pop @L 2
+            inpv 0
+            push $V 3
+            inpv 0
+            push @V 2
+            call built_in.add 2
+            push @L 0
+            pop $D
+            pop $T
+            stor @T $D
+            inpv 0
+            push $V 2
+            inpv 0
+            push @V 2
+            push @L 0
+            call built_in.add 2
+            push 2
+            call built_in.add 2
+            pop $D
+            pop $T
+            stor @T $D
+            inpv 0
+            push $V 3
+            push @L 2
+            call built_in.add 2
+            inpv 0
+            push @V 2
+            pop $D
+            pop $T
+            stor @T $D
+            inpv 0
+            push $V 3
+            inpv 0
+            push @V 2
+            call built_in.add 2
+            push @L 1
+            push @L 0
+            call built_in.sub 2
+            push 2
+            call built_in.sub 2
+            pop $D
+            pop $T
+            stor @T $D
+            inpv 0
+            push $V 3
+            inpv 0
+            push @V 2
+            call built_in.add 2
+            push 1
+            call built_in.neg 1
+            pop $D
+            pop $T
+            stor @T $D
+            push @L 2
+            push 1
+            call built_in.sub 2
+            return
+        label system.gc
+            push 0
+            return
+    debug-label end system.system
+debug-label end
