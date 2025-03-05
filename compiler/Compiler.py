@@ -178,7 +178,7 @@ class Compiler:
                 code.append(f"pop @D {self.attribute[str(self.now_class.name)][str(i.name)][1]}")
             else:
                 self.declare(i)
-                code.append(f"pop @L {self.count["local"] + self.count["argument"] - 1}")
+                code.append(f"pop @L {self.count['local'] + self.count['argument'] - 1}")
         if len(var.var_list) > len(var.expression_list):
             for i in var.var_list[len(var.expression_list) :]:
                 code.append("push 0")
@@ -191,7 +191,7 @@ class Compiler:
                     code.append(f"pop @D {self.attribute[str(self.now_class.name)][str(i.name)][1]}")
                 else:
                     self.declare(i)
-                    code.append(f"pop @L {self.count["local"] + self.count["argument"] - 1}")
+                    code.append(f"pop @L {self.count['local'] + self.count['argument'] - 1}")
         return code
 
     def compileDo_S(self, do: Do_S) -> List[str]:
