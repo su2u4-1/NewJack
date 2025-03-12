@@ -1,0 +1,26 @@
+# NewJack grammar
+declare ::= <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}]
+type ::= <built_in_type> | <identifier'class name'> | <type> '<' <type> [{',' <type>}] '>'
+expression ::= <term> {<operator> <term>}
+term ::= ('@' | '-' | '!') <term> | <call> | <variable> | <value> | '(' <expression> ')'
+call ::= <variable> '(' [<expression> [{',' <expression>}]] ')'
+variable ::= <identifier'var name'> | '(' <value> ')' | <variable> ['[' <expression> ']' | '.' <identifier'attr name'>]
+value ::= <int> | <char> | <bool> | <void> | <string> | <float> | <arr> | <pointer>
+int ::= ['-'] <digit> [{<digit>}]
+char ::= "'" <unicode_character> "'"
+bool ::= 'true' | 'false'
+void ::= 'NULL'
+string ::= '"' [{<unicode_character>}] '"'
+float ::= ['-'] <digit> '.' <digit> [{<digit>}]
+arr ::= '[' <expression> [{',' <expression>}] ']'
+pointer ::= '@' <variable>
+
+# tokens type:
+identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
+built_in_type ::= 'int' | 'char' | 'bool' | 'void' | 'string' | 'float' | 'arr' | 'pointer'
+operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
+atoz ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
+        | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+AtoZ ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'
+        | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'

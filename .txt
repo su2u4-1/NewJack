@@ -1,0 +1,25 @@
+declare
+expression
+    operator
+    variable
+    call
+if-elif-else
+while-else
+for-else
+try-catch
+include/import
+
+built-in 
+    type
+    class
+    function
+class
+    attribute
+method
+function
+
+type system
+variable scope
+    global
+    local
+    argument
