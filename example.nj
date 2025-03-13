@@ -1,0 +1,46 @@
+import list;  # import stdlib
+     # ^ constant, file, lib, example
+import "<path>/userlib" as userlib;  # import userlib
+                         # ^ constant, file, lib, example
+
+int a = 0;  # normal, file, int, example
+constant int b = 1;  # constant, file, int, example
+global int c = 2;  # normal, global, int, example
+constant global int d = 3;  # constant, global, int, example
+
+int main() {  # constant, file, function, example
+    int e = 4;  # normal, subroutine, int, example.main
+    constant int f = 5;  # constant, subroutine, int, example.main
+    
+    global int g = 6;  # error
+    constant global int h = 7;  # error
+    
+    return 0;
+}
+
+class A {  # constant, file, class, example
+    int i = 0;  # normal, class.private, int, example.A
+    constant int j = 1;  # constant, class.private, int, example.A
+    
+    global int k = 2;  # error
+    constant global int l = 3;  # error
+
+    public int i = 0;  # normal, class.public, int, example.A
+    public constant int j = 1;  # constant, class.public, int, example.A
+
+    public A init(self, int m) {  # constant, class.public, A, example.A
+                      # ^ normal, subroutine, int, example.A.init
+        
+        int n = 4;  # normal, subroutine, int, example.A.init
+        constant int o = 5;  # constant, subroutine, int, example.A.init
+        
+        global int p = 6;  # error
+        constant global int q = 7;  # error
+        
+        return self;
+    }
+
+    A _init(self) {  # constant, class.private, A, example.A
+        return self;
+    }
+}

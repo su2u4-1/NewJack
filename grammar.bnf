@@ -1,7 +1,7 @@
 # NewJack grammar
-declare ::= <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}]
+declare_var ::= ['constant'] ['global'] <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}] ';'
 type ::= <built_in_type> | <identifier'class name'> | <type> '<' <type> [{',' <type>}] '>'
-expression ::= <term> {<operator> <term>}
+expression ::= [<variable> '='] <term> {<operator> <term>} ';'
 term ::= ('@' | '-' | '!') <term> | <call> | <variable> | <value> | '(' <expression> ')'
 call ::= <variable> '(' [<expression> [{',' <expression>}]] ')'
 variable ::= <identifier'var name'> | '(' <value> ')' | <variable> ['[' <expression> ']' | '.' <identifier'attr name'>]
@@ -14,6 +14,10 @@ string ::= '"' [{<unicode_character>}] '"'
 float ::= ['-'] <digit> '.' <digit> [{<digit>}]
 arr ::= '[' <expression> [{',' <expression>}] ']'
 pointer ::= '@' <variable>
+function ::= ['constant'] <type> <identifier'func name'> '(' <declare_args> ')' '{' [{<statement>}] '}'
+class ::= <identifier'class name'> '{' [{<declare_attr>}] [{<method>}] '}'
+method ::= ['constant'] ['public'] <type> <identifier'method name'> '(' <identifier'self'> ',' <declare_args> ')' '{' [{<statement>}] '}'
+statement ::= <if> | <for> | <while> | <return> | <expression>
 
 # tokens type:
 identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
