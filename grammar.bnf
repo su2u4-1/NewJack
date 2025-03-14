@@ -1,34 +1,42 @@
 # NewJack grammar
 declare_var ::= ['constant'] ['global'] <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}] ';'
+declare_attr ::= ['constant'] ['public'] <type> <identifier'attr name'> ['=' <expression>] ';'
+declare_args ::= [<type> <identifier'var name'> [{',' <type> <identifier'var name'>}] [',' '/' <type> <identifier'arr[var] name'>]]
 type ::= <built_in_type> | <identifier'class name'> | <type> '<' <type> [{',' <type>}] '>'
-expression ::= [<variable> '='] <term> {<operator> <term>} ';'
-term ::= ('@' | '-' | '!') <term> | <call> | <variable> | <value> | '(' <expression> ')'
+expression ::= <term> {<operator> <term>} ';'
+term ::= ('^' | '@' | '-' | '!') <term> | <call> | <variable> | <value> | '(' <expression> ')'
 call ::= <variable> '(' [<expression> [{',' <expression>}]] ')'
-variable ::= <identifier'var name'> | '(' <value> ')' | <variable> ['[' <expression> ']' | '.' <identifier'attr name'>]
-value ::= <int> | <char> | <bool> | <void> | <string> | <float> | <arr> | <pointer>
+variable ::= <identifier'var name'> | <term> | <variable> ['[' <expression> ']' | '.' <identifier'attr name'>]
+value ::= <int> | <char> | <bool> | <void> | <string> | <float> | <arr> | <pointer> | <dict> | <tuple>
 int ::= ['-'] <digit> [{<digit>}]
 char ::= "'" <unicode_character> "'"
 bool ::= 'true' | 'false'
 void ::= 'NULL'
 string ::= '"' [{<unicode_character>}] '"'
-float ::= ['-'] <digit> '.' <digit> [{<digit>}]
+float ::= ['-'] <digit> [{<digit>}] '.' <digit> [{<digit>}]
 arr ::= '[' <expression> [{',' <expression>}] ']'
 pointer ::= '@' <variable>
+dict ::= '{' [<expression'constant'> ':' <expression> [{',' <expression'constant'> ':' <expression>}]] '}'
+tuple ::= '(' <expression> [{',' <expression>} ')']
 function ::= ['constant'] <type> <identifier'func name'> '(' <declare_args> ')' '{' [{<statement>}] '}'
 class ::= <identifier'class name'> '{' [{<declare_attr>}] [{<method>}] '}'
 method ::= ['constant'] ['public'] <type> <identifier'method name'> '(' <identifier'self'> ',' <declare_args> ')' '{' [{<statement>}] '}'
-statement ::= <if> | <for> | <while> | <return> | <expression> | <break>
+statement ::= <if> | <for> | <while> | <return> | <expression> | <break> | <import>
 if ::= 'if' '(' <expression> ')' '{' [{<statement>}] '}' [{'elif' '(' <expression> ')' '{' [{<statement>}] '}'}] ['else' '{' [{<statement>}] '}']
 for ::= 'for' '(' <type> <identifier'var name'> 'in' <iterator> ')' '{' [{<statement>}] '}' ['else' '{' [{<statement>}] '}']
 iterator ::= <variable> | <call>
 while ::= 'while' '(' <expression> ')' '{' [{<statement>}] '}' ['else' '{' [{<statement>}] '}']
 return ::= 'return' [<expression>] ';'
 break ::= 'break' <expression> ';'
+import ::= 'import' (<identifier'stblib name'> | <str'userlib name'> 'as' <identifier'alias name'>) ';'
 
 # tokens type:
 identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
 built_in_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer' | 'range'
+        | 'type' | 'tuple' | 'dict'
+symbol ::= '(' | ')' | '[' | ']' | '{' | '}' | ',' | ';' | '.' | <operator>
 operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
+        | '&' | '|' | '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**' | '@' | '^' | '<<' | '>>' | '!'
 atoz ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
         | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
 AtoZ ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'

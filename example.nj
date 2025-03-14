@@ -8,6 +8,13 @@ constant int b = 1;  # constant, file, int, example
 global int c = 2;  # normal, global, int, example
 constant global int d = 3;  # constant, global, int, example
 
+pointer<int> p = @a;  # normal, file, pointer<int>, example
+type T = pointer<int>;  # normal, file, type, example
+T p2 = @b;  # normal, file, T, example
+# T == pointer<int>
+arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example
+# arr<T> == arr<pointer<int>>
+
 int main() {  # constant, file, function, example
     int e = 4;  # normal, subroutine, int, example.main
     constant int f = 5;  # constant, subroutine, int, example.main
