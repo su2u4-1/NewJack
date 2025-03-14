@@ -1,3 +1,5 @@
+# identifier: constant(normal, constant), scope(global, file, class, subroutine), type, parent
+
 import list;  # import stdlib
      # ^ constant, file, lib, example
 import "<path>/userlib" as userlib;  # import userlib
@@ -50,4 +52,7 @@ class A {  # constant, file, class, example
     A _init(self) {  # constant, class.private, A, example.A
         return self;
     }
+}
+
+for (int i in range(0, 10, 1)) {
 }
