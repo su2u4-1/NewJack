@@ -23,3 +23,14 @@ variable scope
     global
     local
     argument
+
+built_in_function:
+    int(obj: any) -> int
+    char(c: int) -> char
+    bool(obj: any) -> bool
+    constant void() -> NULL
+    str(obj: any) -> str
+    float(obj: any) -> float
+    arr(obj: sequence) -> arr
+    pointer(type: class #T, var: T) -> pointer<T>
+    range(a: int, b: int, c: int) -> iterator

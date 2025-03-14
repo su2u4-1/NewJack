@@ -27,7 +27,7 @@ break ::= 'break' <expression> ';'
 
 # tokens type:
 identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
-built_in_type ::= 'int' | 'char' | 'bool' | 'void' | 'string' | 'float' | 'arr' | 'pointer' | 'range'
+built_in_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer' | 'range'
 operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
 atoz ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
         | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
