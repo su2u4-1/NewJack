@@ -27,20 +27,16 @@ import ::= 'import' (<identifier'stblib name'> | <str'userlib name'> 'as' <ident
 
 # tokens type
 identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
-builtin_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer' | 'range'
-        | 'type' | 'tuple' | 'dict'
 symbol ::= '(' | ')' | '[' | ']' | '{' | '}' | ',' | ';' | '.' | <operator>
-operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
-        | '&' | '|' | '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**' | '@' | '^' | '<<' | '>>' | '!'
 int ::= ['-'] <digit> [{<digit>}]
 char ::= "'" <unicode_character> "'"
-bool ::= 'true' | 'false'
-void ::= 'NULL'
 string ::= '"' [{<unicode_character>}] '"'
 float ::= ['-'] <digit> [{<digit>}] '.' <digit> [{<digit>}]
 keyword ::= <bool> | <void> | <builtin_type> | 'if' | 'elif' | 'else' | 'for' | 'in'
         | 'while' | 'return' | 'break' | 'continue' | 'import' | 'constant' | 'global'
         | 'public' | 'function' | 'method' | 'class' | 'var'
+comment_0 ::= ('#' | "//") [{<unicode_character>}] '\n'
+comment_1 ::= '/*' [{<unicode_character> | '\n'}] '*/'
 
 # terminal symbol
 atoz ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
@@ -49,6 +45,12 @@ AtoZ ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' |
         | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
 digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 unicode_character
+builtin_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer' | 'range'
+        | 'type' | 'tuple' | 'dict'
+operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
+        | '&' | '|' | '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**' | '@' | '^' | '<<' | '>>' | '!'
+bool ::= 'true' | 'false'
+void ::= 'NULL'
 
 # P operator         description
 # 1 ! - @ ^          logic not, neg, get address, dereference
