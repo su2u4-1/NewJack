@@ -5,54 +5,77 @@ import list;  # import stdlib
 import "<path>/userlib" as userlib;  # import userlib
                          # ^ constant, file, lib, example
 
-int a = 0;  # normal, file, int, example
-constant int b = 1;  # constant, file, int, example
-global int c = 2;  # normal, global, int, example
-constant global int d = 3;  # constant, global, int, example
+var int a = 0;  # normal, file, int, example
+var constant int b = 1;  # constant, file, int, example
+var global int c = 2;  # normal, global, int, example
+var constant global int d = 3;  # constant, global, int, example
 
-pointer<int> p = @a;  # normal, file, pointer<int>, example
-type T = pointer<int>;  # normal, file, type, example
-T p2 = @b;  # normal, file, T, example
+var pointer<int> p = @a;  # normal, file, pointer<int>, example
+var type T = pointer<int>;  # normal, file, type, example
+var T p2 = @b;  # normal, file, T, example
 # T == pointer<int>
-arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example
+var arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example
 # arr<T> == arr<pointer<int>>
 
-int main() {  # constant, file, function, example
-    int e = 4;  # normal, subroutine, int, example.main
-    constant int f = 5;  # constant, subroutine, int, example.main
-    
-    global int g = 6;  # error
-    constant global int h = 7;  # error
-    
+function int main() {  # constant, file, function, example
+    var int e = 4;  # normal, subroutine, int, example.main
+    var constant int f = 5;  # constant, subroutine, int, example.main
+
+    var global int g = 6;  # error
+    var constant global int h = 7;  # error
+
     return 0;
 }
 
 class A {  # constant, file, class, example
-    int i = 0;  # normal, class.private, int, example.A
-    constant int j = 1;  # constant, class.private, int, example.A
-    
-    global int k = 2;  # error
-    constant global int l = 3;  # error
+    var int i = 0;  # normal, class.private, int, example.A
+    var constant int j = 1;  # constant, class.private, int, example.A
 
-    public int i = 0;  # normal, class.public, int, example.A
-    public constant int j = 1;  # constant, class.public, int, example.A
+    var global int k = 2;  # error
+    var constant global int l = 3;  # error
 
-    public A init(self, int m) {  # constant, class.public, A, example.A
+    var public int i = 0;  # normal, class.public, int, example.A
+    var public constant int j = 1;  # constant, class.public, int, example.A
+
+    method public A init(self, int m) {  # constant, class.public, A, example.A
                       # ^ normal, subroutine, int, example.A.init
-        
-        int n = 4;  # normal, subroutine, int, example.A.init
-        constant int o = 5;  # constant, subroutine, int, example.A.init
-        
-        global int p = 6;  # error
-        constant global int q = 7;  # error
-        
+
+        var int n = 4;  # normal, subroutine, int, example.A.init
+        var constant int o = 5;  # constant, subroutine, int, example.A.init
+
+        var global int p = 6;  # error
+        var constant global int q = 7;  # error
+
         return self;
     }
 
-    A _init(self) {  # constant, class.private, A, example.A
+    method A _init(self) {  # constant, class.private, A, example.A
         return self;
     }
 }
 
 for (int i in range(0, 10, 1)) {
+       # ^ normal, block, int, loop_0
+    print(str(i));
+    while (true) {
+        str t = input("stop?: ")  # normal, block, int, loop_1
+        if (t[0] == 'Y' || t[0] == 'y') {
+            break 2;
+        } elif (t.length == 1) {
+            break;
+        } else {
+            print(str(i), str(i), str(i));
+        }
+    }
+} else {
+    print("done");
+}
+
+char t = input(": ")[0]  # normal, file, char, example
+if (t == 'a') {
+    print("aaa");
+} elif (t == 'b') {
+    print("bbb");
+} else {
+    print("???");
 }
