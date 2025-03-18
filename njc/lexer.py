@@ -21,10 +21,12 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     tokens.append(Token("comment", content, location))
                     content = ""
                     state = ""
+                p = char
                 continue
             if p == "+" or p == "%":
                 if char == "=":
                     tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", p, (i + 1, j - 1)))
@@ -33,18 +35,22 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     state = "integer"
                     content = p + char
                     location = (i + 1, j - 1)
+                    p = char
                     continue
                 elif char == "=":
                     tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", p, (i + 1, j - 1)))
             elif p == "*":
                 if char == "=":
                     tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    p = char
                     continue
                 elif char == "*":
                     tokens.append(Token("symbol", p + "*", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", p, (i + 1, j - 1)))
@@ -53,53 +59,63 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     state = "comment_0"
                     content = "//"
                     location = (i + 1, j - 1)
+                    p = char
                     continue
                 elif char == "*":
                     state = "comment_1"
                     content = "/*"
                     location = (i + 1, j - 1)
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", p, (i + 1, j - 1)))
             elif p == ">":
                 if char == "=":
                     tokens.append(Token("symbol", ">=", (i + 1, j - 1)))
+                    p = char
                     continue
                 elif char == ">":
                     tokens.append(Token("symbol", ">>", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", ">", (i + 1, j - 1)))
             elif p == "<":
                 if char == "=":
                     tokens.append(Token("symbol", "<=", (i + 1, j - 1)))
+                    p = char
                     continue
                 elif char == "<":
                     tokens.append(Token("symbol", "<<", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", "<", (i + 1, j - 1)))
             elif p == "=":
                 if char == "=":
                     tokens.append(Token("symbol", "==", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", "=", (i + 1, j - 1)))
             elif p == "!":
                 if char == "=":
                     tokens.append(Token("symbol", "!=", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", "!", (i + 1, j - 1)))
             elif p == "&":
                 if char == "&":
                     tokens.append(Token("symbol", "&&", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", "&", (i + 1, j - 1)))
             elif p == "|":
                 if char == "|":
                     tokens.append(Token("symbol", "||", (i + 1, j - 1)))
+                    p = char
                     continue
                 else:
                     tokens.append(Token("symbol", "|", (i + 1, j - 1)))
@@ -119,6 +135,7 @@ def lexer(source: list[str], file: str) -> list[Token]:
                         error("Character constant too long or too short", (i + 1, j), file)
                 else:
                     error("Empty character constant", (i + 1, j), file)
+                p = char
                 continue
             elif state == "string":
                 if char == '"':
@@ -127,14 +144,17 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     content = ""
                 else:
                     content += char
+                p = char
                 continue
             elif state == "integer":
                 if char in digit:
                     content += char
+                    p = char
                     continue
                 elif char == ".":
                     state = "float"
                     content += char
+                    p = char
                     continue
                 else:
                     tokens.append(Token("integer", content, location))
@@ -142,10 +162,12 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     content = ""
             elif state == "comment_0":
                 content += char
+                p = char
                 continue
             if state == "identifier":
                 if char in atoz or char in AtoZ or char in digit or char == "_":
                     content += char
+                    p = char
                     continue
                 else:
                     if content in keyword:
@@ -155,9 +177,7 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     state = ""
                     content = ""
 
-            if char.isspace():
-                pass
-            elif char in symbol:
+            if char in symbol:
                 if char in "+-*/%>=<!&|":
                     state = "symbol"
                 else:
