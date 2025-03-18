@@ -34,7 +34,7 @@ string ::= '"' [{<unicode_character>}] '"'
 float ::= ['-'] <digit> [{<digit>}] '.' <digit> [{<digit>}]
 keyword ::= <bool> | <void> | <builtin_type> | 'if' | 'elif' | 'else' | 'for' | 'in'
         | 'while' | 'return' | 'break' | 'continue' | 'import' | 'constant' | 'global'
-        | 'public' | 'function' | 'method' | 'class' | 'var'
+        | 'public' | 'function' | 'method' | 'class' | 'var' | 'as'
 comment_0 ::= ('#' | "//") [{<unicode_character>}] '\n'
 comment_1 ::= '/*' [{<unicode_character> | '\n'}] '*/'
 

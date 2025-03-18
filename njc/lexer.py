@@ -1,8 +1,9 @@
-from lib import Token, symbol, digit, atoz, AtoZ, keyword
+from lib import atoz, AtoZ, digit, keyword, symbol, Token
 
 
 def error(message: str, location: tuple[int, int], file: str) -> None:
-    pass
+    print(f"Error: {message} at {location} in {file}")
+    exit(1)
 
 
 def lexer(source: list[str], file: str) -> list[Token]:
@@ -10,20 +11,100 @@ def lexer(source: list[str], file: str) -> list[Token]:
     state = ""
     content = ""
     p = ""
-    pp = ""
+    # pp = ""
     location = (-1, -1)
     for i, line in enumerate(source):
         for j, char in enumerate(line):
-            if state == "-":
+            if state == "comment_1":
+                content += char
+                if p == "*" and char == "/":
+                    tokens.append(Token("comment", content, location))
+                    content = ""
+                    state = ""
+                continue
+            if p == "+" or p == "%":
+                if char == "=":
+                    tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", p, (i + 1, j - 1)))
+            elif p == "-":
                 if char in digit:
                     state = "integer"
                     content = p + char
                     location = (i + 1, j - 1)
                     continue
+                elif char == "=":
+                    tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    continue
                 else:
                     tokens.append(Token("symbol", p, (i + 1, j - 1)))
-                    state = ""
-            elif state == "char":
+            elif p == "*":
+                if char == "=":
+                    tokens.append(Token("symbol", p + "=", (i + 1, j - 1)))
+                    continue
+                elif char == "*":
+                    tokens.append(Token("symbol", p + "*", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", p, (i + 1, j - 1)))
+            elif p == "/":
+                if char == "/":
+                    state = "comment_0"
+                    content = "//"
+                    location = (i + 1, j - 1)
+                    continue
+                elif char == "*":
+                    state = "comment_1"
+                    content = "/*"
+                    location = (i + 1, j - 1)
+                    continue
+                else:
+                    tokens.append(Token("symbol", p, (i + 1, j - 1)))
+            elif p == ">":
+                if char == "=":
+                    tokens.append(Token("symbol", ">=", (i + 1, j - 1)))
+                    continue
+                elif char == ">":
+                    tokens.append(Token("symbol", ">>", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", ">", (i + 1, j - 1)))
+            elif p == "<":
+                if char == "=":
+                    tokens.append(Token("symbol", "<=", (i + 1, j - 1)))
+                    continue
+                elif char == "<":
+                    tokens.append(Token("symbol", "<<", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", "<", (i + 1, j - 1)))
+            elif p == "=":
+                if char == "=":
+                    tokens.append(Token("symbol", "==", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", "=", (i + 1, j - 1)))
+            elif p == "!":
+                if char == "=":
+                    tokens.append(Token("symbol", "!=", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", "!", (i + 1, j - 1)))
+            elif p == "&":
+                if char == "&":
+                    tokens.append(Token("symbol", "&&", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", "&", (i + 1, j - 1)))
+            elif p == "|":
+                if char == "|":
+                    tokens.append(Token("symbol", "||", (i + 1, j - 1)))
+                    continue
+                else:
+                    tokens.append(Token("symbol", "|", (i + 1, j - 1)))
+
+            if state == "char":
                 if char != "'":
                     if len(content) == 0:
                         content = char
@@ -31,7 +112,7 @@ def lexer(source: list[str], file: str) -> list[Token]:
                         error("Character constant too long", (i + 1, j), file)
                 elif char == "'":
                     if len(content) == 1:
-                        tokens.append(Token("char", content, (i + 1, j)))
+                        tokens.append(Token("char", "'" + content + "'", (i + 1, j)))
                         state = ""
                         content = ""
                     else:
@@ -52,15 +133,14 @@ def lexer(source: list[str], file: str) -> list[Token]:
                     content += char
                     continue
                 elif char == ".":
-                    pass  # TODO: int -> float
+                    state = "float"
+                    content += char
+                    continue
                 else:
                     tokens.append(Token("integer", content, location))
                     state = ""
                     content = ""
             elif state == "comment_0":
-                content += char
-                continue
-            elif state == "comment_1":
                 content += char
                 continue
             if state == "identifier":
@@ -78,8 +158,10 @@ def lexer(source: list[str], file: str) -> list[Token]:
             if char.isspace():
                 pass
             elif char in symbol:
-                if char in "-/><=!+-*/%&|":
-                    state = char
+                if char in "+-*/%>=<!&|":
+                    state = "symbol"
+                else:
+                    tokens.append(Token("symbol", char, (i + 1, j)))
             elif char == "'":
                 state = "char"
             elif char == '"':
@@ -88,6 +170,7 @@ def lexer(source: list[str], file: str) -> list[Token]:
             elif char in digit:
                 state = "integer"
                 location = (i + 1, j)
+                content = char
             elif char == "#":
                 state = "comment_0"
                 content = "#"
@@ -95,7 +178,8 @@ def lexer(source: list[str], file: str) -> list[Token]:
             elif char in atoz or char in AtoZ or char == "_":
                 state = "identifier"
                 location = (i + 1, j)
-            pp = p
+                content = char
+            # pp = p
             p = char
         if state == "comment_0":
             tokens.append(Token("comment", content, location))

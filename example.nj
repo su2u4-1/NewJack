@@ -1,5 +1,5 @@
 # identifier: constant(normal, constant), scope(global, file, class, subroutine), type, parent
-
+/*
 import list;  # import stdlib
      # ^ constant, file, lib, example
 import "<path>/userlib" as userlib;  # import userlib
@@ -58,7 +58,7 @@ for (int i in range(0, 10, 1)) {
        # ^ normal, block, int, loop_0
     print(str(i));
     while (true) {
-        str t = input("stop?: ")  # normal, block, int, loop_1
+        str t = input("stop?: ");  # normal, block, int, loop_1
         if (t[0] == 'Y' || t[0] == 'y') {
             break 2;
         } elif (t.length == 1) {
@@ -71,7 +71,7 @@ for (int i in range(0, 10, 1)) {
     print("done");
 }
 
-char t = input(": ")[0]  # normal, file, char, example
+char t = input(": ")[0];  # normal, file, char, example
 if (t == 'a') {
     print("aaa");
 } elif (t == 'b') {
@@ -79,3 +79,32 @@ if (t == 'a') {
 } else {
     print("???");
 }
+*/
+
++
+-
+*
+/
+%
+==
+!=
+<
+>
+<=
+>=
+&&
+||
+&
+|
+=
++=
+-=
+*=
+/=
+%=
+**
+@
+^
+<<
+>>
+!
