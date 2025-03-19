@@ -1,9 +1,9 @@
 # identifier: constant(normal, constant), scope(global, file, class, subroutine), type, parent
-/*
+
 import list;  # import stdlib
-     # ^ constant, file, lib, example
+#      ^ constant, file, lib, example
 import "<path>/userlib" as userlib;  # import userlib
-                         # ^ constant, file, lib, example
+#                          ^ constant, file, lib, example
 
 var int a = 0;  # normal, file, int, example
 var constant int b = 1;  # constant, file, int, example
@@ -38,7 +38,7 @@ class A {  # constant, file, class, example
     var public constant int j = 1;  # constant, class.public, int, example.A
 
     method public A init(self, int m) {  # constant, class.public, A, example.A
-                      # ^ normal, subroutine, int, example.A.init
+        #                          ^ normal, subroutine, int, example.A.init
 
         var int n = 4;  # normal, subroutine, int, example.A.init
         var constant int o = 5;  # constant, subroutine, int, example.A.init
@@ -55,7 +55,7 @@ class A {  # constant, file, class, example
 }
 
 for (int i in range(0, 10, 1)) {
-       # ^ normal, block, int, loop_0
+    #    ^ normal, block, int, loop_0
     print(str(i));
     while (true) {
         str t = input("stop?: ");  # normal, block, int, loop_1
@@ -79,32 +79,6 @@ if (t == 'a') {
 } else {
     print("???");
 }
-*/
 
-+
--
-*
-/
-%
-==
-!=
-<
->
-<=
->=
-&&
-||
-&
-|
-=
-+=
--=
-*=
-/=
-%=
-**
-@
-^
-<<
->>
-!
+bool r = ^(@(!(1 + 1 - 1 * 1 / 1 % 1 == 1 != 1 < 1 > 1 <= 1 >= 1 && 1 || 1 & 1 | 1 = 1 += 1 -= 1 *= 1 /= 1 %= 1 ** 1 << 1 >> 1)));
+#    ^ normal, file, bool, example

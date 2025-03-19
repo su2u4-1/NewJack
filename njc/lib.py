@@ -49,3 +49,10 @@ class Token:
 
     def __str__(self) -> str:
         return f"<{self.type}> {self.constant} {self.location}"
+
+
+class Args:
+    def __init__(self, path: str = "", flags: list[str] = [], args: list[str] = []) -> None:
+        self.path = path
+        self.flags = flags
+        self.args = args
