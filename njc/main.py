@@ -1,8 +1,11 @@
 from os.path import abspath, isfile
 from sys import argv
 
-from lexer import lexer
+from lexer import Lexer
 from lib import Args
+from parser import Parser
+
+source: dict[str, list[str]] = {}
 
 
 def parse_args(args: list[str]) -> Args:
@@ -22,11 +25,13 @@ def parse_args(args: list[str]) -> Args:
 def main(args: Args) -> None:
     with open(args.path, "r") as f:
         code = f.readlines()
-    tokens = lexer(code, args.path)
+    source[args.path] = code
 
-    # output result
-    for i in tokens:
-        print(i)
+    tokens = Lexer(args.path).lex()
+
+    ast = Parser(tokens, args.path).parse()
+
+    print(repr(ast))
 
 
 if len(argv) <= 1:

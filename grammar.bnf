@@ -1,4 +1,5 @@
 # NewJack grammar
+code ::= [{<import> | <declare_var> | <statement> | <function> | <class> | <comment_0> | <comment_1>}]
 declare_var ::= 'var' ['constant'] ['global'] <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}] ';'
 declare_attr ::= 'var' ['constant'] ['public'] <type> <identifier'attr name'> ['=' <expression>] ';'
 declare_args ::= [<type> <identifier'var name'> [{',' <type> <identifier'var name'>}] [',' '/' <type> <identifier'arr[var] name'>]]
