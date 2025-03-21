@@ -41,7 +41,6 @@ keyword = (
     "void",
     "while",
 )
-STDLIB = ("list", "math", "random", "")
 
 source: dict[str, list[str]] = {}
 
@@ -106,10 +105,10 @@ class Args:
         return f"Args('{self.path}', {self.flags}, {self.args})"
 
 
-class AST_node:
-    def __init__(self, type: str, *args: "AST_node", **kwargs: Union[str, float]) -> None:
+class ASTNode:
+    def __init__(self, type: str, *args: "ASTNode", **kwargs: Union[str, float]) -> None:
         self.type = type
-        self.children: tuple[AST_node, ...] = args
+        self.children: tuple[ASTNode, ...] = args
         self.args: dict[str, Union[str, float]] = kwargs
 
     def __str__(self) -> str:
@@ -130,3 +129,6 @@ class CompileError(Exception):
 
     def __str__(self) -> str:
         return f'File "{self.file}", line {self.location[0]}, in {self.location[1]}\n{self.source_code}\n' + " " * self.location[1] + "^"
+
+
+STDLIB = Tokens("keyword", ("list", "math", "random"))

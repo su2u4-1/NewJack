@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from lib import CompileError, Token, AST_node, Tokens, STDLIB, source
+from lib import CompileError, Token, ASTNode, Tokens, STDLIB, source
 
 
 class Parser:
@@ -20,8 +20,8 @@ class Parser:
         else:
             raise Exception(f"Unexpected EOF in {self.file}")
 
-    def parse(self) -> AST_node:
-        nodes: list[AST_node] = []
+    def parse(self) -> ASTNode:
+        nodes: list[ASTNode] = []
         while True:
             try:
                 self.get()
@@ -39,16 +39,13 @@ class Parser:
                 nodes.append(self.parse_statements())
             else:
                 print(self.now)
-        return AST_node("root", *nodes, file=self.file)
+        return ASTNode("root", *nodes, file=self.file)
 
-    def parse_import(self) -> AST_node:
+    def parse_import(self) -> ASTNode:
         self.get()
-        if self.now.type == "identifier":
-            if self.now.constant in STDLIB:
-                lib_name = self.now.constant
-                lib_alias = self.now.constant
-            else:
-                self.error(f"{self.now.constant} does not exist in stdlib", self.now.location)
+        if self.now in STDLIB:
+            lib_name = self.now.constant
+            lib_alias = self.now.constant
         elif self.now.type == "string":
             lib_name = self.now.constant
             self.get()
@@ -58,18 +55,37 @@ class Parser:
             if self.now.type != "identifier":
                 self.error(f"Expected identifier after 'as' in import statement", self.now.location)
             lib_alias = self.now.constant
+        elif self.now.type == "identifier":
+            self.error(f"{self.now.constant} does not exist in stdlib", self.now.location)
         else:
             self.error(f"Invalid import statement", self.now.location)
-        return AST_node("import", name=lib_name, alias=lib_alias)
+        return ASTNode("import", name=lib_name, alias=lib_alias)
 
-    def parse_var(self) -> AST_node:
-        return AST_node("var")
+    def parse_var(self) -> ASTNode:
+        self.get()
+        constant_var = False
+        global_var = False
+        if self.now == Token("keyword", "constant"):
+            constant_var = True
+            self.get()
+        if self.now == Token("keyword", "global"):
+            global_var = True
+            self.get()
+        if self.now.type == "identifier" or self.now in STDLIB:
+            self.parse_type()
+        else:
+            self.error(f"Invalid variable declaration", self.now.location)
+        # TODO: parse variable declaration
+        return ASTNode("var")
 
-    def parse_func(self) -> AST_node:
-        return AST_node("func")
+    def parse_func(self) -> ASTNode:
+        return ASTNode("func")
 
-    def parse_class(self) -> AST_node:
-        return AST_node("class")
+    def parse_class(self) -> ASTNode:
+        return ASTNode("class")
 
-    def parse_statements(self) -> AST_node:
-        return AST_node("statements")
+    def parse_statements(self) -> ASTNode:
+        return ASTNode("statements")
+
+    def parse_type(self) -> ASTNode:
+        return ASTNode("type")
