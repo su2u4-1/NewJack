@@ -1,5 +1,4 @@
-from lib import atoz, AtoZ, digit, keyword, symbol, Token, CompileError
-from main import source
+from lib import atoz, AtoZ, digit, keyword, symbol, Token, CompileError, source
 
 
 class Lexer:
@@ -202,5 +201,6 @@ class Lexer:
                     location = (i + 1, j)
                     content = char
                 else:
-                    self.error(f"Invalid character {char}", (i + 1, j))
+                    if not char.isspace():
+                        self.error(f"Invalid character {char}", (i + 1, j))
         return tokens

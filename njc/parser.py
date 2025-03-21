@@ -1,6 +1,6 @@
 from typing import NoReturn
-from lib import CompileError, Token, AST_node, Tokens, STDLIB
-from main import source
+
+from lib import CompileError, Token, AST_node, Tokens, STDLIB, source
 
 
 class Parser:

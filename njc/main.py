@@ -2,10 +2,8 @@ from os.path import abspath, isfile
 from sys import argv
 
 from lexer import Lexer
-from lib import Args
+from lib import Args, source
 from parser import Parser
-
-source: dict[str, list[str]] = {}
 
 
 def parse_args(args: list[str]) -> Args:

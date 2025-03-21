@@ -43,6 +43,8 @@ keyword = (
 )
 STDLIB = ("list", "math", "random", "")
 
+source: dict[str, list[str]] = {}
+
 
 class Token:
     def __init__(self, type: str, constant: str, file: str = "", location: tuple[int, int] = (-1, -1)) -> None:
@@ -115,7 +117,7 @@ class AST_node:
 
     def __repr__(self) -> str:
         return (
-            f"AST_node('{self.type}', {', '.join(repr(i) for i in self.children)}, {', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
+            f"AST_node('{self.type}'{', '.join(repr(i) for i in self.children)}, {', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
         )
 
 
