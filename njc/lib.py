@@ -106,29 +106,71 @@ class Args:
 
 
 class ASTNode:
-    def __init__(self, type: str, *args: "ASTNode", **kwargs: Union[str, float]) -> None:
+    def __init__(
+        self,
+        type: str,
+        value: Optional[Union[str, float, "ASTNode", list["ASTNode"]]] = None,
+        **kwargs: Union[str, float, "ASTNode", list["ASTNode"]],
+    ) -> None:
         self.type = type
-        self.children: tuple[ASTNode, ...] = args
-        self.args: dict[str, Union[str, float]] = kwargs
+        self.args: dict[str, Union[str, float, ASTNode, list[ASTNode]]] = kwargs
+        if value is not None:
+            self.args["value"] = value
 
     def __str__(self) -> str:
-        return f"<{self.type}> ({', '.join(f'{i} = {self.args[i]}' for i in self.args)}): [{self.children}]"
+        return f"<{self.type}> ({', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
 
     def __repr__(self) -> str:
-        return (
-            f"AST_node('{self.type}'{', '.join(repr(i) for i in self.children)}, {', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
-        )
+        return f"AST_node('{self.type}'{', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
 
 
 class CompileError(Exception):
     def __init__(self, message: str, file: str, source_code: str, location: tuple[int, int]) -> None:
         super().__init__(message)
+        self.message = message
         self.file = abspath(file)
         self.source_code = source_code
         self.location = location
 
     def __str__(self) -> str:
-        return f'File "{self.file}", line {self.location[0]}, in {self.location[1]}\n{self.source_code}\n' + " " * self.location[1] + "^"
+        return (
+            f'File "{self.file}", line {self.location[0]}, in {self.location[1]}\n{self.message}\n{self.source_code}'
+            + " " * self.location[1]
+            + "^"
+        )
 
 
-STDLIB = Tokens("keyword", ("list", "math", "random"))
+STDLIB = Tokens("identifier", ("list", "math", "random"))
+BUILTINTYPE = Tokens("keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict"))
+OPERATOR = Tokens(
+    "operator",
+    (
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
+        "**",
+        "<<",
+        ">>",
+        "<",
+        ">",
+        "<=",
+        ">=",
+        "==",
+        "!=",
+        "&&",
+        "||",
+        "&",
+        "|",
+        "^",
+        "@",
+        "!",
+        "=",
+        "+=",
+        "-=",
+        "*=",
+        "/=",
+        "%=",
+    ),
+)

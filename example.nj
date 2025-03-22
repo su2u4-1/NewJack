@@ -82,3 +82,9 @@ if (t == 'a') {
 
 bool r = ^(@(!(1 + 1 - 1 * 1 / 1 % 1 == 1 != 1 < 1 > 1 <= 1 >= 1 && 1 || 1 & 1 | 1 = 1 += 1 -= 1 *= 1 /= 1 %= 1 ** 1 << 1 >> 1)));
 #    ^ normal, file, bool, example
+
+var int a1, a2 = 0;
+var int a3;
+var int a4 = 0, a5;
+var int a6, a7;
+var int a8 = 0, a9 = 0;
