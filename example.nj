@@ -8,10 +8,10 @@ import "<path>/userlib" as userlib;  # import userlib
 var int a = 0;  # normal, file, int, example
 var constant int b = 1;  # constant, file, int, example
 var global int c = 2;  # normal, global, int, example
-var constant global int d = 3;  # constant, global, int, example
+var constant global int d = b + c * b - a;  # constant, global, int, example
 
 var pointer<int> p = @a;  # normal, file, pointer<int>, example
-var type T = pointer<int>;  # normal, file, type, example
+var type T = type(pointer, int);  # normal, file, type, example
 var T p2 = @b;  # normal, file, T, example
 # T == pointer<int>
 var arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example

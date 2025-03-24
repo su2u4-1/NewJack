@@ -1,13 +1,15 @@
-from typing import NoReturn, Callable, Any
+from typing import NoReturn, Callable, Any, TypeVar
 
-from lib import CompileError, Token, ASTNode, Tokens, STDLIB, source, BUILTINTYPE, OPERATOR
+from lib import CompileError, Token, ASTNode, Tokens, STDLIB, source, BUILTINTYPE, OPERATOR, PRECEDENCE
+
+T = TypeVar("T")
 
 
-def log_function(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
+def log_function(func: Callable[[Any], T]) -> Callable[[Any], T]:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        print(f"-> {func.__name__}")
+        print(f"into-> {func.__name__}")
         result = func(*args, **kwargs)
-        print(f"<- {func.__name__}")
+        print(f"<-exit {func.__name__}")
         return result
 
     return wrapper
@@ -53,8 +55,8 @@ class Parser:
                 nodes.append(self.parse_import())
             elif self.now == Token("keyword", "var"):
                 nodes.extend(self.parse_var())
-            elif self.now == Token("keyword", "func"):
-                nodes.append(self.parse_func())
+            elif self.now == Token("keyword", "function"):
+                nodes.append(self.parse_function())
             elif self.now == Token("keyword", "class"):
                 nodes.append(self.parse_class())
             elif self.now == Tokens("keyword", ("if", "for", "while")):
@@ -67,19 +69,19 @@ class Parser:
     def parse_import(self) -> ASTNode:
         self.get()
         if self.now in STDLIB:
-            lib_name = self.now.constant
-            lib_alias = self.now.constant
+            lib_name = self.now.content
+            lib_alias = self.now.content
         elif self.now.type == "string":
-            lib_name = self.now.constant
+            lib_name = self.now.content
             self.get()
             if self.now != Token("keyword", "as"):
                 self.error(f"Expected 'as' after import statement", self.now.location)
             self.get()
             if self.now.type != "identifier":  # type: ignore
                 self.error(f"Expected identifier after 'as' in import statement", self.now.location)
-            lib_alias = self.now.constant
+            lib_alias = self.now.content
         elif self.now.type == "identifier":
-            self.error(f"{self.now.constant} does not exist in stdlib", self.now.location)
+            self.error(f"{self.now.content} does not exist in stdlib", self.now.location)
         else:
             self.error(f"Invalid import statement", self.now.location)
         return ASTNode("import", name=lib_name, alias=lib_alias)
@@ -99,13 +101,12 @@ class Parser:
         if self.now.type != "identifier":
             self.error(f"Expected identifier after variable type", self.now.location)
         declare_var: list[ASTNode] = []
-        var_name = self.now.constant
+        var_name = self.now.content
         self.get()
         var_expression = ASTNode("None", "None")
         if self.now == Token("symbol", "="):
             self.get()
             var_expression = self.parse_expression()
-            self.get()
         declare_var.append(
             ASTNode("var", var_type=type_var, constant=constant_var, global_=global_var, name=var_name, expression=var_expression)
         )
@@ -117,13 +118,12 @@ class Parser:
                 self.get()
                 if self.now.type != "identifier":
                     self.error(f"Expected identifier after ',' in variable declaration", self.now.location)
-                var_name = self.now.constant
+                var_name = self.now.content
                 self.get()
                 var_expression = ASTNode("None", "None")
                 if self.now == Token("symbol", "="):
                     self.get()
                     var_expression = self.parse_expression()
-                    self.get()
                 declare_var.append(
                     ASTNode("var", var_type=type_var, constant=constant_var, global_=global_var, name=var_name, expression=var_expression)
                 )
@@ -136,22 +136,10 @@ class Parser:
         return declare_var
 
     @log_function
-    def parse_func(self) -> ASTNode:
-        return ASTNode("func")
-
-    @log_function
-    def parse_class(self) -> ASTNode:
-        return ASTNode("class")
-
-    @log_function
-    def parse_statements(self) -> ASTNode:
-        return ASTNode("statements")
-
-    @log_function
     def parse_type(self) -> ASTNode:
         self.get()
         if self.now in BUILTINTYPE or self.now.type == "identifier":
-            type_a = self.now.constant
+            type_a = self.now.content
         else:
             self.error(f"Invalid type declaration", self.now.location)
         type_b: list[ASTNode] = []
@@ -173,20 +161,133 @@ class Parser:
 
     @log_function
     def parse_expression(self) -> ASTNode:
-        terms: list[ASTNode] = []
-        operators: list[Token] = []
-        terms.append(self.parse_term())
+        input: list[ASTNode] = []
+        output: list[ASTNode] = []
+        stack: list[ASTNode] = []
+        input.append(self.parse_term())
         self.get()
         while True:
             if self.now in OPERATOR:
-                operators.append(self.now)
+                input.append(ASTNode("operator", self.now.content))
+                self.get()
             else:
                 break
-            terms.append(self.parse_term())
+            input.append(self.parse_term())
             self.get()
-        # TODO: parse expression
+        for i in input:
+            if i.type == "operator":
+                while len(stack) > 0:
+                    assert "value" in i.args
+                    assert "value" in stack[-1].args
+                    assert isinstance(i.args["value"], str)
+                    assert isinstance(stack[-1].args["value"], str)
+                    if PRECEDENCE[i.args["value"]] >= PRECEDENCE[stack[-1].args["value"]]:
+                        output.append(stack.pop())
+                    else:
+                        break
+                stack.append(i)
+            else:
+                assert i.type == "term"
+                output.append(i)
+        while len(stack) > 0:
+            output.append(stack.pop())
+        return ASTNode("expression", output)
 
     @log_function
     def parse_term(self) -> ASTNode:
-        # TODO: parse term
+        if self.now.type == "symbol" and self.now.content in ("-", "^", "!", "@"):
+            self.get()
+            t = ""
+            if self.now.content == "@":
+                t = "pointer"
+            elif self.now.content == "!":
+                t = "not"
+            elif self.now.content == "-":
+                t = "neg"
+            elif self.now.content == "^":
+                t = "depointer"
+            return ASTNode("term", ASTNode(t, self.parse_term()))
+        elif self.now == Token("symbol", "("):
+            term = self.parse_tuple()
+            assert "value" in term.args
+            assert isinstance(term.args["value"], list)
+            assert len(term.args["value"]) >= 1
+            assert isinstance(term.args["value"][0], ASTNode)
+            assert term.args["value"][0].type == "expression"
+            if len(term.args["value"]) == 1:
+                return ASTNode("term", ASTNode("expression", term.args["value"][0]))
+            else:
+                return ASTNode("term", ASTNode("tuple", term.args["value"]))
+        elif self.now.type == "identifier":
+            next_node = self.parse_variable()
+            return ASTNode("term", next_node)
+        elif self.now.type in ("int", "float", "string", "char"):
+            return ASTNode("term", ASTNode(self.now.type, self.now.content))
+        elif self.now.type == "keyword":
+            if self.now.content in ("true", "false"):
+                return ASTNode("term", ASTNode("bool", self.now.content))
+            elif self.now.content == "NULL":
+                return ASTNode("term", ASTNode("void", "NULL"))
+            elif self.now in BUILTINTYPE:
+                return ASTNode("term", ASTNode("variable", self.now.content))
+            else:
+                self.error(f"The keyword '{self.now.content}' does not exist in term", self.now.location)
+        else:
+            self.error(f"Invalid term", self.now.location)
         return ASTNode("term")
+
+    @log_function
+    def parse_variable(self) -> ASTNode:
+        # TODO: parse variable
+        if self.now.type != "identifier":
+            self.error(f"Expected identifier in variable", self.now.location)
+        var_name = self.now.content
+        return ASTNode("variable", var_name)
+
+    @log_function
+    def parse_call(self) -> ASTNode:
+        return ASTNode("call")
+
+    @log_function
+    def parse_arr(self) -> ASTNode:
+        return ASTNode("arr")
+
+    @log_function
+    def parse_tuple(self) -> ASTNode:
+        return ASTNode("tuple")
+
+    @log_function
+    def parse_dict(self) -> ASTNode:
+        return ASTNode("dict")
+
+    @log_function
+    def parse_function(self) -> ASTNode:
+        return ASTNode("function")
+
+    @log_function
+    def parse_class(self) -> ASTNode:
+        return ASTNode("class")
+
+    @log_function
+    def parse_statements(self) -> ASTNode:
+        return ASTNode("statements")
+
+    @log_function
+    def parse_if(self) -> ASTNode:
+        return ASTNode("if")
+
+    @log_function
+    def parse_for(self) -> ASTNode:
+        return ASTNode("for")
+
+    @log_function
+    def parse_while(self) -> ASTNode:
+        return ASTNode("while")
+
+    @log_function
+    def parse_break(self) -> ASTNode:
+        return ASTNode("break")
+
+    @log_function
+    def parse_return(self) -> ASTNode:
+        return ASTNode("return")

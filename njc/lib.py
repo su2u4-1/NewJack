@@ -46,23 +46,23 @@ source: dict[str, list[str]] = {}
 
 
 class Token:
-    def __init__(self, type: str, constant: str, file: str = "", location: tuple[int, int] = (-1, -1)) -> None:
+    def __init__(self, type: str, content: str, file: str = "", location: tuple[int, int] = (-1, -1)) -> None:
         self.type = type
-        self.constant = constant
+        self.content = content
         self.file = file
         self.line = location[0] - 1
         self.location = location
 
     def __str__(self) -> str:
-        return f"<{self.type}> {self.constant} {self.location}"
+        return f"<{self.type}> {self.content} {self.location}"
 
     def __eq__(self, o: object) -> bool:
         if not isinstance(o, Token):
             return NotImplemented
-        return self.type == o.type and self.constant == o.constant
+        return self.type == o.type and self.content == o.content
 
     def __repr__(self) -> str:
-        return f"Token('{self.type}', '{self.constant}', '{self.file}', {self.location})"
+        return f"Token('{self.type}', '{self.content}', '{self.file}', {self.location})"
 
 
 class Tokens:
@@ -80,7 +80,7 @@ class Tokens:
         if isinstance(o, Tokens):
             return self.type == o.type and self.constants == o.constants
         elif isinstance(o, Token):
-            return self.type == o.type and o.constant in self.constants
+            return self.type == o.type and o.content in self.constants
         else:
             return NotImplemented
 
@@ -118,10 +118,17 @@ class ASTNode:
             self.args["value"] = value
 
     def __str__(self) -> str:
-        return f"<{self.type}> ({', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
+        return repr(self)
+        # return f"<{self.type}> ({', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
 
     def __repr__(self) -> str:
-        return f"AST_node('{self.type}'{', '.join(f'{i} = {self.args[i]}' for i in self.args)})"
+        t: list[str] = []
+        for i in self.args:
+            if i != "value":
+                t.append(f"{i} = {repr(self.args[i])}")
+        if "value" in self.args:
+            t.insert(0, repr(self.args["value"]))
+        return f"ASTNode('{self.type}', {', '.join(t)})"
 
 
 class CompileError(Exception):
@@ -143,7 +150,7 @@ class CompileError(Exception):
 STDLIB = Tokens("identifier", ("list", "math", "random"))
 BUILTINTYPE = Tokens("keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict"))
 OPERATOR = Tokens(
-    "operator",
+    "symbol",
     (
         "+",
         "-",
@@ -174,3 +181,30 @@ OPERATOR = Tokens(
         "%=",
     ),
 )
+PRECEDENCE = {
+    "!": 1,
+    "-": 1,
+    "@": 1,
+    "^": 1,
+    "*": 2,
+    "/": 2,
+    "%": 2,
+    "+": 3,
+    "-": 3,
+    "<<": 4,
+    ">>": 4,
+    "<": 5,
+    "<=": 5,
+    ">": 5,
+    ">=": 5,
+    "==": 6,
+    "!=": 6,
+    "&&": 7,
+    "||": 8,
+    "=": 9,
+    "+=": 9,
+    "-=": 9,
+    "*=": 9,
+    "/=": 9,
+    "%=": 9,
+}

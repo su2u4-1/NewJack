@@ -155,7 +155,15 @@ class Lexer:
                         content += char
                         continue
                     else:
-                        tokens.append(Token("integer", content, self.file, location))
+                        tokens.append(Token("int", content, self.file, location))
+                        state = ""
+                        content = ""
+                elif state == "float":
+                    if char in digit:
+                        content += char
+                        continue
+                    else:
+                        tokens.append(Token("float", content, self.file, location))
                         state = ""
                         content = ""
                 elif state == "comment_0":
