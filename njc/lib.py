@@ -9,6 +9,7 @@ AtoZ = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 keyword = (
     "arr",
     "as",
+    "attr",
     "bool",
     "break",
     "char",
@@ -21,6 +22,7 @@ keyword = (
     "false",
     "float",
     "for",
+    "fpointer",
     "function",
     "global",
     "if",
@@ -33,6 +35,7 @@ keyword = (
     "public",
     "range",
     "return",
+    "static",
     "str",
     "true",
     "tuple",
@@ -148,7 +151,9 @@ class CompileError(Exception):
 
 
 STDLIB = Tokens("identifier", ("list", "math", "random"))
-BUILTINTYPE = Tokens("keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict"))
+BUILTINTYPE = Tokens(
+    "keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict", "fpointer")
+)
 OPERATOR = Tokens(
     "symbol",
     (
@@ -186,6 +191,7 @@ PRECEDENCE = {
     "-": 1,
     "@": 1,
     "^": 1,
+    "power": 1,
     "*": 2,
     "/": 2,
     "%": 2,
@@ -199,7 +205,9 @@ PRECEDENCE = {
     ">=": 5,
     "==": 6,
     "!=": 6,
-    "&&": 7,
+    "&": 7,
+    "|": 7,
+    "&&": 8,
     "||": 8,
     "=": 9,
     "+=": 9,

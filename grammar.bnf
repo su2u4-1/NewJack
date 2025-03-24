@@ -1,30 +1,31 @@
 # NewJack grammar
 code ::= [{<import> | <declare_var> | <statement> | <function> | <class> | <comment_0> | <comment_1>}]
-declare_var ::= 'var' ['constant'] ['global'] <type> <identifier'var name'> ['=' <expression>] [{',' <identifier'var name'> ['=' <expression>]}] ';'
-declare_attr ::= 'var' ['constant'] ['public'] <type> <identifier'attr name'> ['=' <expression>] ';'
-declare_args ::= [<type> <identifier'var name'> [{',' <type> <identifier'var name'>}] [',' '/' <type> <identifier'arr[var] name'>]]
-type ::= <builtin_type> | <identifier'class name'> | <type> '<' <type> [{',' <type>}] '>'
-expression ::= <term> {<operator> <term>} ';'
+declare_var ::= ('var' | 'constant') ['global'] <type> <identifier'var_name'> ['=' <expression>] [{',' <identifier'var_name'> ['=' <expression>]}] ';'
+declare_attr ::= ('attr' | 'static') ['public'] <type> <identifier'attr_name'> ['=' <expression>] ';'
+declare_args ::= <type> <identifier'var_name'> [{',' <type> <identifier'var_name'>}] [',' '*' <type> <identifier'arr[var]_name'>]
+type ::= <builtin_type> | <identifier'class_name'> | <type> '<' <type> [{',' <type>}] '>'
+expression ::= <term> {<operator> <term>}
 term ::= ('^' | '@' | '-' | '!') <term> | <call> | <variable> | <value> | '(' <expression> ')'
 call ::= <variable> '(' [<expression> [{',' <expression>}]] ')'
-variable ::= <identifier'var name'> | <term> | <variable> ['[' <expression> ']' | '.' <identifier'attr name'>]
-value ::= <int> | <char> | <bool> | <void> | <string> | <float> | <arr> | <pointer> | <dict> | <tuple>
+variable ::= <identifier'var_name'> | <call> | '(' <value> ')' | <variable> ['[' <expression> ']' | '.' <identifier'attr_name'>]
+value ::= <int> | <char> | <bool> | <null> | <string> | <float> | <arr> | <pointer> | <dict> | <tuple> | '^' <pointer>
 arr ::= '[' <expression> [{',' <expression>}] ']'
 pointer ::= '@' <variable>
-dict ::= '{' [<expression'constant'> ':' <expression> [{',' <expression'constant'> ':' <expression>}]] '}'
-tuple ::= '(' <expression> [{',' <expression>} ')']
-function ::= 'function' ['constant'] <type> <identifier'func name'> '(' <declare_args> ')' '{' [{<statement>}] '}'
-class ::= 'class' <identifier'class name'> '{' [{<declare_attr>}] [{<method> | <function>}] '}'
-method ::= 'method' ['constant'] ['public'] <type> <identifier'method name'> '(' <identifier'self'> ',' <declare_args> ')' '{' [{<statement>}] '}'
-statement ::= <if> | <for> | <while> | <return> | <expression> | <break> | <import> | <continue>
-if ::= 'if' '(' <expression> ')' '{' [{<statement>}] '}' [{'elif' '(' <expression> ')' '{' [{<statement>}] '}'}] ['else' '{' [{<statement>}] '}']
-for ::= 'for' '(' <type> <identifier'var name'> 'in' <iterator> ')' '{' [{<statement>}] '}' ['else' '{' [{<statement>}] '}']
+dict ::= '{' [<built_in_types_non_container> ':' <expression> [{',' <expression'built_in_types_non_container'> ':' <expression>}]] '}'
+built_in_types_non_container ::= 'int' | 'char' | 'bool' | 'str' | 'float'
+tuple ::= '(' <expression> [{',' <expression>}] ')'
+function ::= 'function' ['constant'] <type> <identifier'func_name'> '(' [<declare_args>] ')' '{' {(<statement> | <declare_var>)} '}'
+class ::= 'class' <identifier'class_name'> '{' [{<declare_attr>}] [{<method> | <function>}] '}'
+method ::= 'method' ['static'] ['public'] <type> (<identifier'method_name'> | <str'operator'>) '(' [<identifier'self'>] [',' <declare_args>] ')' '{' {<statement>} '}'
+statement ::= <if> | <for> | <while> | <return> | <expression> ';' | <break> | <import> | <continue> | <pass>
+if ::= 'if' '(' <expression> ')' '{' {<statement>} '}' [{'elif' '(' <expression> ')' '{' {<statement>} '}'}] ['else' '{' {<statement>} '}']
+for ::= 'for' '(' <type> <identifier'var_name'> 'in' <iterator> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
 iterator ::= <variable> | <call>
-while ::= 'while' '(' <expression> ')' '{' [{<statement>}] '}' ['else' '{' [{<statement>}] '}']
+while ::= 'while' '(' <expression> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
 return ::= 'return' [<expression>] ';'
-break ::= 'break' <expression> ';'
+break ::= 'break' [<expression'int_greater_than_0'>] ';'
 continue ::= 'continue' ';'
-import ::= 'import' (<identifier'stblib name'> | <str'userlib name'> 'as' <identifier'alias name'>) ';'
+import ::= 'import' (<identifier'stblib_name'> | <str'userlib_name'> 'as' <identifier'alias_name'>) ';'
 
 # tokens type
 identifier ::= (<atoz> | <AtoZ> | '_') {<atoz> | <AtoZ> | <digit> | '_'}
@@ -33,9 +34,9 @@ int ::= ['-'] <digit> [{<digit>}]
 char ::= "'" <unicode_character> "'"
 string ::= '"' [{<unicode_character>}] '"'
 float ::= ['-'] <digit> [{<digit>}] '.' <digit> [{<digit>}]
-keyword ::= <bool> | <void> | <builtin_type> | 'if' | 'elif' | 'else' | 'for' | 'in'
-        | 'while' | 'return' | 'break' | 'continue' | 'import' | 'constant' | 'global'
-        | 'public' | 'function' | 'method' | 'class' | 'var' | 'as'
+keyword ::= <bool> | <void> | <null> | <pass> | <builtin_type> | 'if' | 'elif' | 'else'
+        | 'for' | 'in' | 'while' | 'return' | 'break' | 'continue' | 'import' | 'constant'
+        | 'global' | 'public' | 'function' | 'method' | 'class' | 'var' | 'as'
 comment_0 ::= ('#' | "//") [{<unicode_character>}] '\n'
 comment_1 ::= '/*' [{<unicode_character> | '\n'}] '*/'
 
@@ -46,20 +47,23 @@ AtoZ ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' |
         | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
 digit ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 unicode_character
-builtin_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer' | 'range'
-        | 'type' | 'tuple' | 'dict'
-operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||'
-        | '&' | '|' | '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**' | '@' | '^' | '<<' | '>>' | '!'
+builtin_type ::= 'int' | 'char' | 'bool' | 'void' | 'str' | 'float' | 'arr' | 'pointer'
+        | 'range' | 'type' | 'tuple' | 'dict' | 'fpointer'
+operator ::= '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&'
+| '||' | '&' | '|' | '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '**' | '@' | '^' | '<<'
+| '>>' | '!'
 bool ::= 'true' | 'false'
-void ::= 'NULL'
+void ::= 'void'
+null ::= 'NULL'
+pass ::= 'pass'
 
 # P operator         description
-# 1 ! - @ ^          logic not, neg, get address, dereference
+# 1 ! - @ ^ **       logic not, neg, get address, dereference, power
 # 2 * / %            mul, div, rem
 # 3 +  -             add, sub
 # 4 << >>            left shift, right shift
 # 5 < <= > >=        <, ≤, >, ≥
 # 6 == !=            =, ≠
-# 7 &&               logic and
-# 8 ||               logic or
+# 7 & |              bit and, bit or
+# 8 && ||            logic and, logic or
 # 9 = += -= *= /= %= assign, add assign, sub assign, mul assign, div assign, rem assign

@@ -6,9 +6,9 @@ import "<path>/userlib" as userlib;  # import userlib
 #                          ^ constant, file, lib, example
 
 var int a = 0;  # normal, file, int, example
-var constant int b = 1;  # constant, file, int, example
+constant int b = 1;  # constant, file, int, example
 var global int c = 2;  # normal, global, int, example
-var constant global int d = b + c * b - a;  # constant, global, int, example
+constant global int d = b + c * b - a;  # constant, global, int, example
 
 var pointer<int> p = @a;  # normal, file, pointer<int>, example
 var type T = type(pointer, int);  # normal, file, type, example
@@ -19,32 +19,32 @@ var arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example
 
 function int main() {  # constant, file, function, example
     var int e = 4;  # normal, subroutine, int, example.main
-    var constant int f = 5;  # constant, subroutine, int, example.main
+    constant int f = 5;  # constant, subroutine, int, example.main
 
     var global int g = 6;  # error
-    var constant global int h = 7;  # error
+    constant global int h = 7;  # error
 
     return 0;
 }
 
 class A {  # constant, file, class, example
-    var int i = 0;  # normal, class.private, int, example.A
-    var constant int j = 1;  # constant, class.private, int, example.A
+    attr int i = 0;  # normal, class.private, int, example.A
+    static int j = 1;  # constant, class.private, int, example.A
 
-    var global int k = 2;  # error
-    var constant global int l = 3;  # error
+    attr global int k = 2;  # error
+    static global int l = 3;  # error
 
-    var public int i = 0;  # normal, class.public, int, example.A
-    var public constant int j = 1;  # constant, class.public, int, example.A
+    attr public int i = 0;  # normal, class.public, int, example.A
+    attr public constant int j = 1;  # constant, class.public, int, example.A
 
     method public A init(self, int m) {  # constant, class.public, A, example.A
         #                          ^ normal, subroutine, int, example.A.init
 
         var int n = 4;  # normal, subroutine, int, example.A.init
-        var constant int o = 5;  # constant, subroutine, int, example.A.init
+        constant int o = 5;  # constant, subroutine, int, example.A.init
 
         var global int p = 6;  # error
-        var constant global int q = 7;  # error
+        constant global int q = 7;  # error
 
         return self;
     }

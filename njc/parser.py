@@ -53,7 +53,7 @@ class Parser:
                 break
             if self.now == Token("keyword", "import"):
                 nodes.append(self.parse_import())
-            elif self.now == Token("keyword", "var"):
+            elif self.now == Tokens("keyword", ("var", "constant", "attr", "static")):
                 nodes.extend(self.parse_var())
             elif self.now == Token("keyword", "function"):
                 nodes.append(self.parse_function())
@@ -90,10 +90,16 @@ class Parser:
     def parse_var(self) -> list[ASTNode]:
         constant_var = False
         global_var = False
-        if self.next() == Token("keyword", "constant"):
-            self.get()
+        attr_var = False
+        if self.now == Token("keyword", "constant"):
             constant_var = True
-        if self.next() == Token("keyword", "global"):
+        elif self.now == Token("keyword", "attr"):
+            attr_var = True
+        elif self.now == Token("keyword", "static"):
+            constant_var = True
+            attr_var = True
+        self.get()
+        if self.now == Token("keyword", "global"):
             self.get()
             global_var = True
         type_var = self.parse_type()
@@ -108,7 +114,15 @@ class Parser:
             self.get()
             var_expression = self.parse_expression()
         declare_var.append(
-            ASTNode("var", var_type=type_var, constant=constant_var, global_=global_var, name=var_name, expression=var_expression)
+            ASTNode(
+                "var",
+                var_type=type_var,
+                attr=attr_var,
+                constant=constant_var,
+                global_=global_var,
+                name=var_name,
+                expression=var_expression,
+            )
         )
         if self.now == Token("symbol", ";"):
             return declare_var
@@ -125,7 +139,15 @@ class Parser:
                     self.get()
                     var_expression = self.parse_expression()
                 declare_var.append(
-                    ASTNode("var", var_type=type_var, constant=constant_var, global_=global_var, name=var_name, expression=var_expression)
+                    ASTNode(
+                        "var",
+                        var_type=type_var,
+                        attr=attr_var,
+                        constant=constant_var,
+                        global_=global_var,
+                        name=var_name,
+                        expression=var_expression,
+                    )
                 )
                 if self.now == Token("symbol", ";"):
                     return declare_var
