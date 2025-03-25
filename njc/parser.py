@@ -1,15 +1,16 @@
-from typing import NoReturn, Callable, Any, TypeVar
+from typing import Callable, NoReturn, TypeVar
 
-from lib import CompileError, Token, ASTNode, Tokens, STDLIB, source, BUILTINTYPE, OPERATOR, PRECEDENCE
+from lib import ASTNode, BUILTINTYPE, CompileError, OPERATOR, PRECEDENCE, source, STDLIB, Token, Tokens
 
 T = TypeVar("T")
+log: list[str] = []
 
 
-def log_function(func: Callable[[Any], T]) -> Callable[[Any], T]:
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        print(f"into-> {func.__name__}")
+def log_function(func: Callable[..., T]) -> Callable[..., T]:
+    def wrapper(*args: ..., **kwargs: ...) -> T:
+        log.append(f"into-> {func.__name__}")
         result = func(*args, **kwargs)
-        print(f"<-exit {func.__name__}")
+        log.append(f"<-exit {func.__name__}")
         return result
 
     return wrapper
@@ -33,10 +34,11 @@ class Parser:
             self.now = self.tokens[self.index]
             if self.now.type == "comment":
                 self.get()
+            else:
+                log.append(str(self.now))
         else:
             raise Exception(f"Unexpected EOF in {self.file}")
             # self.now = Token("EOF", "EOF")
-        print(self.now)
 
     def next(self, a: int = 1) -> Token:
         if self.index + a < len(self.tokens):
@@ -46,24 +48,30 @@ class Parser:
 
     def parse(self) -> ASTNode:
         nodes: list[ASTNode] = []
-        while True:
-            try:
-                self.get()
-            except Exception:
-                break
-            if self.now == Token("keyword", "import"):
-                nodes.append(self.parse_import())
-            elif self.now == Tokens("keyword", ("var", "constant", "attr", "static")):
-                nodes.extend(self.parse_var())
-            elif self.now == Token("keyword", "function"):
-                nodes.append(self.parse_function())
-            elif self.now == Token("keyword", "class"):
-                nodes.append(self.parse_class())
-            elif self.now == Tokens("keyword", ("if", "for", "while")):
-                nodes.append(self.parse_statements())
-            else:
-                pass  # TODO: error
-        return ASTNode("root", *nodes, file=self.file)
+        try:
+            while True:
+                try:
+                    self.get()
+                except Exception:
+                    break
+                if self.now == Token("keyword", "import"):
+                    nodes.append(self.parse_import())
+                elif self.now == Tokens("keyword", ("var", "constant", "attr", "static")):
+                    nodes.extend(self.parse_var())
+                elif self.now == Token("keyword", "function"):
+                    nodes.append(self.parse_function())
+                elif self.now == Token("keyword", "class"):
+                    nodes.append(self.parse_class())
+                elif self.now == Tokens("keyword", ("if", "for", "while")):
+                    nodes.append(self.parse_statements())
+                else:
+                    pass  # TODO: error
+        except Exception as e:
+            for i in log:
+                print(i)
+            print(ASTNode("root", nodes, file=self.file))
+            raise e
+        return ASTNode("root", nodes, file=self.file)
 
     @log_function
     def parse_import(self) -> ASTNode:
@@ -159,13 +167,13 @@ class Parser:
 
     @log_function
     def parse_type(self) -> ASTNode:
-        self.get()
         if self.now in BUILTINTYPE or self.now.type == "identifier":
             type_a = self.now.content
         else:
             self.error(f"Invalid type declaration", self.now.location)
         type_b: list[ASTNode] = []
         if self.next() == Token("symbol", "<"):
+            self.get()
             self.get()
             type_b.append(self.parse_type())
             self.get()
@@ -177,6 +185,7 @@ class Parser:
                         break
                     elif self.now != Token("symbol", ","):
                         self.error(f"Expected '>' after type declaration", self.now.location)
+                    self.get()
             if self.now != Token("symbol", ">"):
                 self.error(f"Expected '>' after type declaration", self.now.location)
         return ASTNode("type", type_a=type_a, type_b=type_b)
@@ -218,7 +227,6 @@ class Parser:
     @log_function
     def parse_term(self) -> ASTNode:
         if self.now.type == "symbol" and self.now.content in ("-", "^", "!", "@"):
-            self.get()
             t = ""
             if self.now.content == "@":
                 t = "pointer"
@@ -228,6 +236,8 @@ class Parser:
                 t = "neg"
             elif self.now.content == "^":
                 t = "depointer"
+            assert t != ""
+            self.get()
             return ASTNode("term", ASTNode(t, self.parse_term()))
         elif self.now == Token("symbol", "("):
             term = self.parse_tuple()
@@ -240,9 +250,12 @@ class Parser:
                 return ASTNode("term", ASTNode("expression", term.args["value"][0]))
             else:
                 return ASTNode("term", ASTNode("tuple", term.args["value"]))
+        elif self.now == Token("symbol", "["):
+            return ASTNode("term", self.parse_arr())
+        elif self.now == Token("symbol", "{"):
+            return ASTNode("term", self.parse_dict())
         elif self.now.type == "identifier":
-            next_node = self.parse_variable()
-            return ASTNode("term", next_node)
+            return ASTNode("term", self.parse_variable())
         elif self.now.type in ("int", "float", "string", "char"):
             return ASTNode("term", ASTNode(self.now.type, self.now.content))
         elif self.now.type == "keyword":
@@ -251,7 +264,7 @@ class Parser:
             elif self.now.content == "NULL":
                 return ASTNode("term", ASTNode("void", "NULL"))
             elif self.now in BUILTINTYPE:
-                return ASTNode("term", ASTNode("variable", self.now.content))
+                return ASTNode("term", self.parse_variable())
             else:
                 self.error(f"The keyword '{self.now.content}' does not exist in term", self.now.location)
         else:
@@ -261,14 +274,58 @@ class Parser:
     @log_function
     def parse_variable(self) -> ASTNode:
         # TODO: parse variable
-        if self.now.type != "identifier":
+        if self.now.type != "identifier" and self.now not in BUILTINTYPE:
             self.error(f"Expected identifier in variable", self.now.location)
         var_name = self.now.content
-        return ASTNode("variable", var_name)
+        if self.next() == Token("symbol", "["):
+            self.get()
+            self.get()
+            index = self.parse_expression()
+            if self.now != Token("symbol", "]"):
+                self.error(f"Expected ']' after index in variable", self.now.location)
+            var = ASTNode("variable", var_name, index=index)
+        elif self.next() == Token("symbol", "."):
+            self.get()
+            self.get()
+            var = ASTNode("variable", var_name, attr=self.parse_variable())
+        else:
+            var = ASTNode("variable", var_name)
+        if self.next() == Tokens("symbol", ("(", "<")):
+            self.get()
+            var = self.parse_call(var)
+        return var
 
     @log_function
-    def parse_call(self) -> ASTNode:
-        return ASTNode("call")
+    def parse_call(self, var: ASTNode) -> ASTNode:
+        types: list[ASTNode] = []
+        if self.now == "<":
+            self.get()
+            types.append(self.parse_type())
+            self.get()
+            if self.now == Token("symbol", ","):
+                while True:
+                    types.append(self.parse_type())
+                    self.get()
+                    if self.now == Token("symbol", ">"):
+                        break
+                    elif self.now != Token("symbol", ","):
+                        self.error(f"Expected '>' after type declaration", self.now.location)
+                    self.get()
+            if self.now != Token("symbol", ">"):
+                self.error(f"Expected '>' after type declaration", self.now.location)
+            self.get()
+        if self.now != Token("symbol", "("):
+            self.error(f"Expected '(' after function call", self.now.location)
+        self.get()
+        args: list[ASTNode] = []
+        if self.now != Token("symbol", ")"):
+            args.append(self.parse_expression())
+            while self.now == Token("symbol", ","):
+                self.get()
+                args.append(self.parse_expression())
+            if self.now != Token("symbol", ")"):
+                self.error(f"Expected ')' after function call", self.now.location)
+        return ASTNode("call", var=var, types=types, args=args)
 
     @log_function
     def parse_arr(self) -> ASTNode:
