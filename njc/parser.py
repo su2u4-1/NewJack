@@ -268,21 +268,21 @@ class Parser:
             else:
                 self.error(f"The keyword '{self.now.content}' does not exist in term", self.now.location)
         else:
-            self.error(f"Invalid term", self.now.location)
+            self.error("Invalid term", self.now.location)
         return ASTNode("term")
 
     @log_function
     def parse_variable(self) -> ASTNode:
         # TODO: parse variable
         if self.now.type != "identifier" and self.now not in BUILTINTYPE:
-            self.error(f"Expected identifier in variable", self.now.location)
+            self.error("Expected identifier in variable", self.now.location)
         var_name = self.now.content
         if self.next() == Token("symbol", "["):
             self.get()
             self.get()
             index = self.parse_expression()
             if self.now != Token("symbol", "]"):
-                self.error(f"Expected ']' after index in variable", self.now.location)
+                self.error("Expected ']' after index in variable", self.now.location)
             var = ASTNode("variable", var_name, index=index)
         elif self.next() == Token("symbol", "."):
             self.get()
@@ -309,13 +309,13 @@ class Parser:
                     if self.now == Token("symbol", ">"):
                         break
                     elif self.now != Token("symbol", ","):
-                        self.error(f"Expected '>' after type declaration", self.now.location)
+                        self.error("Expected '>' after type declaration", self.now.location)
                     self.get()
             if self.now != Token("symbol", ">"):
-                self.error(f"Expected '>' after type declaration", self.now.location)
+                self.error("Expected '>' after type declaration", self.now.location)
             self.get()
         if self.now != Token("symbol", "("):
-            self.error(f"Expected '(' after function call", self.now.location)
+            self.error("Expected '(' after function call", self.now.location)
         self.get()
         args: list[ASTNode] = []
         if self.now != Token("symbol", ")"):
@@ -324,19 +324,58 @@ class Parser:
                 self.get()
                 args.append(self.parse_expression())
             if self.now != Token("symbol", ")"):
-                self.error(f"Expected ')' after function call", self.now.location)
+                self.error("Expected ')' after function call", self.now.location)
         return ASTNode("call", var=var, types=types, args=args)
 
     @log_function
     def parse_arr(self) -> ASTNode:
-        return ASTNode("arr")
+        arr: list[ASTNode] = []
+        assert self.now == Token("symbol", "[")
+        self.get()
+        if self.now != Token("symbol", "]"):
+            arr.append(self.parse_expression())
+            while self.now == Token("symbol", ","):
+                self.get()
+                arr.append(self.parse_expression())
+            if self.now != Token("symbol", "]"):
+                self.error("Expected ']' after array declaration", self.now.location)
+        return ASTNode("arr", arr)
 
     @log_function
     def parse_tuple(self) -> ASTNode:
-        return ASTNode("tuple")
+        t: list[ASTNode] = []
+        assert self.now == Token("symbol", "(")
+        self.get()
+        if self.now != Token("symbol", ")"):
+            t.append(self.parse_expression())
+            while self.now == Token("symbol", ","):
+                self.get()
+                t.append(self.parse_expression())
+            if self.now != Token("symbol", ")"):
+                self.error("Expected ')' after array declaration", self.now.location)
+        return ASTNode("tuple", t)
 
     @log_function
     def parse_dict(self) -> ASTNode:
+        d: list[tuple[ASTNode, ASTNode]] = []
+        assert self.now == Token("symbol", "{")
+        self.get()
+        if self.now != Token("symbol", "}"):
+            a = self.parse_expression()
+            if self.now != Token("symbol", ":"):
+                self.error("Expected ':' after key in dict declaration", self.now.location)
+            self.get()
+            b = self.parse_expression()
+            d.append((a, b))
+            while self.now == Token("symbol", ","):
+                a = self.parse_expression()
+                if self.now != Token("symbol", ":"):
+                    self.error("Expected ':' after key in dict declaration", self.now.location)
+                self.get()
+                b = self.parse_expression()
+                d.append((a, b))
+            if self.now != Token("symbol", "}"):
+                self.error("Expected '}' after array declaration", self.now.location)
         return ASTNode("dict")
 
     @log_function
