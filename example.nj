@@ -56,7 +56,7 @@ class A {  # constant, file, class, example
 
 for (int i in range(0, 10, 1)) {
     #    ^ normal, block, int, loop_0
-    print(str(i));
+    print(i);
     while (true) {
         str t = input("stop?: ");  # normal, block, int, loop_1
         if (t[0] == 'Y' || t[0] == 'y') {
@@ -64,7 +64,7 @@ for (int i in range(0, 10, 1)) {
         } elif (t.length == 1) {
             break;
         } else {
-            print(str(i), str(i), str(i));
+            print(i, i, i);
         }
     }
 } else {

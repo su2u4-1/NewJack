@@ -31,14 +31,14 @@ built_in_function:
     void() -> NULL
     str(obj: any) -> str
     float(obj: any) -> float
-    arr(type: T, /, item: T) -> arr<T>
+    arr(type: T, *item: T) -> arr<T>
     pointer(type: T, var: T) -> pointer<T>
 
     range(a: int, b: int, c: int) -> iterator
-    print(s :str, /, other: tuple[str]) -> NULL
+    print(s :obj, *other: tuple[obj]) -> NULL
     input(s: str) -> str
-    // max(a: int, /, other: tuple[int]) -> bool
-    // min(a: int, /, other: tuple[int]) -> bool
+    // max(a: int, *other: tuple[int]) -> bool
+    // min(a: int, *other: tuple[int]) -> bool
     // bin(a: int) -> str
     // oct(a: int) -> str
     // hex(a: int) -> str
