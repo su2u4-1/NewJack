@@ -54,13 +54,14 @@ class A {  # constant, file, class, example
     }
 }
 
-for (int i in range(0, 10, 1)) {
-    #    ^ normal, block, int, loop_0
+for label (int i in range(0, 10, 1)) {
+    #|         ^ normal, block, int, loop_0
+    #^ normal, block, int, loop_0
     print(i);
     while (true) {
         str t = input("stop?: ");  # normal, block, int, loop_1
         if (t[0] == 'Y' || t[0] == 'y') {
-            break 2;
+            break label;
         } elif (t.length == 1) {
             break;
         } else {
