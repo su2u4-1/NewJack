@@ -17,12 +17,14 @@ var T p2 = @b;  # normal, file, T, example
 var arr<T> p_arr = [p, p2];  # normal, file, arr<T>, example
 # arr<T> == arr<pointer<int>>
 
-function int main() {  # constant, file, function, example
+function int main<T>(T a) {  # constant, file, function, example
     var int e = 4;  # normal, subroutine, int, example.main
     constant int f = 5;  # constant, subroutine, int, example.main
 
     var global int g = 6;  # error
     constant global int h = 7;  # error
+
+    var pointer<T> p3 = @a;  # normal, subroutine, pointer<T>, example.main
 
     return 0;
 }

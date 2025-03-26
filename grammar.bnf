@@ -1,5 +1,5 @@
 # NewJack grammar
-code ::= [{<import> | <declare_var> | <statement> | <function> | <class> | <comment_0> | <comment_1>}]
+code ::= [{<import> | <statement> | <function> | <class> | <comment_0> | <comment_1>}]
 declare_var ::= ('var' | 'constant') ['global'] <type> <identifier'var_name'> ['=' <expression>] [{',' <identifier'var_name'> ['=' <expression>]}] ';'
 declare_attr ::= ('attr' | 'static') ['public'] <type> <identifier'attr_name'> ['=' <expression>] ';'
 declare_args ::= <type> <identifier'var_name'> [{',' <type> <identifier'var_name'>}] [',' '*' <type> <identifier'arr[var]_name'>]
@@ -17,7 +17,7 @@ tuple ::= '(' <expression> [{',' <expression>}] ')'
 function ::= 'function' ['constant'] <type> <identifier'func_name'> ['<' <identifier'type_name'> [{',' <identifier'type_name'>}] '>'] '(' [<declare_args>] ')' '{' {(<statement> | <declare_var>)} '}'
 class ::= 'class' <identifier'class_name'> '{' [{<declare_attr>}] [{<method> | <function>}] '}'
 method ::= 'method' ['static'] ['public'] <type> (<identifier'method_name'> | <str'operator'>) ['<' <identifier'type_name'> [{',' <identifier'type_name'>}] '>'] '(' [<identifier'self'>] [',' <declare_args>] ')' '{' {<statement>} '}'
-statement ::= <if> | <for> | <while> | <return> | <expression> ';' | <break> | <import> | <continue> | <pass>
+statement ::= <if> | <for> | <while> | <return> | <expression> ';' | <break> | <continue> | <pass> | <declare_var>
 if ::= 'if' '(' <expression> ')' '{' {<statement>} '}' [{'elif' '(' <expression> ')' '{' {<statement>} '}'}] ['else' '{' {<statement>} '}']
 for ::= 'for' [<identifier>] '(' <type> <identifier'var_name'> 'in' <iterator> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
 iterator ::= <variable> | <call>
