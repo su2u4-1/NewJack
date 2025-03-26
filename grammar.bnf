@@ -19,11 +19,11 @@ class ::= 'class' <identifier'class_name'> '{' [{<declare_attr>}] [{<method> | <
 method ::= 'method' ['static'] ['public'] <type> (<identifier'method_name'> | <str'operator'>) ['<' <identifier'type_name'> [{',' <identifier'type_name'>}] '>'] '(' [<identifier'self'>] [',' <declare_args>] ')' '{' {<statement>} '}'
 statement ::= <if> | <for> | <while> | <return> | <expression> ';' | <break> | <continue> | <pass> | <declare_var>
 if ::= 'if' '(' <expression> ')' '{' {<statement>} '}' [{'elif' '(' <expression> ')' '{' {<statement>} '}'}] ['else' '{' {<statement>} '}']
-for ::= 'for' [<identifier>] '(' <type> <identifier'var_name'> 'in' <iterator> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
+for ::= 'for' [<identifier'label'>] '(' <type> <identifier'var_name'> 'in' <iterator> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
 iterator ::= <variable> | <call>
-while ::= 'while' [<identifier>] '(' <expression> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
+while ::= 'while' [<identifier'label'>] '(' <expression> ')' '{' {<statement>} '}' ['else' '{' {<statement>} '}']
 return ::= 'return' [<expression>] ';'
-break ::= 'break' [<identifier>] ';'
+break ::= 'break' [<identifier'label'>] ';'
 continue ::= 'continue' ';'
 import ::= 'import' (<identifier'stblib_name'> | <str'userlib_name'> 'as' <identifier'alias_name'>) ';'
 
