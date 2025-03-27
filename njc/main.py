@@ -1,9 +1,9 @@
 from os.path import abspath, isfile
 from sys import argv
 
-from lexer import Lexer
-from lib import Args, source
-from parser import Parser
+from .lexer import Lexer
+from .lib import Args, source
+from .parser import Parser
 
 
 def parse_args(args: list[str]) -> Args:

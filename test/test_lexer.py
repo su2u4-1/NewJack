@@ -1,4 +1,5 @@
 import unittest
+
 from njc.lexer import Lexer
 from njc.lib import Token, source, CompileError
 

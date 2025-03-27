@@ -1,4 +1,5 @@
 import unittest
+
 from njc.parser import Parser
 from njc.lib import Token, ASTNode, source, CompileError
 

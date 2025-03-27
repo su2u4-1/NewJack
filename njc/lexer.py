@@ -1,4 +1,4 @@
-from lib import atoz, AtoZ, digit, keyword, symbol, Token, CompileError, source
+from .lib import atoz, AtoZ, digit, keyword, symbol, Token, CompileError, source
 
 
 class Lexer:

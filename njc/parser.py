@@ -1,6 +1,6 @@
 from typing import Callable, NoReturn, TypeVar
 
-from lib import ASTNode, BUILTINTYPE, CompileError, OPERATOR, PRECEDENCE, source, STDLIB, Token, Tokens
+from .lib import ASTNode, BUILTINTYPE, CompileError, OPERATOR, PRECEDENCE, source, STDLIB, Token, Tokens
 
 T = TypeVar("T")
 log: list[str] = []
