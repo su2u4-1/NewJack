@@ -116,11 +116,7 @@ ASTNode(
                 )
             ],
             name="main",
-            args=[
-                ASTNode(
-                    "var", var_type=ASTNode("type", type_a="T", type_b=[]), var_kind="arg", name="a", expression=ASTNode("None", "None")
-                )
-            ],
+            args=[ASTNode("var", var_type=ASTNode("type", type_a="T", type_b=[]), var_kind="arg", name="a", expression=ASTNode("None", "None"))],
             body=[
                 ASTNode(
                     "var",

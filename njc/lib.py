@@ -143,17 +143,11 @@ class CompileError(Exception):
         self.location = location
 
     def __str__(self) -> str:
-        return (
-            f'File "{self.file}", line {self.location[0]}, in {self.location[1]}\n{self.message}\n{self.source_code}'
-            + " " * self.location[1]
-            + "^"
-        )
+        return f'File "{self.file}", line {self.location[0]}, in {self.location[1]}\n{self.message}\n{self.source_code}' + " " * self.location[1] + "^"
 
 
 STDLIB = Tokens("identifier", ("list", "math", "random"))
-BUILTINTYPE = Tokens(
-    "keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict", "fpointer")
-)
+BUILTINTYPE = Tokens("keyword", ("int", "char", "bool", "void", "str", "float", "arr", "pointer", "range", "type", "tuple", "dict", "fpointer"))
 OPERATOR = Tokens(
     "symbol",
     (
